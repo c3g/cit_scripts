@@ -74,17 +74,15 @@ mkdir -p ${TEST_DIR}/GenPipesFull
 cd ${TEST_DIR}/GenPipesFull
 
 ## clone GenPipes from bitbucket
-echo "cloning Genpipes master from: git@bitbucket.org:mugqic/genpipes.git"
+branch=master
+echo "cloning Genpipes ${branch} from: git@bitbucket.org:mugqic/genpipes.git"
 
 if [ -d "genpipes" ]; then
   rm -rf genpipes
 fi
 
-git clone git@bitbucket.org:mugqic/genpipes.git
+git clone --depth 1 --branch ${branch} --single-branch git@bitbucket.org:mugqic/genpipes.git
 
-## test branch
-#cd genpipes/
-#git checkout cit_fix_cedar_2019-04
 
 ## set MUGQIC_PIPELINE_HOME to GenPipes bitbucket install:
 export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/CentOS6

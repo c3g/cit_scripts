@@ -74,13 +74,14 @@ mkdir -p ${TEST_DIR}/GenPipesCommand
 cd ${TEST_DIR}/GenPipesCommand
 
 ## clone GenPipes from bitbucket
-echo "cloning Genpipes master from: git@bitbucket.org:mugqic/genpipes.git"
+branch=master
+echo "cloning Genpipes ${branch} from: git@bitbucket.org:mugqic/genpipes.git"
 
 if [ -d "genpipes" ]; then
   rm -rf genpipes
 fi
 
-git clone git@bitbucket.org:mugqic/genpipes.git
+git clone --depth 1 --branch ${branch} --single-branch git@bitbucket.org:mugqic/genpipes.git
 
 
 ## set MUGQIC_PIPELINE_HOME to GenPipes bitbucket install:
