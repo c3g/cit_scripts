@@ -81,7 +81,7 @@ if [ -d "genpipes" ]; then
   rm -rf genpipes
 fi
 
-git clone --depth 1 --branch ${branch} --single-branch git@bitbucket.org:mugqic/genpipes.git
+git clone --depth 1 --branch ${branch} git@bitbucket.org:mugqic/genpipes.git
 
 
 ## set MUGQIC_PIPELINE_HOME to GenPipes bitbucket install:
