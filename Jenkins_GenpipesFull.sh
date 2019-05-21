@@ -11,6 +11,8 @@ rrg=6007512
 HOST=`hostname`;
 DNSDOMAIN=`dnsdomainname`;
 
+export GENPIPES_CIT=
+
 export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/CentOS6
 
 if [[ $HOST == abacus* || $DNSDOMAIN == ferrier.genome.mcgill.ca ]]; then
@@ -110,7 +112,10 @@ mkdir -p ${pipeline}
 cd ${pipeline}
 
 $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini $MUGQIC_INSTALL_HOME/testdata/${pipeline}/${pipeline}.ini \
+-c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+$MUGQIC_INSTALL_HOME/testdata/${pipeline}/${pipeline}.ini \
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
 -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
 -s 1-${steps} \
@@ -146,7 +151,9 @@ mkdir -p ${pipeline}_${protocol}
 cd ${pipeline}_${protocol}
 
 $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+-c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
 -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
 -s 1-${steps} \
@@ -183,7 +190,9 @@ mkdir -p ${pipeline}_${protocol}
 cd ${pipeline}_${protocol}
 
 $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+-c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
 -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
 -s 1-${steps} \
@@ -221,8 +230,10 @@ fi
 mkdir -p ${pipeline}_${protocol}
 cd ${pipeline}_${protocol}
 
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+${MUGQIC_PIPELINES_HOME}/pipelines/${pipeline}/${pipeline}.py \
+-c ${MUGQIC_PIPELINES_HOME}/pipelines/${pipeline}/${pipeline}.base.ini \
+${MUGQIC_PIPELINES_HOME}/pipelines/${pipeline}/${pipeline}.${server}.ini \
+${MUGQIC_PIPELINES_HOME}/pipelines/${pipeline}/cit.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
 -s 1-${steps} \
 -j $scheduler \
@@ -260,7 +271,9 @@ mkdir -p ${pipeline}_${protocol}
 cd ${pipeline}_${protocol}
 
 $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+-c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
 -s 1-${steps} \
 -j $scheduler \
@@ -299,7 +312,9 @@ mkdir -p ${pipeline}
 cd ${pipeline}
 
 $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+-c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/${technology}/readset.${technology}.txt \
 -s 1-${steps} \
 -j $scheduler > ${pipeline}_commands.sh
@@ -356,7 +371,10 @@ mkdir -p ${pipeline}_${protocol}
 cd ${pipeline}_${protocol}
 
 $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini $MUGQIC_INSTALL_HOME/testdata/${pipeline}/hicseq.GM12878_chr19.ini \
+-c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+$MUGQIC_INSTALL_HOME/testdata/${pipeline}/hicseq.GM12878_chr19.ini \
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
 -s 1-${steps} \
 -j $scheduler \
@@ -399,7 +417,9 @@ ln -s $MUGQIC_INSTALL_HOME/testdata/hicseq/GSE69600_promoter_capture_bait_coordi
 
 
 $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+-c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
 -s 1-${steps} \
 -j $scheduler \
@@ -436,7 +456,9 @@ mkdir -p ${pipeline}
 cd ${pipeline}
 
 $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+-c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/${technology}/readset.${technology}.txt \
 -d $MUGQIC_INSTALL_HOME/testdata/${technology}/design.${technology}.txt \
 -s 1-${steps} \
@@ -476,7 +498,9 @@ mkdir -p ${pipeline}
 cd ${pipeline}
 
 $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+-c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/${technology}/readset.${technology}.txt \
 -d $MUGQIC_INSTALL_HOME/testdata/${technology}/design.${technology}.txt \
 -s 1-${steps} \
@@ -513,7 +537,9 @@ mkdir -p ${pipeline}
 cd ${pipeline}
 
 $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+-c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
 -s 1-${steps} \
 -j $scheduler > ${pipeline}_commands.sh
@@ -551,7 +577,9 @@ mkdir -p ${pipeline}
 cd ${pipeline}
 
 $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+-c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/${technology}/readset.${technology}.txt \
 -s 1-${steps} \
 -j $scheduler > ${pipeline}_commands.sh
@@ -589,7 +617,9 @@ mkdir -p ${pipeline}_${protocol}
 cd ${pipeline}_${protocol}
 
 $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+-c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
 -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
 -s 1-${steps} \
@@ -627,7 +657,9 @@ mkdir -p ${pipeline}_${protocol}
 cd ${pipeline}_${protocol}
 
 $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+-c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
 -s 1-${steps} \
 -j $scheduler \
