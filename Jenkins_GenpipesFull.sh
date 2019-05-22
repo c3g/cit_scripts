@@ -190,7 +190,7 @@ mkdir -p ${pipeline}_${protocol}
 cd ${pipeline}_${protocol}
 
 $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini
+-c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
 $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
 $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
@@ -271,7 +271,7 @@ mkdir -p ${pipeline}_${protocol}
 cd ${pipeline}_${protocol}
 
 $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini
+-c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
 $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
 $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
@@ -312,7 +312,7 @@ mkdir -p ${pipeline}
 cd ${pipeline}
 
 $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini
+-c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
 $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
 $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/${technology}/readset.${technology}.txt \
