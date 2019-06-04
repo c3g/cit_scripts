@@ -76,7 +76,13 @@ mkdir -p ${TEST_DIR}/GenPipesFull
 cd ${TEST_DIR}/GenPipesFull
 
 ## clone GenPipes from bitbucket
-branch=master
+
+if [ -z ${GENPIPES_BRANCH+x} ]; then
+ branch=master
+else
+ branch=${GENPIPES_BRANCH}
+fi
+
 echo "cloning Genpipes ${branch} from: git@bitbucket.org:mugqic/genpipes.git"
 
 if [ -d "genpipes" ]; then
