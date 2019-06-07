@@ -5,6 +5,37 @@
 
 ## guillaume's rrg account at CC's id is 6007512; the def account id is 6002326; change based on whether we have a RAC allocation on server or not
 
+usage (){
+
+echo
+echo "usage: $0 create the script for genpipes, submiting them on the HPC system"
+echo
+echo "   -p <pipeline1>[,pipeline2,...]       Pipeline to test, default: do them all"
+echo "   -b <branch>                          Genpipe branch to test"
+echo "   -s                                   generate scritp only, no HPC submit"
+
+}
+
+
+while getopts "p:b:s" opt; do
+  case $opt in
+    p)
+      PIPELINE=${OPTARG}
+      ;;
+    b)
+      BRANCH=${OPTARG}
+      ;;
+    s)
+      SCRIPT_ONLY=true
+      ;;
+   \?)
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+
 def=6002326
 rrg=6007512
 
@@ -77,7 +108,9 @@ cd ${TEST_DIR}/GenPipesFull
 
 ## clone GenPipes from bitbucket
 
-if [ -z ${GENPIPES_BRANCH+x} ]; then
+if [ -n "${BRANCH}" ] ;then
+  branch=${BRANCH}
+elif [ -z ${GENPIPES_BRANCH+x} ]; then
  branch=master
 else
  branch=${GENPIPES_BRANCH}
@@ -99,8 +132,35 @@ export MUGQIC_PIPELINES_HOME=${TEST_DIR}/GenPipesFull/genpipes
 mkdir -p ${TEST_DIR}/GenPipesFull/scriptTestOutputs
 cd ${TEST_DIR}/GenPipesFull/scriptTestOutputs
 
+pipelines=(chipseq dnaseq rnaseq hicseq methylseq pacbio_assembly ampliconseq  dnaseq_high_coverage
+rnaseq_denovo_assembly rnaseq_light tumor_pair illumina_run_processing)
 
-#pipelines=(chipseq dnaseq rnaseq hicseq methylseq pacbio_assembly ampliconseq dnaseq_high_coverage rnaseq_denovo_assembly rnaseq_light tumor_pair illumina_run_processing)
+generate_script () {
+pipeline=$1
+steps=$2
+extra="${@:2}"
+
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
+-c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+$MUGQIC_INSTALL_HOME/testdata/${pipeline}/${pipeline}.ini \
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
+${extra}
+-s 1-${steps} \
+-j $scheduler > ${pipeline}_commands.sh
+
+}
+
+submit () {
+
+  if [ -z ${SCRIPT_ONLY} ]]; then
+    module purge
+    bash ${pipeline}_commands.sh
+    echo "${pipeline} jobs submitted"
+  fi
+
+}
+
 
 ## chipseq.py:
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -117,15 +177,18 @@ fi
 mkdir -p ${pipeline}
 cd ${pipeline}
 
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
-$MUGQIC_INSTALL_HOME/testdata/${pipeline}/${pipeline}.ini \
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
--r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
--d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
--s 1-${steps} \
--j $scheduler > ${pipeline}_commands.sh
+generate_script ${pipeline} ${steps} -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt -d \
+$MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt
+
+# $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
+# -c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
+# $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+# $MUGQIC_INSTALL_HOME/testdata/${pipeline}/${pipeline}.ini \
+# $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
+# -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+# -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
+# -s 1-${steps} \
+# -j $scheduler > ${pipeline}_commands.sh
 
 ExitCodes+=(["${pipeline}"]="$?")
 
@@ -264,7 +327,7 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 module load mugqic/python/2.7.14
 
 pipeline=dnaseq
-steps=33
+steps=32
 protocol=mpileup
 
 
