@@ -135,28 +135,37 @@ cd ${TEST_DIR}/GenPipesFull/scriptTestOutputs
 pipelines=(chipseq dnaseq rnaseq hicseq methylseq pacbio_assembly ampliconseq  dnaseq_high_coverage
 rnaseq_denovo_assembly rnaseq_light tumor_pair illumina_run_processing)
 
-generate_script () {
-pipeline=$1
-steps=$2
-extra="${@:2}"
+export pipeline
+export steps
+export technology
 
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
-$MUGQIC_INSTALL_HOME/testdata/${pipeline}/${pipeline}.ini \
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
-${extra}
--s 1-${steps} \
--j $scheduler > ${pipeline}_commands.sh
+
+generate_script () {
+  command=${1}
+  extra="${@:1}"
+
+  $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
+  -c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
+  $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+  $MUGQIC_INSTALL_HOME/testdata/${pipeline}/${pipeline}.ini \
+  $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
+  ${extra}
+  -s 1-${steps} \
+  -j $scheduler > ${pipeline}_commands.sh
 
 }
 
 submit () {
+  command=${1}
 
   if [ -z ${SCRIPT_ONLY} ]]; then
     module purge
-    bash ${pipeline}_commands.sh
-    echo "${pipeline} jobs submitted"
+    bash ${command}
+    echo "${command} submit completed"
+  else
+    echo "${command} not submitted"
+    echo "${command} not submitted"
+
   fi
 
 }
@@ -177,25 +186,27 @@ fi
 mkdir -p ${pipeline}
 cd ${pipeline}
 
-generate_script ${pipeline} ${steps} -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt -d \
-$MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt
+# generate_script ${pipeline} ${steps} -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt -d \
+# $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt
 
-# $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
-# -c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
-# $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
-# $MUGQIC_INSTALL_HOME/testdata/${pipeline}/${pipeline}.ini \
-# $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
-# -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-# -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
-# -s 1-${steps} \
-# -j $scheduler > ${pipeline}_commands.sh
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
+-c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+$MUGQIC_INSTALL_HOME/testdata/${pipeline}/${pipeline}.ini \
+$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
+-r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+-d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
+-s 1-${steps} \
+-j $scheduler > ${pipeline}_commands.sh
 
 ExitCodes+=(["${pipeline}"]="$?")
 
 if [ ${ExitCodes["${pipeline}"]} -eq 0 ]; then
-  module purge
-  bash ${pipeline}_commands.sh
-  echo "${pipeline} jobs submitted"
+#   module purge
+#   bash ${pipeline}_commands.sh
+#   echo "${pipeline} jobs submitted"
+  submit ${pipeline}_commands.sh
+
 fi
 
 cd ../
@@ -232,9 +243,7 @@ $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
 ExitCodes+=(["${pipeline}_${protocol}"]="$?")
 
 if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-  module purge
-  bash ${pipeline}_commands_${protocol}.sh
-  echo "${pipeline}_${protocol} jobs submitted"
+  submit ${pipeline}_commands_${protocol}.sh
 fi
 
 cd ../
@@ -271,9 +280,7 @@ $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
 ExitCodes+=(["${pipeline}_${protocol}"]="$?")
 
 if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-  module purge
-  bash ${pipeline}_commands_${protocol}.sh
-  echo "${pipeline}_${protocol} jobs submitted"
+  submit ${pipeline}_commands_${protocol}.sh
 fi
 
 cd ../
@@ -311,9 +318,7 @@ ${MUGQIC_PIPELINES_HOME}/pipelines/${pipeline}/cit.ini \
 ExitCodes+=(["${pipeline}_${protocol}"]="$?")
 
 if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-  module purge
-  bash ${pipeline}_commands_${protocol}.sh
-  echo "${pipeline}_${protocol} jobs submitted"
+  submit ${pipeline}_commands_${protocol}.sh
 fi
 
 cd ../
@@ -351,9 +356,7 @@ $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
 ExitCodes+=(["${pipeline}_${protocol}"]="$?")
 
 if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-  module purge
-  bash ${pipeline}_commands_${protocol}.sh
-  echo "${pipeline}_${protocol} jobs submitted"
+  submit ${pipeline}_commands_${protocol}.sh
 fi
 
 cd ../
@@ -391,9 +394,7 @@ $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
 ExitCodes+=(["${pipeline}"]="$?")
 
 if [ ${ExitCodes["${pipeline}"]} -eq 0 ]; then
-  module purge
-  bash ${pipeline}_commands.sh
-  echo "${pipeline} jobs submitted"
+  submit ${pipeline}_commands.sh
 fi
 
 cd ../
@@ -452,9 +453,7 @@ $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
 ExitCodes+=(["${pipeline}_${protocol}"]="$?")
 
 if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-  module purge
-  bash ${pipeline}_commands_${protocol}.sh
-  echo "${pipeline}_${protocol} jobs submitted"
+  submit ${pipeline}_commands_${protocol}.sh
 fi
 
 cd ../
@@ -497,9 +496,7 @@ $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
 ExitCodes+=(["${pipeline}_${protocol}"]="$?")
 
 if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-  module purge
-  bash ${pipeline}_commands_${protocol}.sh
-  echo "${pipeline}_${protocol} jobs submitted"
+  submit ${pipeline}_commands_${protocol}.sh
 fi
 
 cd ../
@@ -536,9 +533,7 @@ $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
 ExitCodes+=(["${pipeline}"]="$?")
 
 if [ ${ExitCodes["${pipeline}"]} -eq 0 ]; then
-  module purge
-  bash ${pipeline}_commands.sh
-  echo "${pipeline} jobs submitted"
+  submit ${pipeline}_commands.sh
 fi
 
 cd ../
@@ -578,9 +573,7 @@ $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
 ExitCodes+=(["${pipeline}"]="$?")
 
 if [ ${ExitCodes["${pipeline}"]} -eq 0 ]; then
-  module purge
-  bash ${pipeline}_commands.sh
-  echo "${pipeline} jobs submitted"
+  submit ${pipeline}_commands.sh
 fi
 
 cd ../
@@ -616,9 +609,7 @@ $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
 ExitCodes+=(["${pipeline}"]="$?")
 
 if [ ${ExitCodes["${pipeline}"]} -eq 0 ]; then
-  module purge
-  bash ${pipeline}_commands.sh
-  echo "${pipeline} jobs submitted"
+  submit ${pipeline}_commands.sh
 fi
 
 cd ../
@@ -656,9 +647,7 @@ $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
 ExitCodes+=(["${pipeline}"]="$?")
 
 if [ ${ExitCodes["${pipeline}"]} -eq 0 ]; then
-  module purge
-  bash ${pipeline}_commands.sh
-  echo "${pipeline} jobs submitted"
+  submit ${pipeline}_commands.sh
 fi
 
 cd ../
@@ -698,9 +687,7 @@ $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
 ExitCodes+=(["${pipeline}_${protocol}"]="$?")
 
 if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-  module purge
-  bash ${pipeline}_commands_${protocol}.sh
-  echo "${pipeline}_${protocol} jobs submitted"
+  submit ${pipeline}_commands_${protocol}.sh
 fi
 
 cd ../
@@ -737,9 +724,7 @@ $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
 ExitCodes+=(["${pipeline}_${protocol}"]="$?")
 
 if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-  module purge
-  bash ${pipeline}_commands_${protocol}.sh
-  echo "${pipeline}_${protocol} jobs submitted"
+  submit ${pipeline}_commands_${protocol}.sh
 fi
 
 cd ../
