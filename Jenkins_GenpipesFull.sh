@@ -13,20 +13,26 @@ echo
 echo "   -p <pipeline1>[,pipeline2,...]       Pipeline to test, default: do them all"
 echo "   -b <branch>                          Genpipe branch to test"
 echo "   -s                                   generate scritp only, no HPC submit"
+echo "   -d  <path to genpipes repo>          run in debug mode"
 
 }
 
 
-while getopts "p:b:s" opt; do
+while getopts "p:b:sd:" opt; do
   case $opt in
     p)
-      PIPELINE=${OPTARG}
+      IFS=',' read -r -a PIPELINES <<< "${OPTARG}"
+        export PIPELINES
       ;;
     b)
       BRANCH=${OPTARG}
       ;;
     s)
       SCRIPT_ONLY=true
+      ;;
+    d)
+      DEBUG=true
+      MUGQIC_PIPELINES_HOME=${OPTARG}
       ;;
    \?)
       usage
@@ -43,6 +49,7 @@ HOST=`hostname`;
 DNSDOMAIN=`dnsdomainname`;
 
 export GENPIPES_CIT=
+export server
 
 export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/CentOS6
 
@@ -87,7 +94,14 @@ elif [[ $HOST == beluga* || $DNSDOMAIN == beluga.computecanada.ca ]]; then
   export server=beluga
   export scheduler="slurm"
 
+else
+  export TEST_DIR=/tmp/jenkins_tests
+  export serverName=batch
+  export server=beluga
+  export scheduler="slurm"
+
 fi
+
 
 
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -99,13 +113,13 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 module load mugqic/python/2.7.14
 
-
 ## set up a dict to collect exit codes:
 declare -A ExitCodes=()
 
-mkdir -p ${TEST_DIR}/GenPipesFull
-cd ${TEST_DIR}/GenPipesFull
-
+if [[ -z ${DEBUG} ]] ; then
+  mkdir -p ${TEST_DIR}/GenPipesFull
+  cd ${TEST_DIR}/GenPipesFull
+fi
 ## clone GenPipes from bitbucket
 
 if [ -n "${BRANCH}" ] ;then
@@ -122,15 +136,19 @@ if [ -d "genpipes" ]; then
   rm -rf genpipes
 fi
 
-git clone --depth 1 --branch ${branch} git@bitbucket.org:mugqic/genpipes.git
+if [[ -z ${DEBUG} ]] ; then
+  git clone --depth 1 --branch ${branch} git@bitbucket.org:mugqic/genpipes.git
+
+  ## set MUGQIC_PIPELINE_HOME to GenPipes bitbucket install:
+  export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/CentOS6
+  export MUGQIC_PIPELINES_HOME=${TEST_DIR}/GenPipesFull/genpipes
+fi
 
 
-## set MUGQIC_PIPELINE_HOME to GenPipes bitbucket install:
-export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/CentOS6
-export MUGQIC_PIPELINES_HOME=${TEST_DIR}/GenPipesFull/genpipes
-
-mkdir -p ${TEST_DIR}/GenPipesFull/scriptTestOutputs
-cd ${TEST_DIR}/GenPipesFull/scriptTestOutputs
+if [[ -z ${DEBUG} ]] ; then
+  mkdir -p ${TEST_DIR}/GenPipesFull/scriptTestOutputs
+  cd ${TEST_DIR}/GenPipesFull/scriptTestOutputs
+fi
 
 pipelines=(chipseq dnaseq rnaseq hicseq methylseq pacbio_assembly ampliconseq  dnaseq_high_coverage
 rnaseq_denovo_assembly rnaseq_light tumor_pair illumina_run_processing)
@@ -138,37 +156,65 @@ rnaseq_denovo_assembly rnaseq_light tumor_pair illumina_run_processing)
 export pipeline
 export steps
 export technology
+export run_pipeline
 
+prologue () {
+
+  folder=$1
+  if [[ -z ${DEBUG} ]] ; then
+    if [ -d "${folder}" ]; then
+      rm -rf ${folder}
+    fi
+
+    mkdir -p ${folder}
+    cd ${folder}
+  fi
+}
 
 generate_script () {
-  command=${1}
+  local commands=${1}
   extra="${@:1}"
 
-  $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
+  module load mugqic/python/2.7.14
+
+  python $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
   -c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
   $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
-  $MUGQIC_INSTALL_HOME/testdata/${pipeline}/${pipeline}.ini \
   $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
-  ${extra}
+  ${extra} \
   -s 1-${steps} \
-  -j $scheduler > ${pipeline}_commands.sh
+  -j $scheduler > ${commands}
+
 
 }
 
 submit () {
   command=${1}
+  echo $pipeline
 
-  if [[ -z ${SCRIPT_ONLY} ]]; then
+  if [[ -z "${SCRIPT_ONLY}" ]] || [[ -z ${DEBUG} ]] ; then
     module purge
-    bash ${command}
-    echo "${command} submit completed"
-  else
-    echo "${command} not submitted"
-
+      bash ${command}
+      echo "${command} submit completed"
+    else
+      echo "${command} not submitted"
   fi
-
 }
 
+
+check_run () {
+  run_pipeline=false
+
+  if [[ -z ${PIPELINES} ]]; then
+    run_pipeline=true
+  else
+    for p in ${PIPELINES} ; do
+      if [[ ${p}  == ${pipeline} ]]; then
+        run_pipeline=true
+      fi
+    done
+  fi
+}
 
 ## chipseq.py:
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -178,188 +224,143 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 pipeline=chipseq
 steps=19
 
-if [ -d "${pipeline}" ]; then
-  rm -rf ${pipeline}
+check_run
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue ${pipeline}
+    # generate_script ${pipeline} ${steps} -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt -d \
+    # $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt
+
+    generate_script ${pipeline}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt
+
+
+    ExitCodes+=(["${pipeline}"]="$?")
+
+    if [ ${ExitCodes["${pipeline}"]} -eq 0 ]; then
+    #   module purge
+    #   bash ${pipeline}_commands.sh
+    #   echo "${pipeline} jobs submitted"
+      submit ${pipeline}_commands.sh
+
+    fi
+
+    cd ../
 fi
-
-mkdir -p ${pipeline}
-cd ${pipeline}
-
-# generate_script ${pipeline} ${steps} -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt -d \
-# $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt
-
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
-$MUGQIC_INSTALL_HOME/testdata/${pipeline}/${pipeline}.ini \
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
--r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
--d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
--s 1-${steps} \
--j $scheduler > ${pipeline}_commands.sh
-
-ExitCodes+=(["${pipeline}"]="$?")
-
-if [ ${ExitCodes["${pipeline}"]} -eq 0 ]; then
-#   module purge
-#   bash ${pipeline}_commands.sh
-#   echo "${pipeline} jobs submitted"
-  submit ${pipeline}_commands.sh
-
-fi
-
-cd ../
-
 ## rnaseq.py -t stringtie:
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing RNASeq stringtie Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
-module load mugqic/python/2.7.14
 
 pipeline=rnaseq
 steps=19
 protocol=stringtie
 
+check_run
+if [[ ${run_pipeline} == 'true' ]] ; then
+  prologue "${pipeline}_${protocol}"
 
-if [ -d "${pipeline}_${protocol}" ]; then
-  rm -rf ${pipeline}_${protocol}
+   generate_script ${pipeline}_commands_${protocol}.sh \
+   -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+   -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
+   -t ${protocol}
+
+
+   ExitCodes+=(["${pipeline}_${protocol}"]="$?")
+
+   if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
+     submit ${pipeline}_commands_${protocol}.sh
+   fi
+
+   cd ../
 fi
-
-mkdir -p ${pipeline}_${protocol}
-cd ${pipeline}_${protocol}
-
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
--r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
--d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
--s 1-${steps} \
--j $scheduler \
--t ${protocol} > ${pipeline}_commands_${protocol}.sh
-
-ExitCodes+=(["${pipeline}_${protocol}"]="$?")
-
-if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-  submit ${pipeline}_commands_${protocol}.sh
-fi
-
-cd ../
-
 ## rnaseq.py -t cufflinks:
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing RNASeq cufflinks Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
-module load mugqic/python/2.7.14
+
 
 pipeline=rnaseq
 steps=25
 protocol=cufflinks
 
+check_run
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}_${protocol}"
 
-if [ -d "${pipeline}_${protocol}" ]; then
-  rm -rf ${pipeline}_${protocol}
+    generate_script ${pipeline}_commands_${protocol}.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
+    -t ${protocol}
+
+
+    ExitCodes+=(["${pipeline}_${protocol}"]="$?")
+
+    if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
+      submit ${pipeline}_commands_${protocol}.sh
+    fi
+
+    cd ../
 fi
-
-mkdir -p ${pipeline}_${protocol}
-cd ${pipeline}_${protocol}
-
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
--r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
--d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
--s 1-${steps} \
--j $scheduler \
--t ${protocol} > ${pipeline}_commands_${protocol}.sh
-
-ExitCodes+=(["${pipeline}_${protocol}"]="$?")
-
-if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-  submit ${pipeline}_commands_${protocol}.sh
-fi
-
-cd ../
-
 
 ## dnaseq.py -t mugqic:
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing DNASeq MUGQIC Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
-module load mugqic/python/2.7.14
+
 
 pipeline=dnaseq
 steps=29
 protocol=mugqic
 
+check_run
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}_${protocol}"
 
-if [ -d "${pipeline}_${protocol}" ]; then
-  rm -rf ${pipeline}_${protocol}
+    generate_script ${pipeline}_commands_${protocol}.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    -t ${protocol}
+
+    ExitCodes+=(["${pipeline}_${protocol}"]="$?")
+
+    if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
+      submit ${pipeline}_commands_${protocol}.sh
+    fi
+
+    cd ../
 fi
-
-
-mkdir -p ${pipeline}_${protocol}
-cd ${pipeline}_${protocol}
-
-${MUGQIC_PIPELINES_HOME}/pipelines/${pipeline}/${pipeline}.py \
--c ${MUGQIC_PIPELINES_HOME}/pipelines/${pipeline}/${pipeline}.base.ini \
-${MUGQIC_PIPELINES_HOME}/pipelines/${pipeline}/${pipeline}.${server}.ini \
-${MUGQIC_PIPELINES_HOME}/pipelines/${pipeline}/cit.ini \
--r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
--s 1-${steps} \
--j $scheduler \
--t ${protocol} > ${pipeline}_commands_${protocol}.sh
-
-ExitCodes+=(["${pipeline}_${protocol}"]="$?")
-
-if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-  submit ${pipeline}_commands_${protocol}.sh
-fi
-
-cd ../
-
 
 ## dnaseq.py -t mpileup:
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing DNASeq Mpileup Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
-module load mugqic/python/2.7.14
+
 
 pipeline=dnaseq
 steps=32
 protocol=mpileup
 
+check_run
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}_${protocol}"
 
-if [ -d "${pipeline}_${protocol}" ]; then
-  rm -rf ${pipeline}_${protocol}
+
+    generate_script ${pipeline}_commands_${protocol}.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    -t ${protocol}
+
+    ExitCodes+=(["${pipeline}_${protocol}"]="$?")
+
+    if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
+      submit ${pipeline}_commands_${protocol}.sh
+    fi
+
+    cd ../
 fi
-
-
-mkdir -p ${pipeline}_${protocol}
-cd ${pipeline}_${protocol}
-
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
--r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
--s 1-${steps} \
--j $scheduler \
--t ${protocol} > ${pipeline}_commands_${protocol}.sh
-
-ExitCodes+=(["${pipeline}_${protocol}"]="$?")
-
-if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-  submit ${pipeline}_commands_${protocol}.sh
-fi
-
-cd ../
-
 
 ## dnaseq_high_coverage:
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -367,44 +368,32 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing DNASeq High Coverage Command Creati
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
 
-module load mugqic/python/2.7.14
-
-
 pipeline=dnaseq_high_coverage
 technology=dnaseq
 steps=15
 
+check_run
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}"
 
-if [ -d "${pipeline}" ]; then
-  rm -rf ${pipeline}
+    generate_script ${pipeline}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${technology}/readset.${technology}.txt
+
+    ExitCodes+=(["${pipeline}"]="$?")
+
+    if [ ${ExitCodes["${pipeline}"]} -eq 0 ]; then
+      submit ${pipeline}_commands.sh
+    fi
+
+    cd ../
 fi
-
-mkdir -p ${pipeline}
-cd ${pipeline}
-
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
--r $MUGQIC_INSTALL_HOME/testdata/${technology}/readset.${technology}.txt \
--s 1-${steps} \
--j $scheduler > ${pipeline}_commands.sh
-
-ExitCodes+=(["${pipeline}"]="$?")
-
-if [ ${ExitCodes["${pipeline}"]} -eq 0 ]; then
-  submit ${pipeline}_commands.sh
-fi
-
-cd ../
-
 
 ## tumor_pair.py: No inis on most servers yet
 # echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 # echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing Tumor Pair Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 # echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
-# module load mugqic/python/2.7.14
+#
 
 
 # $MUGQIC_PIPELINES_HOME/pipelines/tumor_pair/tumor_pair.py \
@@ -423,40 +412,29 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing HiCSeq HiC Command Creation ~~
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
 
-module load mugqic/python/2.7.14
+
 
 pipeline=hicseq
 steps=16
 protocol=hic
 extra="-e MboI"
 
+check_run
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}_${protocol}"
 
-if [ -d "${pipeline}_${protocol}" ]; then
-  rm -rf ${pipeline}_${protocol}
+    generate_script ${pipeline}_commands_${protocol}.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    -t ${protocol} ${extra}
+
+    ExitCodes+=(["${pipeline}_${protocol}"]="$?")
+
+    if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
+      submit ${pipeline}_commands_${protocol}.sh
+    fi
+
+    cd ../
 fi
-
-
-mkdir -p ${pipeline}_${protocol}
-cd ${pipeline}_${protocol}
-
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
-$MUGQIC_INSTALL_HOME/testdata/${pipeline}/hicseq.GM12878_chr19.ini \
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
--r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
--s 1-${steps} \
--j $scheduler \
--t ${protocol} ${extra} > ${pipeline}_commands_${protocol}.sh
-
-ExitCodes+=(["${pipeline}_${protocol}"]="$?")
-
-if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-  submit ${pipeline}_commands_${protocol}.sh
-fi
-
-cd ../
-
 
 
 ## hicseq.py -t capture:
@@ -466,77 +444,61 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ## soft link to capture bed file
 
-module load mugqic/python/2.7.14
+
 
 pipeline=hicseq
 steps=17
 protocol=capture
 extra="-e MboI"
 
+check_run
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}_${protocol}"
 
-if [ -d "${pipeline}_${protocol}" ]; then
-  rm -rf ${pipeline}_${protocol}
+    ln -s $MUGQIC_INSTALL_HOME/testdata/hicseq/GSE69600_promoter_capture_bait_coordinates.bed \
+    GSE69600_promoter_capture_bait_coordinates.bed
+
+    generate_script ${pipeline}_commands_${protocol}.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    -t ${protocol} ${extra}
+
+
+    ExitCodes+=(["${pipeline}_${protocol}"]="$?")
+
+    if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
+      submit ${pipeline}_commands_${protocol}.sh
+    fi
+
+    cd ../
 fi
-
-mkdir -p ${pipeline}_${protocol}
-cd ${pipeline}_${protocol}
-ln -s $MUGQIC_INSTALL_HOME/testdata/hicseq/GSE69600_promoter_capture_bait_coordinates.bed GSE69600_promoter_capture_bait_coordinates.bed
-
-
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
--r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
--s 1-${steps} \
--j $scheduler \
--t ${protocol} ${extra} > ${pipeline}_commands_${protocol}.sh
-
-ExitCodes+=(["${pipeline}_${protocol}"]="$?")
-
-if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-  submit ${pipeline}_commands_${protocol}.sh
-fi
-
-cd ../
-
 
 ## rnaseq_light.py:
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing RNASeq Light Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
-module load mugqic/python/2.7.14
+
 
 pipeline=rnaseq_light
-technology=rnaseq
+technology=rnaseq_light
 steps=7
 
+check_run
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}"
 
-if [ -d "${pipeline}" ]; then
-  rm -rf ${pipeline}
+    generate_script ${pipeline}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${technology}/readset.${technology}.txt \
+    -d $MUGQIC_INSTALL_HOME/testdata/${technology}/design.${technology}.txt
+
+    ExitCodes+=(["${pipeline}"]="$?")
+
+    if [ ${ExitCodes["${pipeline}"]} -eq 0 ]; then
+      submit ${pipeline}_commands.sh
+    fi
+
+    cd ../
 fi
-
-mkdir -p ${pipeline}
-cd ${pipeline}
-
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
--r $MUGQIC_INSTALL_HOME/testdata/${technology}/readset.${technology}.txt \
--d $MUGQIC_INSTALL_HOME/testdata/${technology}/design.${technology}.txt \
--s 1-${steps} \
--j $scheduler > ${pipeline}_commands.sh
-
-ExitCodes+=(["${pipeline}"]="$?")
-
-if [ ${ExitCodes["${pipeline}"]} -eq 0 ]; then
-  submit ${pipeline}_commands.sh
-fi
-
-cd ../
-
 
 
 ## rnaseq_denovo_assembly.py:
@@ -545,38 +507,28 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing RNASeq de novo Command Creation ~
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
 
-module load mugqic/python/2.7.14
+
 
 pipeline=rnaseq_denovo_assembly
 technology=rnaseq
 steps=23
 
+check_run
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}"
 
-if [ -d "${pipeline}" ]; then
-  rm -rf ${pipeline}
+    generate_script ${pipeline}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${technology}/readset.${technology}.txt \
+    -d $MUGQIC_INSTALL_HOME/testdata/${technology}/design.${technology}.txt
+
+    ExitCodes+=(["${pipeline}"]="$?")
+
+    if [ ${ExitCodes["${pipeline}"]} -eq 0 ]; then
+      submit ${pipeline}_commands.sh
+    fi
+
+    cd ../
 fi
-
-
-mkdir -p ${pipeline}
-cd ${pipeline}
-
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
--r $MUGQIC_INSTALL_HOME/testdata/${technology}/readset.${technology}.txt \
--d $MUGQIC_INSTALL_HOME/testdata/${technology}/design.${technology}.txt \
--s 1-${steps} \
--j $scheduler > ${pipeline}_commands.sh
-
-ExitCodes+=(["${pipeline}"]="$?")
-
-if [ ${ExitCodes["${pipeline}"]} -eq 0 ]; then
-  submit ${pipeline}_commands.sh
-fi
-
-cd ../
-
 
 ## methylseq.py:
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -584,35 +536,28 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing methylseq Command Creation ~~~
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
 
-module load mugqic/python/2.7.14
+
 
 pipeline=methylseq
 steps=15
 
 
-if [ -d "${pipeline}" ]; then
-  rm -rf ${pipeline}
+check_run
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}"
+
+    generate_script ${pipeline}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt
+
+    ExitCodes+=(["${pipeline}"]="$?")
+
+    if [ ${ExitCodes["${pipeline}"]} -eq 0 ]; then
+      submit ${pipeline}_commands.sh
+    fi
+
+    cd ../
 fi
-
-mkdir -p ${pipeline}
-cd ${pipeline}
-
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
--r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
--s 1-${steps} \
--j $scheduler > ${pipeline}_commands.sh
-
-ExitCodes+=(["${pipeline}"]="$?")
-
-if [ ${ExitCodes["${pipeline}"]} -eq 0 ]; then
-  submit ${pipeline}_commands.sh
-fi
-
-cd ../
-
 
 
 ## pacbio_assembly.py:
@@ -621,36 +566,28 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing PacBio Assembly Command Creation 
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
 
-module load mugqic/python/2.7.14
+
 
 pipeline=pacbio_assembly
 technology=pacbio
 steps=12
 
 
-if [ -d "${pipeline}" ]; then
-  rm -rf ${pipeline}
+check_run
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}"
+
+    generate_script ${pipeline}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${technology}/readset.${technology}.txt
+
+    ExitCodes+=(["${pipeline}"]="$?")
+
+    if [ ${ExitCodes["${pipeline}"]} -eq 0 ]; then
+      submit ${pipeline}_commands.sh
+    fi
+
+    cd ../
 fi
-
-mkdir -p ${pipeline}
-cd ${pipeline}
-
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
--r $MUGQIC_INSTALL_HOME/testdata/${technology}/readset.${technology}.txt \
--s 1-${steps} \
--j $scheduler > ${pipeline}_commands.sh
-
-ExitCodes+=(["${pipeline}"]="$?")
-
-if [ ${ExitCodes["${pipeline}"]} -eq 0 ]; then
-  submit ${pipeline}_commands.sh
-fi
-
-cd ../
-
 
 
 ## ampliconseq.py:
@@ -659,75 +596,60 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing AmpliconSeq Dada2 Command Creation
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
 
-module load mugqic/python/2.7.14
+
 
 
 pipeline=ampliconseq
 steps=7
 protocol=dada2
 
-if [ -d "${pipeline}_${protocol}" ]; then
-  rm -rf ${pipeline}_${protocol}
+check_run
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}_${protocol}"
+
+    generate_script ${pipeline}_commands_${protocol}.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
+    -t ${protocol}
+
+    ExitCodes+=(["${pipeline}_${protocol}"]="$?")
+
+    if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
+      submit ${pipeline}_commands_${protocol}.sh
+    fi
+
+    cd ../
 fi
-
-mkdir -p ${pipeline}_${protocol}
-cd ${pipeline}_${protocol}
-
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
--r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
--d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
--s 1-${steps} \
--j $scheduler \
--t ${protocol} > ${pipeline}_commands_${protocol}.sh
-
-ExitCodes+=(["${pipeline}_${protocol}"]="$?")
-
-if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-  submit ${pipeline}_commands_${protocol}.sh
-fi
-
-cd ../
-
 
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing AmpliconSeq Qiime Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
 
-module load mugqic/python/2.7.14
+
 
 pipeline=ampliconseq
 steps=34
 protocol=qiime
 
 
-if [ -d "${pipeline}_${protocol}" ]; then
-  rm -rf ${pipeline}_${protocol}
+check_run
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}_${protocol}"
+
+    generate_script ${pipeline}_commands_${protocol}.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    -t ${protocol}
+
+
+    ExitCodes+=(["${pipeline}_${protocol}"]="$?")
+
+    if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
+      submit ${pipeline}_commands_${protocol}.sh
+    fi
+
+    cd ../
 fi
-
-mkdir -p ${pipeline}_${protocol}
-cd ${pipeline}_${protocol}
-
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
-$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
--r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
--s 1-${steps} \
--j $scheduler \
--t ${protocol} > ${pipeline}_commands_${protocol}.sh
-
-ExitCodes+=(["${pipeline}_${protocol}"]="$?")
-
-if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-  submit ${pipeline}_commands_${protocol}.sh
-fi
-
-cd ../
-
 
 
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
