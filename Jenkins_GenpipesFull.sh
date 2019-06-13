@@ -158,12 +158,11 @@ generate_script () {
 submit () {
   command=${1}
 
-  if [ -z ${SCRIPT_ONLY} ]]; then
+  if [[ -z ${SCRIPT_ONLY} ]]; then
     module purge
     bash ${command}
     echo "${command} submit completed"
   else
-    echo "${command} not submitted"
     echo "${command} not submitted"
 
   fi

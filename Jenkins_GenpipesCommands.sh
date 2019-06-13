@@ -54,6 +54,12 @@ elif [[ $HOST == beluga* || $DNSDOMAIN == beluga.computecanada.ca ]]; then
   export server=beluga
   export scheduler="slurm"
 
+else
+  export TEST_DIR=/tmp/jenkins_tests
+  export serverName=a_laptop
+  export server=a_laptop
+  export scheduler="slurm"
+
 fi
 
 
@@ -74,7 +80,7 @@ mkdir -p ${TEST_DIR}/GenPipesCommand
 cd ${TEST_DIR}/GenPipesCommand
 
 ## clone GenPipes from bitbucket
-branch=master
+branch=cit_fix_cedar_2019-04
 echo "cloning Genpipes ${branch} from: git@bitbucket.org:mugqic/genpipes.git"
 
 if [ -d "genpipes" ]; then
