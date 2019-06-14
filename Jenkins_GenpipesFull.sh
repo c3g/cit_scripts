@@ -480,7 +480,7 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 pipeline=rnaseq_light
-technology=rnaseq_light
+technology=rnaseq
 steps=7
 
 check_run
@@ -488,8 +488,8 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}"
 
     generate_script ${pipeline}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${technology}/readset.${pipeline}.txt \
-    -d $MUGQIC_INSTALL_HOME/testdata/${technology}/design.${pipeline}.txt
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${technology}.txt \
+    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${technology}.txt
 
     ExitCodes+=(["${pipeline}"]="$?")
 
