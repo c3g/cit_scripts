@@ -488,8 +488,8 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}"
 
     generate_script ${pipeline}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${technology}/readset.${technology}.txt \
-    -d $MUGQIC_INSTALL_HOME/testdata/${technology}/design.${technology}.txt
+    -r $MUGQIC_INSTALL_HOME/testdata/${technology}/readset.${pipeline}.txt \
+    -d $MUGQIC_INSTALL_HOME/testdata/${technology}/design.${pipeline}.txt
 
     ExitCodes+=(["${pipeline}"]="$?")
 
@@ -547,8 +547,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}"
 
     generate_script ${pipeline}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt
 
     ExitCodes+=(["${pipeline}"]="$?")
 
