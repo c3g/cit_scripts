@@ -14,11 +14,12 @@ echo "   -p <pipeline1>[,pipeline2,...]       Pipeline to test, default: do them
 echo "   -b <branch>                          Genpipe branch to test"
 echo "   -s                                   generate scritp only, no HPC submit"
 echo "   -d  <path to genpipes repo>          run in debug mode"
+echo "   -u                                   update mode, do not remove latest pipeline run"
 
 }
 
 
-while getopts "p:b:sd:" opt; do
+while getopts "p:b:sd:u" opt; do
   case $opt in
     p)
       IFS=',' read -r -a PIPELINES <<< "${OPTARG}"
@@ -30,8 +31,11 @@ while getopts "p:b:sd:" opt; do
     s)
       SCRIPT_ONLY=true
       ;;
+    u)
+      export UPDATE_MODE=true
+      ;;
     d)
-      DEBUG=true
+      export DEBUG=true
       MUGQIC_PIPELINES_HOME=${OPTARG}
       ;;
    \?)
@@ -162,10 +166,9 @@ prologue () {
 
   folder=$1
   if [[ -z ${DEBUG} ]] ; then
-    if [ -d "${folder}" ]; then
+    if [ -d "${folder}" ] && [[  -z ${UPDATE_MODE} ]] ; then
       rm -rf ${folder}
     fi
-
     mkdir -p ${folder}
     cd ${folder}
   fi
