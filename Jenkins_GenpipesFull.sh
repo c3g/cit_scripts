@@ -179,6 +179,15 @@ generate_script () {
   extra="${@:1}"
 
   module load mugqic/python/2.7.14
+  echo "************************ running *********************************"
+  echo "python $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py"\
+  "-c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini" \
+  "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini" \
+  "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini" \
+  "${extra}" \
+  "-s 1-${steps}" \
+  "-j $scheduler > ${commands}"
+  echo "******************************************************************"
 
   python $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
   -c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
@@ -187,7 +196,6 @@ generate_script () {
   ${extra} \
   -s 1-${steps} \
   -j $scheduler > ${commands}
-
 
 }
 
