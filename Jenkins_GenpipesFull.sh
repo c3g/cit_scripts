@@ -631,35 +631,35 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     cd ../
 fi
 
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing AmpliconSeq Qiime Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+#echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+#echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing AmpliconSeq Qiime Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+#echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
 
 
 
-pipeline=ampliconseq
-steps=34
-protocol=qiime
+#pipeline=ampliconseq
+#steps=34
+#protocol=qiime
 
 
-check_run
-if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}_${protocol}"
+#check_run
+#if [[ ${run_pipeline} == 'true' ]] ; then
+#    prologue "${pipeline}_${protocol}"
 
-    generate_script ${pipeline}_commands_${protocol}.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-    -t ${protocol}
+#    generate_script ${pipeline}_commands_${protocol}.sh \
+#    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+#    -t ${protocol}
 
 
-    ExitCodes+=(["${pipeline}_${protocol}"]="$?")
+#    ExitCodes+=(["${pipeline}_${protocol}"]="$?")
 
-    if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-      submit ${pipeline}_commands_${protocol}.sh
-    fi
+#    if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
+#      submit ${pipeline}_commands_${protocol}.sh
+#    fi
 
-    cd ../
-fi
+#    cd ../
+#fi
 
 
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
