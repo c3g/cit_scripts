@@ -149,6 +149,7 @@ fi
 
 if [[ -z ${DEBUG} ]] ; then
   cd ${GENPIPES_DIR}
+  echo cloning to ${GENPIPES_DIR}/genpipes
   git clone --depth 1 --branch ${branch} git@bitbucket.org:mugqic/genpipes.git
 
   ## set MUGQIC_PIPELINE_HOME to GenPipes bitbucket install:
