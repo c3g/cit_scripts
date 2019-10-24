@@ -16,11 +16,21 @@ echo "   -s                                   generate scritp only, no HPC submi
 echo "   -d  <path to genpipes repo>          run in debug mode"
 echo "   -u                                   update mode, do not remove latest pipeline run"
 echo "   -l                                   deploy genpipe in /tmp dir "
+echo "   -a                                   list all available pipeline and exit "
 
 }
 
+pipelines=(chipseq dnaseq rnaseq hicseq methylseq pacbio_assembly ampliconseq  dnaseq_high_coverage
+rnaseq_denovo_assembly rnaseq_light tumor_pair illumina_run_processing)
 
-while getopts "p:b:sld:u" opt; do
+
+avail (){
+
+  echo available pipeline in the test suite
+  (IFS=$'\n' ; echo "${pipelines[*]}" )
+}
+
+while getopts "ap:b:sld:u" opt; do
   case $opt in
     p)
       IFS=',' read -r -a PIPELINES <<< "${OPTARG}"
@@ -34,6 +44,10 @@ while getopts "p:b:sld:u" opt; do
       ;;
     s)
       SCRIPT_ONLY=true
+      ;;
+    a)
+      avail
+      exit 0
       ;;
     u)
       export UPDATE_MODE=true
@@ -163,8 +177,6 @@ if [[ -z ${DEBUG} ]] ; then
   cd ${TEST_DIR}/GenPipesFull/scriptTestOutputs
 fi
 
-pipelines=(chipseq dnaseq rnaseq hicseq methylseq pacbio_assembly ampliconseq  dnaseq_high_coverage
-rnaseq_denovo_assembly rnaseq_light tumor_pair illumina_run_processing)
 
 export pipeline
 export steps
