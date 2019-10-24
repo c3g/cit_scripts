@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/usr/bin/env bash
 
 ## Server set up:
 
@@ -15,11 +15,12 @@ echo "   -b <branch>                          Genpipe branch to test"
 echo "   -s                                   generate scritp only, no HPC submit"
 echo "   -d  <path to genpipes repo>          run in debug mode"
 echo "   -u                                   update mode, do not remove latest pipeline run"
+echo "   -l                                   deploy genpipe in /tmp dir "
 
 }
 
 
-while getopts "p:b:sd:u" opt; do
+while getopts "p:b:sld:u" opt; do
   case $opt in
     p)
       IFS=',' read -r -a PIPELINES <<< "${OPTARG}"
@@ -27,6 +28,9 @@ while getopts "p:b:sd:u" opt; do
       ;;
     b)
       BRANCH=${OPTARG}
+      ;;
+    l)
+      GENPIPES_DIR=$(mktemp -d /tmp/genpipes_XXXX)
       ;;
     s)
       SCRIPT_ONLY=true
@@ -107,13 +111,16 @@ else
 fi
 
 
-
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "Starting Genpipes Full Command tests today:  $(date)"
 echo "                                    Server:  ${serverName}"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
 ## set up environment:
+
+if [[ -z  ${GENPIPES_DIR} ]]; then
+  ${GENPIPES_DIR} = ${TEST_DIR}/GenPipesFull
+fi
 
 module load mugqic/python/2.7.14
 
@@ -141,11 +148,12 @@ if [ -d "genpipes" ]; then
 fi
 
 if [[ -z ${DEBUG} ]] ; then
+  cd ${GENPIPES_DIR}
   git clone --depth 1 --branch ${branch} git@bitbucket.org:mugqic/genpipes.git
 
   ## set MUGQIC_PIPELINE_HOME to GenPipes bitbucket install:
   export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/CentOS6
-  export MUGQIC_PIPELINES_HOME=${TEST_DIR}/GenPipesFull/genpipes
+  export MUGQIC_PIPELINES_HOME=${GENPIPES_DIR}/genpipes
 fi
 
 
@@ -185,7 +193,6 @@ generate_script () {
   "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini" \
   "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini" \
   "${extra}" \
-  "-s 1-${steps}" \
   "-j $scheduler > ${commands}"
   echo "******************************************************************"
 
@@ -194,7 +201,6 @@ generate_script () {
   $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
   $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
   ${extra} \
-  -s 1-${steps} \
   -j $scheduler > ${commands}
 
 }
