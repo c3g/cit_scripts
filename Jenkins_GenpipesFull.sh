@@ -13,14 +13,13 @@ echo
 echo "   -p <pipeline1>[,pipeline2,...]       Pipeline to test, default: do them all"
 echo "   -b <branch>                          Genpipe branch to test"
 echo "   -s                                   generate scritp only, no HPC submit"
-echo "   -d  <path to genpipes repo>          run in debug mode"
 echo "   -u                                   update mode, do not remove latest pipeline run"
 echo "   -l                                   deploy genpipe in /tmp dir "
 
 }
 
 
-while getopts "p:b:sld:u" opt; do
+while getopts "p:b:slu" opt; do
   case $opt in
     p)
       IFS=',' read -r -a PIPELINES <<< "${OPTARG}"
@@ -30,17 +29,13 @@ while getopts "p:b:sld:u" opt; do
       BRANCH=${OPTARG}
       ;;
     l)
-      GENPIPES_DIR=$(mktemp -d /tmp/genpipes_XXXX)
+      export GENPIPES_DIR=$(mktemp -d /tmp/genpipes_XXXX)
       ;;
     s)
-      SCRIPT_ONLY=true
+      export SCRIPT_ONLY=true
       ;;
     u)
       export UPDATE_MODE=true
-      ;;
-    d)
-      export DEBUG=true
-      MUGQIC_PIPELINES_HOME=${OPTARG}
       ;;
    \?)
       usage
@@ -48,7 +43,6 @@ while getopts "p:b:sld:u" opt; do
       ;;
   esac
 done
-
 
 def=6002326
 rrg=6007512
@@ -210,7 +204,7 @@ submit () {
   command=${1}
   echo $pipeline
 
-  if [[ -z "${SCRIPT_ONLY}" ]] || [[ -z ${DEBUG} ]] ; then
+  if [[ -z ${SCRIPT_ONLY} ]] ; then
     module purge
       bash ${command}
       echo "${command} submit completed"
