@@ -220,11 +220,9 @@ check_run () {
   if [[ -z ${PIPELINES} ]]; then
     run_pipeline=true
   else
-    for p in ${PIPELINES} ; do
-      if [[ ${p}  == ${pipeline} ]]; then
-        run_pipeline=true
-      fi
-    done
+    if [[ " ${PIPELINES[@]} " =~ " ${pipeline} " ]]; then
+      run_pipeline=true
+    fi
   fi
 }
 
