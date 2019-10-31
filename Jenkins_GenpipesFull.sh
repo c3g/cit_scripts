@@ -13,7 +13,6 @@ echo
 echo "   -p <pipeline1>[,pipeline2,...]       Pipeline to test, default: do them all"
 echo "   -b <branch>                          Genpipe branch to test"
 echo "   -s                                   generate scritp only, no HPC submit"
-echo "   -d  <path to genpipes repo>          run in debug mode"
 echo "   -u                                   update mode, do not remove latest pipeline run"
 echo "   -l                                   deploy genpipe in /tmp dir "
 echo "   -a                                   list all available pipeline and exit "
@@ -30,7 +29,7 @@ avail (){
   (IFS=$'\n' ; echo "${pipelines[*]}" )
 }
 
-while getopts "ap:b:sld:u" opt; do
+while getopts "ap:b:slu" opt; do
   case $opt in
     p)
       IFS=',' read -r -a PIPELINES <<< "${OPTARG}"
@@ -40,10 +39,10 @@ while getopts "ap:b:sld:u" opt; do
       BRANCH=${OPTARG}
       ;;
     l)
-      GENPIPES_DIR=$(mktemp -d /tmp/genpipes_XXXX)
+      export GENPIPES_DIR=$(mktemp -d /tmp/genpipes_XXXX)
       ;;
     s)
-      SCRIPT_ONLY=true
+      export SCRIPT_ONLY=true
       ;;
     a)
       avail
@@ -52,17 +51,12 @@ while getopts "ap:b:sld:u" opt; do
     u)
       export UPDATE_MODE=true
       ;;
-    d)
-      export DEBUG=true
-      MUGQIC_PIPELINES_HOME=${OPTARG}
-      ;;
    \?)
       usage
       exit 1
       ;;
   esac
 done
-
 
 def=6002326
 rrg=6007512
@@ -133,7 +127,7 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## set up environment:
 
 if [[ -z  ${GENPIPES_DIR} ]]; then
-  ${GENPIPES_DIR} = ${TEST_DIR}/GenPipesFull
+  GENPIPES_DIR=${TEST_DIR}/GenPipesFull
 fi
 
 module load mugqic/python/2.7.14
@@ -222,7 +216,7 @@ submit () {
   command=${1}
   echo $pipeline
 
-  if [[ -z "${SCRIPT_ONLY}" ]] || [[ -z ${DEBUG} ]] ; then
+  if [[ -z ${SCRIPT_ONLY} ]] ; then
     module purge
       bash ${command}
       echo "${command} submit completed"
@@ -238,11 +232,9 @@ check_run () {
   if [[ -z ${PIPELINES} ]]; then
     run_pipeline=true
   else
-    for p in ${PIPELINES} ; do
-      if [[ ${p}  == ${pipeline} ]]; then
-        run_pipeline=true
-      fi
-    done
+    if [[ " ${PIPELINES[@]} " =~ " ${pipeline} " ]]; then
+      run_pipeline=true
+    fi
   fi
 }
 
