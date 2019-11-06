@@ -19,8 +19,9 @@ echo "   -a                                   list all available pipeline and ex
 
 }
 
-pipelines=(chipseq dnaseq rnaseq hicseq methylseq pacbio_assembly ampliconseq  dnaseq_high_coverage
-rnaseq_denovo_assembly rnaseq_light tumor_pair illumina_run_processing)
+#pipelines=(chipseq dnaseq rnaseq hicseq methylseq pacbio_assembly ampliconseq  dnaseq_high_coverage
+#rnaseq_denovo_assembly rnaseq_light tumor_pair illumina_run_processing)
+pipelines=(chipseq dnaseq_mugqic dnaseq_mpileup  rnaseq_stringtie rnaseq_cufflinks  hicseq_hic hicseq_capture methylseq pacbio_assembly ampliconseq_dada2 ampliconseq_qiime  dnaseq_high_coverage  rnaseq_denovo_assembly rnaseq_light tumor_pair illumina_run_processing)
 
 
 avail (){
@@ -173,13 +174,14 @@ fi
 
 
 export pipeline
-export steps
 export technology
 export run_pipeline
+export protocol
 
 prologue () {
-
+  # Folder is named pipeline_protocole
   folder=$1
+  
   if [[ -z ${DEBUG} ]] ; then
     if [ -d "${folder}" ] && [[  -z ${UPDATE_MODE} ]] ; then
       rm -rf ${folder}
@@ -214,10 +216,10 @@ generate_script () {
 
 submit () {
   command=${1}
-  echo $pipeline
 
   if [[ -z ${SCRIPT_ONLY} ]] ; then
     module purge
+      echo submiting $pipeline
       bash ${command}
       echo "${command} submit completed"
     else
@@ -227,12 +229,14 @@ submit () {
 
 
 check_run () {
+  # if there is not protocol remove the _
+  pip=${1%%_}
   run_pipeline=false
 
   if [[ -z ${PIPELINES} ]]; then
     run_pipeline=true
   else
-    if [[ " ${PIPELINES[@]} " =~ " ${pipeline} " ]]; then
+    if [[ " ${PIPELINES[@]} " =~ " ${pip} " ]]; then
       run_pipeline=true
     fi
   fi
@@ -244,9 +248,9 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing ChIPSeq Command Creation ~~~~
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
 pipeline=chipseq
-steps=19
+protocol=''
 
-check_run
+check_run $pipeline_$protocol
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue ${pipeline}
     # generate_script ${pipeline} ${steps} -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt -d \
@@ -276,7 +280,6 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 pipeline=rnaseq
-steps=19
 protocol=stringtie
 
 check_run
@@ -305,7 +308,6 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 pipeline=rnaseq
-steps=25
 protocol=cufflinks
 
 check_run
@@ -335,7 +337,6 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 pipeline=dnaseq
-steps=29
 protocol=mugqic
 
 check_run
@@ -363,7 +364,6 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 pipeline=dnaseq
-steps=32
 protocol=mpileup
 
 check_run
@@ -392,7 +392,7 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 pipeline=dnaseq_high_coverage
 technology=dnaseq
-steps=15
+protocol=''
 
 check_run
 if [[ ${run_pipeline} == 'true' ]] ; then
@@ -437,7 +437,6 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 pipeline=hicseq
-steps=16
 protocol=hic
 extra="-e MboI"
 
@@ -469,7 +468,6 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 pipeline=hicseq
-steps=17
 protocol=capture
 extra="-e MboI"
 
@@ -502,8 +500,8 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 pipeline=rnaseq_light
+protocol=''
 technology=rnaseq
-steps=7
 
 check_run
 if [[ ${run_pipeline} == 'true' ]] ; then
@@ -533,7 +531,7 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 pipeline=rnaseq_denovo_assembly
 technology=rnaseq
-steps=23
+protocol=''
 
 check_run
 if [[ ${run_pipeline} == 'true' ]] ; then
@@ -561,7 +559,7 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 pipeline=methylseq
-steps=15
+protocol=''
 
 
 check_run
@@ -590,8 +588,8 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 pipeline=pacbio_assembly
+protocol=''
 technology=pacbio
-steps=12
 
 
 check_run
@@ -621,7 +619,6 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 pipeline=ampliconseq
-steps=7
 protocol=dada2
 
 check_run
@@ -650,7 +647,6 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 pipeline=ampliconseq
-steps=34
 protocol=qiime
 
 
