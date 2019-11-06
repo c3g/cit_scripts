@@ -232,7 +232,6 @@ check_run () {
   # if there is not protocol remove the _
   pip=${1%%_}
   run_pipeline=false
-
   if [[ -z ${PIPELINES} ]]; then
     run_pipeline=true
   else
@@ -250,7 +249,7 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 pipeline=chipseq
 protocol=''
 
-check_run $pipeline_$protocol
+check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue ${pipeline}
     # generate_script ${pipeline} ${steps} -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt -d \
@@ -282,7 +281,38 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 pipeline=rnaseq
 protocol=stringtie
 
-check_run
+check_run "${pipeline}_${protocol}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue ${pipeline}
+    # generate_script ${pipeline} ${steps} -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt -d \
+    # $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt
+
+    generate_script ${pipeline}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt
+
+
+    ExitCodes+=(["${pipeline}"]="$?")
+
+    if [ ${ExitCodes["${pipeline}"]} -eq 0 ]; then
+    #   module purge
+    #   bash ${pipeline}_commands.sh
+    #   echo "${pipeline} jobs submitted"
+      submit ${pipeline}_commands.sh
+
+    fi
+
+    cd ../
+fi
+## rnaseq.py -t stringtie:
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing RNASeq stringtie Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+
+
+pipeline=rnaseq
+protocol=stringtie
+
 if [[ ${run_pipeline} == 'true' ]] ; then
   prologue "${pipeline}_${protocol}"
 
@@ -310,7 +340,7 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 pipeline=rnaseq
 protocol=cufflinks
 
-check_run
+check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}"
 
@@ -339,7 +369,7 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 pipeline=dnaseq
 protocol=mugqic
 
-check_run
+check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}"
 
@@ -366,7 +396,7 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 pipeline=dnaseq
 protocol=mpileup
 
-check_run
+check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}"
 
@@ -394,7 +424,7 @@ pipeline=dnaseq_high_coverage
 technology=dnaseq
 protocol=''
 
-check_run
+check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}"
 
@@ -440,7 +470,7 @@ pipeline=hicseq
 protocol=hic
 extra="-e MboI"
 
-check_run
+check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}"
 
@@ -471,7 +501,7 @@ pipeline=hicseq
 protocol=capture
 extra="-e MboI"
 
-check_run
+check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}"
 
@@ -503,7 +533,7 @@ pipeline=rnaseq_light
 protocol=''
 technology=rnaseq
 
-check_run
+check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}"
 
@@ -533,7 +563,7 @@ pipeline=rnaseq_denovo_assembly
 technology=rnaseq
 protocol=''
 
-check_run
+check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}"
 
@@ -562,7 +592,7 @@ pipeline=methylseq
 protocol=''
 
 
-check_run
+check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}"
 
@@ -592,7 +622,7 @@ protocol=''
 technology=pacbio
 
 
-check_run
+check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}"
 
@@ -621,7 +651,7 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 pipeline=ampliconseq
 protocol=dada2
 
-check_run
+check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}"
 
@@ -650,7 +680,7 @@ pipeline=ampliconseq
 protocol=qiime
 
 
-check_run
+check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}"
 
