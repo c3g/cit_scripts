@@ -163,8 +163,8 @@ echo "    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 echo "                                Checking space Usage by folder:"
 echo "    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    "
 
-
-du -hs --time $TEST_DIR/* 2>/dev/null | sort -hr
+module load python/3.7
+ls -d    /project/6007512/C3G/projects/* | parallel -P 8 python3 size.py | sort -hr
 
 
 
