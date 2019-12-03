@@ -164,7 +164,7 @@ echo "                                Checking space Usage by folder:"
 echo "    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    "
 
 module load python/3.7
-ls -d    $TEST_DIR/* | parallel -P 8 python3 size.py | sort -hr
+ls -d    $TEST_DIR/* | parallel -P 10 python3 size.py | sort -hr
 
 
 
