@@ -145,11 +145,11 @@ else
 fi
 
 if [[ -z ${GENPIPES_DIR} ]]; then
-  if [[ ${commit} == '' ]] ; then
+  if [ -n "${commit}" ] ; then
+    GENPIPES_DIR=${TEST_DIR}/GenPipesFull_${branch}_${commit}
+  else
     TIMESTAMP=`date +%FT%H.%M.%S` 
     GENPIPES_DIR=${TEST_DIR}/GenPipesFull_${branch}_${TIMESTAMP}
-  else
-    GENPIPES_DIR=${TEST_DIR}/GenPipesFull_${branch}_${commit}
 fi
 
 ## set up a dict to collect exit codes:
@@ -173,8 +173,10 @@ if [[ -z ${DEBUG} ]] ; then
   cd ${GENPIPES_DIR}
   echo cloning to ${GENPIPES_DIR}/genpipes
   git clone --depth 3 --branch ${branch} git@bitbucket.org:mugqic/genpipes.git
-  cd genpipes
-  git checkout ${commit}
+  if [ -n "${commit}" ]; then
+    cd genpipes
+    git checkout ${commit}
+  fi
 
   ## set MUGQIC_PIPELINE_HOME to GenPipes bitbucket install:
   export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/CentOS6
