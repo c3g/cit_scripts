@@ -16,6 +16,7 @@ rrg_id=rrg-bourqueg-ad
 HOST=`hostname`;
 DNSDOMAIN=`dnsdomainname`;
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 if [[ $HOST == abacus* || $DNSDOMAIN == ferrier.genome.mcgill.ca ]]; then
 
@@ -164,7 +165,7 @@ echo "                                Checking space Usage by folder:"
 echo "    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    "
 
 module load python/3.7
-ls -d    $TEST_DIR/* | parallel -P 10 python3 size.py | sort -hr
+ls -d    $TEST_DIR/* | parallel -P 10 python3 ${SCRIPT_DIR}/size.py | sort -hr
 
 
 
