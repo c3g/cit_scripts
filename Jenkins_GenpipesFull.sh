@@ -146,7 +146,8 @@ fi
 
 if [[ -z ${GENPIPES_DIR} ]]; then
   if [[ ${commit} == '' ]] ; then
-    GENPIPES_DIR=${TEST_DIR}/GenPipesFull_${branch}_
+    TIMESTAMP=`date +%FT%H.%M.%S` 
+    GENPIPES_DIR=${TEST_DIR}/GenPipesFull_${branch}_${TIMESTAMP}
   else
     GENPIPES_DIR=${TEST_DIR}/GenPipesFull_${branch}_${commit}
 fi
@@ -171,7 +172,7 @@ fi
 if [[ -z ${DEBUG} ]] ; then
   cd ${GENPIPES_DIR}
   echo cloning to ${GENPIPES_DIR}/genpipes
-  git clone --depth 1 --branch ${branch} git@bitbucket.org:mugqic/genpipes.git
+  git clone --depth 3 --branch ${branch} git@bitbucket.org:mugqic/genpipes.git
   cd genpipes
   git checkout ${commit}
 
