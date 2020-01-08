@@ -2,7 +2,6 @@
 
 ## Server set up:
 
-
 ## guillaume's rrg account at CC's id is 6007512; the def account id is 6002326; change based on whether we have a RAC allocation on server or not
 
 usage (){
@@ -12,6 +11,7 @@ echo "usage: $0 create the script for genpipes, submiting them on the HPC system
 echo
 echo "   -p <pipeline1>[,pipeline2,...]       Pipeline to test, default: do them all"
 echo "   -b <branch>                          Genpipe branch to test"
+echo "   -c <commit>                          Hash string of the commit to test"
 echo "   -s                                   generate scritp only, no HPC submit"
 echo "   -u                                   update mode, do not remove latest pipeline run"
 echo "   -l                                   deploy genpipe in /tmp dir "
@@ -23,14 +23,13 @@ echo "   -a                                   list all available pipeline and ex
 #rnaseq_denovo_assembly rnaseq_light tumor_pair illumina_run_processing)
 pipelines=(chipseq dnaseq_mugqic dnaseq_mpileup  rnaseq_stringtie rnaseq_cufflinks  hicseq_hic hicseq_capture methylseq pacbio_assembly ampliconseq_dada2 ampliconseq_qiime  dnaseq_high_coverage  rnaseq_denovo_assembly rnaseq_light tumor_pair illumina_run_processing)
 
-
 avail (){
 
   echo available pipeline in the test suite
   (IFS=$'\n' ; echo "${pipelines[*]}" )
 }
 
-while getopts "ap:b:slu" opt; do
+while getopts "ap:b:c:slu" opt; do
   case $opt in
     p)
       IFS=',' read -r -a PIPELINES <<< "${OPTARG}"
@@ -38,6 +37,9 @@ while getopts "ap:b:slu" opt; do
       ;;
     b)
       BRANCH=${OPTARG}
+      ;;
+    c)
+      COMMIT=${OPTARG}
       ;;
     l)
       export GENPIPES_DIR=$(mktemp -d /tmp/genpipes_XXXX)
@@ -119,35 +121,46 @@ else
 
 fi
 
-
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "Starting Genpipes Full Command tests today:  $(date)"
 echo "                                    Server:  ${serverName}"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
-## set up environment:
-
-if [[ -z  ${GENPIPES_DIR} ]]; then
-  GENPIPES_DIR=${TEST_DIR}/GenPipesFull
-fi
-
 module load mugqic/python/2.7.14
 
-## set up a dict to collect exit codes:
-declare -A ExitCodes=()
-
-if [[ -z ${DEBUG} ]] ; then
-  mkdir -p ${TEST_DIR}/GenPipesFull
-  cd ${TEST_DIR}/GenPipesFull
-fi
-## clone GenPipes from bitbucket
+## set up environment:
 
 if [ -n "${BRANCH}" ] ;then
   branch=${BRANCH}
 elif [ -z ${GENPIPES_BRANCH+x} ]; then
- branch=master
+  branch=master
 else
- branch=${GENPIPES_BRANCH}
+  branch=${GENPIPES_BRANCH}
+fi
+
+if [ -n "${COMMIT}" ] ;then
+  commit=${COMMIT}
+else
+  commit=""
+fi
+
+if [[ -z ${GENPIPES_DIR} ]]; then
+  if [ -n "${commit}" ] ; then
+    GENPIPES_DIR=${TEST_DIR}/GenPipesFull_${branch}_${commit}
+  else
+    TIMESTAMP=`date +%FT%H.%M.%S` 
+    GENPIPES_DIR=${TEST_DIR}/GenPipesFull_${branch}_${TIMESTAMP}
+fi
+
+## set up a dict to collect exit codes:
+
+declare -A ExitCodes=()
+
+## clone GenPipes from bitbucket
+
+if [[ -z ${DEBUG} ]] ; then
+  mkdir -p ${GENPIPES_DIR}
+  cd ${GENPIPES_DIR}
 fi
 
 echo "cloning Genpipes ${branch} from: git@bitbucket.org:mugqic/genpipes.git"
@@ -159,19 +172,21 @@ fi
 if [[ -z ${DEBUG} ]] ; then
   cd ${GENPIPES_DIR}
   echo cloning to ${GENPIPES_DIR}/genpipes
-  git clone --depth 1 --branch ${branch} git@bitbucket.org:mugqic/genpipes.git
+  git clone --depth 3 --branch ${branch} git@bitbucket.org:mugqic/genpipes.git
+  if [ -n "${commit}" ]; then
+    cd genpipes
+    git checkout ${commit}
+  fi
 
   ## set MUGQIC_PIPELINE_HOME to GenPipes bitbucket install:
   export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/CentOS6
   export MUGQIC_PIPELINES_HOME=${GENPIPES_DIR}/genpipes
 fi
 
-
 if [[ -z ${DEBUG} ]] ; then
-  mkdir -p ${TEST_DIR}/GenPipesFull/scriptTestOutputs
-  cd ${TEST_DIR}/GenPipesFull/scriptTestOutputs
+  mkdir -p ${GENPIPES_DIR}/scriptTestOutputs
+  cd ${GENPIPES_DIR}/scriptTestOutputs
 fi
-
 
 export pipeline
 export technology
@@ -227,7 +242,6 @@ submit () {
   fi
 }
 
-
 check_run () {
   # if there is not protocol remove the _
   pip=${1%%_}
@@ -259,7 +273,6 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
     -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt
 
-
     ExitCodes+=(["${pipeline}"]="$?")
 
     if [ ${ExitCodes["${pipeline}"]} -eq 0 ]; then
@@ -276,7 +289,6 @@ fi
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing RNASeq stringtie Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-
 
 pipeline=rnaseq
 protocol=stringtie
