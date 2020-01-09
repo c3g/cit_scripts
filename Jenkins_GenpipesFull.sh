@@ -86,7 +86,7 @@ elif [[ $HOST == lg-* || $DNSDOMAIN == guillimin.clumeq.ca ]]; then
   export server=guillimin
   export scheduler="pbs"
 
-elif [[ $HOST == ip* ]]; then 
+elif [[ $HOST == ip* ]]; then
 
   export TEST_DIR=/project/${rrg}/C3G/projects/jenkins_tests
   export serverName=mp2b
@@ -148,8 +148,9 @@ if [[ -z ${GENPIPES_DIR} ]]; then
   if [ -n "${commit}" ] ; then
     GENPIPES_DIR=${TEST_DIR}/GenPipesFull_${branch}_${commit}
   else
-    TIMESTAMP=`date +%FT%H.%M.%S` 
+    TIMESTAMP=`date +%FT%H.%M.%S`
     GENPIPES_DIR=${TEST_DIR}/GenPipesFull_${branch}_${TIMESTAMP}
+  fi
 fi
 
 ## set up a dict to collect exit codes:
@@ -196,7 +197,7 @@ export protocol
 prologue () {
   # Folder is named pipeline_protocole
   folder=$1
-  
+
   if [[ -z ${DEBUG} ]] ; then
     if [ -d "${folder}" ] && [[  -z ${UPDATE_MODE} ]] ; then
       rm -rf ${folder}
@@ -714,5 +715,3 @@ fi
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Testing GenPipes Command Complete ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-
-
