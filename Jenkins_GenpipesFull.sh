@@ -104,7 +104,7 @@ elif [[ $HOST == gra-* || $DNSDOMAIN == graham.sharcnet ]]; then
 
   export TEST_DIR=/project/${def}/C3G/projects/jenkins_tests
   export serverName=graham
-  export server=cedar
+  export server=graham
   export scheduler="slurm"
 
 elif [[ $HOST == beluga* || $DNSDOMAIN == beluga.computecanada.ca ]]; then
