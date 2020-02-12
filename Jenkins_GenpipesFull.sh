@@ -291,37 +291,6 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing RNASeq stringtie Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
-pipeline=rnaseq
-protocol=stringtie
-
-check_run "${pipeline}_${protocol}"
-if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue ${pipeline}
-    # generate_script ${pipeline} ${steps} -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt -d \
-    # $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt
-
-    generate_script ${pipeline}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt
-
-
-    ExitCodes+=(["${pipeline}"]="$?")
-
-    if [ ${ExitCodes["${pipeline}"]} -eq 0 ]; then
-    #   module purge
-    #   bash ${pipeline}_commands.sh
-    #   echo "${pipeline} jobs submitted"
-      submit ${pipeline}_commands.sh
-
-    fi
-
-    cd ../
-fi
-## rnaseq.py -t stringtie:
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing RNASeq stringtie Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-
 
 pipeline=rnaseq
 protocol=stringtie
