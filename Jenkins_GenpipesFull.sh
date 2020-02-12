@@ -209,7 +209,7 @@ prologue () {
 
 generate_script () {
   local commands=${1}
-  extra="${@:1}"
+  extra="${@:2}"
 
   module load mugqic/python/2.7.14
   echo "************************ running *********************************"
