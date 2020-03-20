@@ -333,6 +333,20 @@ $MUGQIC_PIPELINES_HOME/pipelines/ampliconseq/ampliconseq.py \
 
 ExitCodes+=(["ampliconseq_qiime"]="$?")
 
+## nanopore.py:
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing Nanopore Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+
+
+$MUGQIC_PIPELINES_HOME/pipelines/nanopore/nanopore.py \
+-c $MUGQIC_PIPELINES_HOME/pipelines/nanopore/nanopore.base.ini $MUGQIC_PIPELINES_HOME/pipelines/nanopore/nanopore.${server}.ini \
+-r $MUGQIC_INSTALL_HOME/testdata/nanopore/readset.nanopore.txt \
+-s 1-5 \
+-j $scheduler > nanoporeCommands.sh
+
+ExitCodes+=(["nanopore"]="$?")
+
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now Checking if DEV exists in ini files ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"

@@ -683,6 +683,34 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 #    cd ../
 fi
 
+## nanopore.py:
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing nanopore Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+
+
+
+
+pipeline=nanopore
+protocol=''
+
+
+check_run "${pipeline}_${protocol}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}"
+
+    generate_script ${pipeline}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt
+
+    ExitCodes+=(["${pipeline}"]="$?")
+
+    if [ ${ExitCodes["${pipeline}"]} -eq 0 ]; then
+      submit ${pipeline}_commands.sh
+    fi
+
+    cd ../
+fi
+
 
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Testing GenPipes Command Complete ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
