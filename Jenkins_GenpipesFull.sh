@@ -203,13 +203,14 @@ prologue () {
       rm -rf ${folder}
     fi
     mkdir -p ${folder}
-    cd ${folder}
+#    cd ${folder}
   fi
 }
 
 generate_script () {
   local commands=${1}
   extra="${@:2}"
+  folder=$(echo ${commands}| cut -d'_' -f 1)
 
   module load mugqic/python/2.7.14
   echo "************************ running *********************************"
@@ -218,7 +219,8 @@ generate_script () {
   "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini" \
   "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini" \
   "${extra}" \
-  "-j $scheduler > ${commands}"
+  "-o ${folder}" \
+  "-j $scheduler > ${folder}/${commands}"
   echo "******************************************************************"
 
   python $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
@@ -226,7 +228,8 @@ generate_script () {
   $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
   $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
   ${extra} \
-  -j $scheduler > ${commands}
+  -o ${folder} \
+  -j $scheduler > ${folder}/${commands}
 
 }
 
