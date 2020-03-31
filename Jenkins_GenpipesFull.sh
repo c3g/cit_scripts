@@ -388,7 +388,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
     generate_script ${pipeline}_commands_${protocol}.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-    -t ${protocol}
+    -t ${protocol} -l debug
 
     ExitCodes+=(["${pipeline}_${protocol}"]="$?")
 
