@@ -139,10 +139,7 @@ echo "    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 if [ "${perc_space%.*}" -gt "$threshold" ]; then
   echo "WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING!"
-  echo "WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING!"
   echo "WARNING! Space usage has exceeded threshold of ${threshold} "
-  echo "WARNING! Space usage has exceeded threshold of ${threshold} "
-  echo "WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING!"
   echo "WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING!"
   exit_status=1
 fi
@@ -150,10 +147,7 @@ fi
 if [[ $server == CC ]]; then
   if [ "${perc_fileNum%.*}" -gt "$threshold" ]; then
     echo "WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING!"
-    echo "WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING!"
     echo "WARNING! File number has exceeded threshold of ${threshold} "
-    echo "WARNING! File number has exceeded threshold of ${threshold} "
-    echo "WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING!"
     echo "WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING!"
     exit_status=1
   fi
@@ -167,7 +161,7 @@ echo "    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 module load python/3.7
 tmpfile=$(mktemp)
 echo ********** UNSORTED **********
-ls -d    $TEST_DIR/* | parallel -P 10 python3 ${SCRIPT_DIR}/size.py 2>/dev/null | tee ${tmpfile}  
+ls -d   $TEST_DIR/* | parallel -P 10 python3 ${SCRIPT_DIR}/size.py 2>/dev/null | tee ${tmpfile}  
 echo **********  SORTED  **********
 sort -hr ${tmpfile}
 

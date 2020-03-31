@@ -101,13 +101,9 @@ echo "    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 if [[ $server == abacus ]]; then
   cd $TEST_DIR 
-  abaquota -t 2> /dev/null
-  used_space=$(abaquota -t 2> /dev/null | grep project | awk '{print($2)}')
-  used_space_raw=${used_space}"T"
-  avail_space=$(abaquota -t 2> /dev/null | grep project | awk '{print($3)}')
-  avail_space_raw=${avail_space}"T"
-  perc_space=$(awk "BEGIN {printf \"%.2f\",${used_space}*100/${avail_space}}")
-
+  df -h | grep " /.b\|^File"
+  df -h | grep " /.b" | tr '%' ' '|awk -v threshold="$threshold" '$5 >= threshold {print $5}' | grep "[0-9][0-9]"
+  BUST=$?
 elif [[ $server == CC ]]; then 
   diskusage_report 2> /dev/null
   used_space_raw=$(diskusage_report 2> /dev/null | grep $id | awk '{print($4)}' | awk 'BEGIN {FS="/"} { print $1}')
@@ -127,15 +123,15 @@ fi
 
 echo "    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    "
 echo ""
-echo "Space used on ${serverName} as part of ${id}: ${used_space_raw} from ${avail_space_raw} ==>  ${perc_space} percent" 
 if [[ $server == CC ]]; then
+  echo "Space used on ${serverName} as part of ${id}: ${used_space_raw} from ${avail_space_raw} ==>  ${perc_space} percent" 
   echo "File # used on ${serverName} as part of ${id}: ${used_fileNum_raw} from ${avail_fileNum_raw} ==>  ${perc_fileNum} percent"
 fi
 echo ""
 echo "    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    "
 
 
-if [ "${perc_space%.*}" -gt "$threshold" ]; then
+if [[ ${BUST} -eq 0 ]]; then
   echo "WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING!"
   echo "WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING!"
   echo "WARNING! Space usage has exceeded threshold of ${threshold} "

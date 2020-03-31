@@ -104,7 +104,7 @@ elif [[ $HOST == gra-* || $DNSDOMAIN == graham.sharcnet ]]; then
 
   export TEST_DIR=/project/${def}/C3G/projects/jenkins_tests
   export serverName=graham
-  export server=cedar
+  export server=graham
   export scheduler="slurm"
 
 elif [[ $HOST == beluga* || $DNSDOMAIN == beluga.computecanada.ca ]]; then
@@ -203,13 +203,14 @@ prologue () {
       rm -rf ${folder}
     fi
     mkdir -p ${folder}
-    cd ${folder}
+#    cd ${folder}
   fi
 }
 
 generate_script () {
   local commands=${1}
-  extra="${@:1}"
+  extra="${@:2}"
+  folder=${commands%_*}
 
   module load mugqic/python/2.7.14
   echo "************************ running *********************************"
@@ -218,7 +219,8 @@ generate_script () {
   "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini" \
   "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini" \
   "${extra}" \
-  "-j $scheduler > ${commands}"
+  "-o ${folder}" \
+  "-j $scheduler > ${folder}/${commands}"
   echo "******************************************************************"
 
   python $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
@@ -226,7 +228,8 @@ generate_script () {
   $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
   $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
   ${extra} \
-  -j $scheduler > ${commands}
+  -o ${folder} \
+  -j $scheduler > ${folder}/${commands}
 
 }
 
@@ -284,38 +287,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
     fi
 
-    cd ../
-fi
-## rnaseq.py -t stringtie:
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing RNASeq stringtie Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-
-pipeline=rnaseq
-protocol=stringtie
-
-check_run "${pipeline}_${protocol}"
-if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue ${pipeline}
-    # generate_script ${pipeline} ${steps} -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt -d \
-    # $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt
-
-    generate_script ${pipeline}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt
-
-
-    ExitCodes+=(["${pipeline}"]="$?")
-
-    if [ ${ExitCodes["${pipeline}"]} -eq 0 ]; then
-    #   module purge
-    #   bash ${pipeline}_commands.sh
-    #   echo "${pipeline} jobs submitted"
-      submit ${pipeline}_commands.sh
-
-    fi
-
-    cd ../
+#    cd ../
 fi
 ## rnaseq.py -t stringtie:
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -329,7 +301,7 @@ protocol=stringtie
 if [[ ${run_pipeline} == 'true' ]] ; then
   prologue "${pipeline}_${protocol}"
 
-   generate_script ${pipeline}_commands_${protocol}.sh \
+   generate_script ${pipeline}_${protocol}_commands.sh \
    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
    -t ${protocol}
@@ -338,10 +310,10 @@ if [[ ${run_pipeline} == 'true' ]] ; then
    ExitCodes+=(["${pipeline}_${protocol}"]="$?")
 
    if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-     submit ${pipeline}_commands_${protocol}.sh
+     submit ${pipeline}_${protocol}_commands.sh
    fi
 
-   cd ../
+#   cd ../
 fi
 ## rnaseq.py -t cufflinks:
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -357,7 +329,7 @@ check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}"
 
-    generate_script ${pipeline}_commands_${protocol}.sh \
+    generate_script ${pipeline}_${protocol}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
     -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
     -t ${protocol}
@@ -366,10 +338,10 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     ExitCodes+=(["${pipeline}_${protocol}"]="$?")
 
     if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-      submit ${pipeline}_commands_${protocol}.sh
+      submit ${pipeline}_${protocol}_commands.sh
     fi
 
-    cd ../
+#    cd ../
 fi
 
 ## dnaseq.py -t mugqic:
@@ -386,17 +358,17 @@ check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}"
 
-    generate_script ${pipeline}_commands_${protocol}.sh \
+    generate_script ${pipeline}_${protocol}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
     -t ${protocol} -l debug
 
     ExitCodes+=(["${pipeline}_${protocol}"]="$?")
 
     if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-      submit ${pipeline}_commands_${protocol}.sh
+      submit ${pipeline}_${protocol}_commands.sh
     fi
 
-    cd ../
+#    cd ../
 fi
 
 ## dnaseq.py -t mpileup:
@@ -414,17 +386,17 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}"
 
 
-    generate_script ${pipeline}_commands_${protocol}.sh \
+    generate_script ${pipeline}_${protocol}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
     -t ${protocol}
 
     ExitCodes+=(["${pipeline}_${protocol}"]="$?")
 
     if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-      submit ${pipeline}_commands_${protocol}.sh
+      submit ${pipeline}_${protocol}_commands.sh
     fi
 
-    cd ../
+#    cd ../
 fi
 
 ## dnaseq_high_coverage:
@@ -450,7 +422,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
       submit ${pipeline}_commands.sh
     fi
 
-    cd ../
+#    cd ../
 fi
 
 ## tumor_pair.py: No inis on most servers yet
@@ -487,17 +459,17 @@ check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}"
 
-    generate_script ${pipeline}_commands_${protocol}.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    generate_script ${pipeline}_${protocol}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}_${protocol}.txt \
     -t ${protocol} ${extra}
 
     ExitCodes+=(["${pipeline}_${protocol}"]="$?")
 
     if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-      submit ${pipeline}_commands_${protocol}.sh
+      submit ${pipeline}_${protocol}_commands.sh
     fi
 
-    cd ../
+#    cd ../
 fi
 
 
@@ -521,7 +493,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     ln -s $MUGQIC_INSTALL_HOME/testdata/hicseq/GSE69600_promoter_capture_bait_coordinates.bed \
     GSE69600_promoter_capture_bait_coordinates.bed
 
-    generate_script ${pipeline}_commands_${protocol}.sh \
+    generate_script ${pipeline}_${protocol}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
     -t ${protocol} ${extra}
 
@@ -529,10 +501,10 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     ExitCodes+=(["${pipeline}_${protocol}"]="$?")
 
     if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-      submit ${pipeline}_commands_${protocol}.sh
+      submit ${pipeline}_${protocol}_commands.sh
     fi
 
-    cd ../
+#    cd ../
 fi
 
 ## rnaseq_light.py:
@@ -560,7 +532,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
       submit ${pipeline}_commands.sh
     fi
 
-    cd ../
+#    cd ../
 fi
 
 
@@ -590,7 +562,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
       submit ${pipeline}_commands.sh
     fi
 
-    cd ../
+#    cd ../
 fi
 
 ## methylseq.py:
@@ -618,7 +590,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
       submit ${pipeline}_commands.sh
     fi
 
-    cd ../
+#    cd ../
 fi
 
 
@@ -648,7 +620,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
       submit ${pipeline}_commands.sh
     fi
 
-    cd ../
+#    cd ../
 fi
 
 
@@ -668,7 +640,7 @@ check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}"
 
-    generate_script ${pipeline}_commands_${protocol}.sh \
+    generate_script ${pipeline}_${protocol}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
     -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
     -t ${protocol}
@@ -676,10 +648,10 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     ExitCodes+=(["${pipeline}_${protocol}"]="$?")
 
     if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-      submit ${pipeline}_commands_${protocol}.sh
+      submit ${pipeline}_${protocol}_commands.sh
     fi
 
-    cd ../
+#    cd ../
 fi
 
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -697,7 +669,7 @@ check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}"
 
-    generate_script ${pipeline}_commands_${protocol}.sh \
+    generate_script ${pipeline}_${protocol}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
     -t ${protocol}
 
@@ -705,13 +677,21 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     ExitCodes+=(["${pipeline}_${protocol}"]="$?")
 
     if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-      submit ${pipeline}_commands_${protocol}.sh
+      submit ${pipeline}_${protocol}_commands.sh
     fi
 
-    cd ../
+#    cd ../
 fi
 
 
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Testing GenPipes Command Complete ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+ret_code=0
+for key in "${!ExitCodes[@]}"; do
+  echo $key return  ${ExitCodes[$key]}
+  if [[ ${ExitCodes[$key]} != 0 ]]; then
+    ret_code=${!ExitCodes[$key]}
+  fi
+done
+exit $ret_code
