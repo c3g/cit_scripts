@@ -460,7 +460,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}"
 
     generate_script ${pipeline}_commands_${protocol}.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}_${protocol}.txt \
     -t ${protocol} ${extra}
 
     ExitCodes+=(["${pipeline}_${protocol}"]="$?")
