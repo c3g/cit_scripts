@@ -283,7 +283,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     #   module purge
     #   bash ${pipeline}_commands.sh
     #   echo "${pipeline} jobs submitted"
-      submit ${pipeline}_commands.sh
+      submit ${pipeline}/${pipeline}_commands.sh
 
     fi
 
