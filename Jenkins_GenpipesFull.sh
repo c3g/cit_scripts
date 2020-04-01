@@ -310,7 +310,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
    ExitCodes+=(["${pipeline}_${protocol}"]="$?")
 
    if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-     submit ${pipeline}_${protocol}_commands.sh
+     submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
    fi
 
 #   cd ../
@@ -338,7 +338,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     ExitCodes+=(["${pipeline}_${protocol}"]="$?")
 
     if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-      submit ${pipeline}_${protocol}_commands.sh
+      submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
     fi
 
 #    cd ../
@@ -365,7 +365,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     ExitCodes+=(["${pipeline}_${protocol}"]="$?")
 
     if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-      submit ${pipeline}_${protocol}_commands.sh
+      submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
     fi
 
 #    cd ../
@@ -393,7 +393,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     ExitCodes+=(["${pipeline}_${protocol}"]="$?")
 
     if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-      submit ${pipeline}_${protocol}_commands.sh
+      submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
     fi
 
 #    cd ../
@@ -419,7 +419,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     ExitCodes+=(["${pipeline}"]="$?")
 
     if [ ${ExitCodes["${pipeline}"]} -eq 0 ]; then
-      submit ${pipeline}_commands.sh
+      submit ${pipeline}/${pipeline}_commands.sh
     fi
 
 #    cd ../
@@ -466,7 +466,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     ExitCodes+=(["${pipeline}_${protocol}"]="$?")
 
     if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-      submit ${pipeline}_${protocol}_commands.sh
+      submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
     fi
 
 #    cd ../
@@ -501,7 +501,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     ExitCodes+=(["${pipeline}_${protocol}"]="$?")
 
     if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-      submit ${pipeline}_${protocol}_commands.sh
+      submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
     fi
 
 #    cd ../
@@ -529,7 +529,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     ExitCodes+=(["${pipeline}"]="$?")
 
     if [ ${ExitCodes["${pipeline}"]} -eq 0 ]; then
-      submit ${pipeline}_commands.sh
+      submit ${pipeline}/${pipeline}_commands.sh
     fi
 
 #    cd ../
@@ -559,7 +559,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     ExitCodes+=(["${pipeline}"]="$?")
 
     if [ ${ExitCodes["${pipeline}"]} -eq 0 ]; then
-      submit ${pipeline}_commands.sh
+      submit ${pipeline}/${pipeline}_commands.sh
     fi
 
 #    cd ../
@@ -587,7 +587,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     ExitCodes+=(["${pipeline}"]="$?")
 
     if [ ${ExitCodes["${pipeline}"]} -eq 0 ]; then
-      submit ${pipeline}_commands.sh
+      submit ${pipeline}/${pipeline}_commands.sh
     fi
 
 #    cd ../
@@ -617,7 +617,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     ExitCodes+=(["${pipeline}"]="$?")
 
     if [ ${ExitCodes["${pipeline}"]} -eq 0 ]; then
-      submit ${pipeline}_commands.sh
+      submit ${pipeline}/${pipeline}_commands.sh
     fi
 
 #    cd ../
@@ -648,7 +648,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     ExitCodes+=(["${pipeline}_${protocol}"]="$?")
 
     if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-      submit ${pipeline}_${protocol}_commands.sh
+      submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
     fi
 
 #    cd ../
@@ -677,7 +677,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     ExitCodes+=(["${pipeline}_${protocol}"]="$?")
 
     if [ ${ExitCodes["${pipeline}_${protocol}"]} -eq 0 ]; then
-      submit ${pipeline}_${protocol}_commands.sh
+      submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
     fi
 
 #    cd ../
