@@ -491,7 +491,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}"
 
     ln -s $MUGQIC_INSTALL_HOME/testdata/hicseq/GSE69600_promoter_capture_bait_coordinates.bed \
-    GSE69600_promoter_capture_bait_coordinates.bed
+    ${pipeline}_${protocol}/GSE69600_promoter_capture_bait_coordinates.bed
 
     generate_script ${pipeline}_${protocol}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
