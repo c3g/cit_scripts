@@ -31,7 +31,7 @@ elif [[ $HOST == lg-* || $DNSDOMAIN == guillimin.clumeq.ca ]]; then
   export server=CC
   export id=${rrg_id}
 
-elif [[ $HOST == ip* ]]; then 
+elif [[ $HOST == ip* ]]; then
 
   export TEST_DIR=/project/${rrg}/C3G/projects/
   export serverName=mp2b
@@ -102,15 +102,23 @@ echo "    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 if [[ $server == abacus ]]; then
-  cd $TEST_DIR 
-  abaquota -t 2> /dev/null
-  used_space=$(abaquota -t 2> /dev/null | grep project | awk '{print($2)}')
-  used_space_raw=${used_space}"T"
-  avail_space=$(abaquota -t 2> /dev/null | grep project | awk '{print($3)}')
-  avail_space_raw=${avail_space}"T"
-  perc_space=$(awk "BEGIN {printf \"%.2f\",${used_space}*100/${avail_space}}")
+  cd $TEST_DIR
 
-elif [[ $server == CC ]]; then 
+  df -h /lb | head -n 1
+  bust=0
+  for d in "lb" "sb" "nb"; do
+    used=$(df -h /$d | grep "^$d" | awk '{ print $5 }')
+    df -h /$d | grep "^$d"
+   if [[ ${used%\%} -gt ${threshold} ]] ; then bust=1 ; fi
+ done
+  df -hi /lb | head -n 1
+  for d in "lb" "sb" "nb"; do
+    used=$(df -hi /$d | grep "^$d" | awk '{ print $5 }')
+    df -hi /$d | grep "^$d"
+    if [[ ${used%\%} -gt ${threshold} ]] ; then bust=1 ; fi
+  done
+
+elif [[ $server == CC ]]; then
   diskusage_report 2> /dev/null
   used_space_raw=$(diskusage_report 2> /dev/null | grep $id | awk '{print($4)}' | awk 'BEGIN {FS="/"} { print $1}')
   used_space=$(unit_tranform $used_space_raw)
@@ -129,7 +137,7 @@ fi
 
 echo "    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    "
 echo ""
-echo "Space used on ${serverName} as part of ${id}: ${used_space_raw} from ${avail_space_raw} ==>  ${perc_space} percent" 
+echo "Space used on ${serverName} as part of ${id}: ${used_space_raw} from ${avail_space_raw} ==>  ${perc_space} percent"
 if [[ $server == CC ]]; then
   echo "File # used on ${serverName} as part of ${id}: ${used_fileNum_raw} from ${avail_fileNum_raw} ==>  ${perc_fileNum} percent"
 fi
@@ -137,7 +145,7 @@ echo ""
 echo "    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    "
 
 
-if [ "${perc_space%.*}" -gt "$threshold" ]; then
+if [[ $bust -ne 0 ]]; then
   echo "WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING!"
   echo "WARNING! Space usage has exceeded threshold of ${threshold} "
   echo "WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING!"
@@ -161,7 +169,7 @@ echo "    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 module load python/3.7
 tmpfile=$(mktemp -p $HOME)
 echo ********** UNSORTED **********
-ls -d   $TEST_DIR/* | parallel -P 10 python3 ${SCRIPT_DIR}/size.py 2>/dev/null | tee ${tmpfile}  
+ls -d   $TEST_DIR/* | parallel -P 10 python3 ${SCRIPT_DIR}/size.py 2>/dev/null | tee ${tmpfile}
 echo **********  SORTED  **********
 sort -hr ${tmpfile}
 rm $tmpfile
