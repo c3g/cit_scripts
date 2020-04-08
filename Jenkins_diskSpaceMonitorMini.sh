@@ -99,6 +99,7 @@ echo "    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 
+BUST=1
 if [[ $server == abacus ]]; then
   cd $TEST_DIR 
   df -h | grep " /.b\|^File"
@@ -131,26 +132,10 @@ echo ""
 echo "    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    "
 
 
-if [[ ${BUST} -eq 0 ]]; then
-  echo "WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING!"
+if [[ ${BUST} -eq 0 || ${perc_space%.*} -gt  ${threshold} || ${perc_fileNum%.*} -gt ${threshold} ]]; then
   echo "WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING!"
   echo "WARNING! Space usage has exceeded threshold of ${threshold} "
-  echo "WARNING! Space usage has exceeded threshold of ${threshold} "
-  echo "WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING!"
-  echo "WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING!"
   exit_status=2
-fi
-
-if [[ $server == CC ]]; then
-  if [ "${perc_fileNum%.*}" -gt "$threshold" ]; then
-    echo "WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING!"
-    echo "WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING!"
-    echo "WARNING! File number has exceeded threshold of ${threshold} "
-    echo "WARNING! File number has exceeded threshold of ${threshold} "
-    echo "WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING!"
-    echo "WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING!"
-    exit_status=2
-  fi
 fi
 
 
