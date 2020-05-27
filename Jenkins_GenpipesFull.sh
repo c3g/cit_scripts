@@ -21,7 +21,7 @@ echo "   -a                                   list all available pipeline and ex
 
 #pipelines=(chipseq dnaseq rnaseq hicseq methylseq pacbio_assembly ampliconseq  dnaseq_high_coverage
 #rnaseq_denovo_assembly rnaseq_light tumor_pair illumina_run_processing)
-pipelines=(chipseq dnaseq_mugqic dnaseq_mpileup  rnaseq_stringtie rnaseq_cufflinks  hicseq_hic hicseq_capture methylseq pacbio_assembly ampliconseq_dada2 ampliconseq_qiime  dnaseq_high_coverage  rnaseq_denovo_assembly rnaseq_light tumor_pair illumina_run_processing)
+pipelines=(nanopore chipseq dnaseq_mugqic dnaseq_mpileup  rnaseq_stringtie rnaseq_cufflinks  hicseq_hic hicseq_capture methylseq pacbio_assembly ampliconseq_dada2 ampliconseq_qiime  dnaseq_high_coverage  rnaseq_denovo_assembly rnaseq_light tumor_pair illumina_run_processing)
 
 avail (){
 
