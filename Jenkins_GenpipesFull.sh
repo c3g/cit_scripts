@@ -243,14 +243,14 @@ generate_script () {
 submit () {
   command=${1}
 
-  if [[ -z ${SCRIPT_ONLY} && ${RET_CODE_CREATE_SCRIPT -eq 0 ]] ; then
+  if [[ -z ${SCRIPT_ONLY} && ${RET_CODE_CREATE_SCRIPT} -eq 0 ]] ; then
       module purge
       echo submiting $pipeline
       bash ${command}
       RET_CODE_SUBMIT_SCRIPT=$?
       ExitCodes+=(["${pipeline}_${protocol}_submit"]="$RET_CODE_SUBMIT_SCRIPT")
       echo "${command} submit completed"
-    else
+  else
       echo "${command} not submitted"
   fi
 }
