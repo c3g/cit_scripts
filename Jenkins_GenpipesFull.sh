@@ -19,15 +19,6 @@ echo "   -a                                   list all available pipeline and ex
 
 }
 
-#pipelines=(chipseq dnaseq rnaseq hicseq methylseq pacbio_assembly ampliconseq  dnaseq_high_coverage
-#rnaseq_denovo_assembly rnaseq_light tumor_pair illumina_run_processing)
-pipelines=(nanopore chipseq dnaseq_mugqic dnaseq_mpileup  rnaseq_stringtie rnaseq_cufflinks  hicseq_hic hicseq_capture methylseq ampliconseq_dada2 ampliconseq_qiime  dnaseq_high_coverage  rnaseq_denovo_assembly rnaseq_light tumor_pair illumina_run_processing)
-
-avail (){
-
-  echo available pipeline in the test suite
-  (IFS=$'\n' ; echo "${pipelines[*]}" )
-}
 
 while getopts "ap:b:c:slu" opt; do
   case $opt in
@@ -48,8 +39,8 @@ while getopts "ap:b:c:slu" opt; do
       export SCRIPT_ONLY=true
       ;;
     a)
-      avail
-      exit 0
+      export AVAIL=is_set
+      echo available pipeline in the test suite
       ;;
     u)
       export UPDATE_MODE=true
@@ -122,13 +113,6 @@ else
 
 fi
 
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "Starting Genpipes Full Command tests today:  $(date)"
-echo "                                    Server:  ${serverName}"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-
-module load mugqic/python/2.7.14
-
 ## set up environment:
 
 if [ -n "${BRANCH}" ] ;then
@@ -162,18 +146,21 @@ export ExitCodes
 
 ## clone GenPipes from bitbucket
 
-if [[ -z ${DEBUG} ]] ; then
+if [[ -z ${AVAIL+x} ]] ; then
+  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+  echo "Starting Genpipes Full Command tests today:  $(date)"
+  echo "                                    Server:  ${serverName}"
+  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+
   mkdir -p ${GENPIPES_DIR}
   cd ${GENPIPES_DIR}
-fi
 
-echo "cloning Genpipes ${branch} from: git@bitbucket.org:mugqic/genpipes.git"
+  echo "cloning Genpipes ${branch} from: git@bitbucket.org:mugqic/genpipes.git"
 
-if [ -d "genpipes" ]; then
-  rm -rf genpipes
-fi
+  if [ -d "genpipes" ]; then
+    rm -rf genpipes
+  fi
 
-if [[ -z ${DEBUG} ]] ; then
   cd ${GENPIPES_DIR}
   echo cloning to ${GENPIPES_DIR}/genpipes
   git clone --depth 3 --branch ${branch} git@bitbucket.org:mugqic/genpipes.git
@@ -187,7 +174,7 @@ if [[ -z ${DEBUG} ]] ; then
   export MUGQIC_PIPELINES_HOME=${GENPIPES_DIR}/genpipes
 fi
 
-if [[ -z ${DEBUG} ]] ; then
+if [[ -z ${AVAIL+x} ]] ; then
   mkdir -p ${GENPIPES_DIR}/scriptTestOutputs
   cd ${GENPIPES_DIR}/scriptTestOutputs
 fi
@@ -196,17 +183,17 @@ export pipeline
 export technology
 export run_pipeline
 export protocol
+export protocol
 
 prologue () {
   # Folder is named pipeline_protocole
   folder=$1
 
-  if [[ -z ${DEBUG} ]] ; then
+  if [[ -z ${AVAIL+x} ]] ; then
     if [ -d "${folder}" ] && [[  -z ${UPDATE_MODE} ]] ; then
       rm -rf ${folder}
     fi
     mkdir -p ${folder}
-#    cd ${folder}
   fi
 }
 
@@ -259,19 +246,23 @@ check_run () {
   # if there is not protocol remove the _
   pip=${1%%_}
   run_pipeline=false
+  if [[ ! -z ${AVAIL+x} ]]; then
+    echo - ${pip}
+    return 0
+  fi
   if [[ -z ${PIPELINES} ]]; then
     run_pipeline=true
   else
     if [[ " ${PIPELINES[@]} " =~ " ${pip} " ]]; then
       run_pipeline=true
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo "                                     Now testing ${pip} "
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     fi
   fi
 }
 
 ## chipseq.py:
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing ChIPSeq Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
 pipeline=chipseq
 protocol=''
@@ -287,18 +278,12 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt
     submit ${pipeline}/${pipeline}_commands.sh
 
-
-#    cd ../
 fi
-## rnaseq.py -t stringtie:
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing RNASeq stringtie Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
 
 pipeline=rnaseq
 protocol=stringtie
-
+check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
   prologue "${pipeline}_${protocol}"
 
@@ -312,12 +297,6 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
 #   cd ../
 fi
-## rnaseq.py -t cufflinks:
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing RNASeq cufflinks Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-
-
 
 pipeline=rnaseq
 protocol=cufflinks
@@ -336,11 +315,6 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 #    cd ../
 fi
 
-## dnaseq.py -t mugqic:
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing DNASeq MUGQIC Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-
 
 
 pipeline=dnaseq
@@ -358,12 +332,6 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
 fi
 
-## dnaseq.py -t mpileup:
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing DNASeq Mpileup Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-
-
 
 pipeline=dnaseq
 protocol=mpileup
@@ -379,11 +347,6 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
     submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
 fi
-
-## dnaseq_high_coverage:
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing DNASeq High Coverage Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
 
 pipeline=dnaseq_high_coverage
@@ -401,30 +364,6 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
 #    cd ../
 fi
-
-## tumor_pair.py: No inis on most servers yet
-# echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-# echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing Tumor Pair Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-# echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-
-#
-
-
-# $MUGQIC_PIPELINES_HOME/pipelines/tumor_pair/tumor_pair.py \
-# -c $MUGQIC_PIPELINES_HOME/pipelines/dnaseq/dnaseq.base.ini $MUGQIC_PIPELINES_HOME/pipelines/tumor_pair/tumor_pair.base.ini $MUGQIC_PIPELINES_HOME/pipelines/tumor_pair/tumor_pair.${server}.ini \
-# -r $MUGQIC_INSTALL_HOME/testdata/tumor_pair/readset.tumorPair.txt \
-# -p $MUGQIC_INSTALL_HOME/testdata/tumor_pair/pairs.csv \
-# -s 1-44 \
-# -j $scheduler > tumor_pairCommands.sh
-
-# ExitCodes+=(["tumor_pair"]="$?")
-
-
-## hicseq.py -t hic:
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing HiCSeq HiC Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-
 
 
 
@@ -445,15 +384,6 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 fi
 
 
-## hicseq.py -t capture:
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing HiCSeq Capture Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-
-## soft link to capture bed file
-
-
-
 pipeline=hicseq
 protocol=capture
 extra="-e MboI"
@@ -462,6 +392,7 @@ check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}"
 
+    ## soft link to capture bed file
     ln -s $MUGQIC_INSTALL_HOME/testdata/hicseq/GSE69600_promoter_capture_bait_coordinates.bed \
     ${pipeline}_${protocol}/GSE69600_promoter_capture_bait_coordinates.bed
 
@@ -472,12 +403,6 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
       submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
 fi
-
-## rnaseq_light.py:
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing RNASeq Light Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-
 
 
 pipeline=rnaseq_light
@@ -497,14 +422,6 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 fi
 
 
-## rnaseq_denovo_assembly.py:
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing RNASeq de novo Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-
-
-
-
 pipeline=rnaseq_denovo_assembly
 technology=rnaseq
 protocol=''
@@ -520,13 +437,6 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
     submit ${pipeline}/${pipeline}_commands.sh
 fi
-
-## methylseq.py:
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing methylseq Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-
-
 
 
 pipeline=methylseq
@@ -545,15 +455,6 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 fi
 
 
-## ampliconseq.py:
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing AmpliconSeq Dada2 Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-
-
-
-
-
 pipeline=ampliconseq
 protocol=dada2
 
@@ -568,12 +469,6 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
       submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
 fi
-
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing AmpliconSeq Qiime Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-
-
 
 
 pipeline=ampliconseq
@@ -592,12 +487,6 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
 fi
 
-## nanopore.py:
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing nanopore Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-
-
 
 
 pipeline=nanopore
@@ -615,6 +504,9 @@ if [[ ${run_pipeline} == 'true' ]] ; then
       submit ${pipeline}/${pipeline}_commands.sh
 fi
 
+if [[ ! -z ${AVAIL+x} ]] ; then
+   exit 0
+fi
 
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Testing GenPipes Command Complete ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
