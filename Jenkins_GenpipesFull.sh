@@ -155,8 +155,8 @@ if [[ -z ${GENPIPES_DIR} ]]; then
 fi
 
 ## set up a dict to collect exit codes:
-export RET_CODE_CREATE_SCRIPT=1
-export RET_CODE_SUBMIT_SCRIPT=1
+export RET_CODE_CREATE_SCRIPT
+export RET_CODE_SUBMIT_SCRIPT
 declare -A ExitCodes=()
 export ExitCodes
 
@@ -243,7 +243,7 @@ generate_script () {
 submit () {
   command=${1}
 
-  if [[ -z ${SCRIPT_ONLY} &&  ${RET_CODE_CREATE_SCRIPT -eq 0 ]] ; then
+  if [[ -z ${SCRIPT_ONLY} && ${RET_CODE_CREATE_SCRIPT -eq 0 ]] ; then
       module purge
       echo submiting $pipeline
       bash ${command}
