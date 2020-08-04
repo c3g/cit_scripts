@@ -278,14 +278,12 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt
     submit ${pipeline}/${pipeline}_commands.sh
 
-
-#    cd ../
 fi
 
 
 pipeline=rnaseq
 protocol=stringtie
-
+check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
   prologue "${pipeline}_${protocol}"
 
