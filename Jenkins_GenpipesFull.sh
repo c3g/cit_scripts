@@ -612,7 +612,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt
 
 
-      submit ${pipeline}_commands.sh
+      submit ${pipeline}/${pipeline}_commands.sh
 fi
 
 
