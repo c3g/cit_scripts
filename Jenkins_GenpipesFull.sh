@@ -152,16 +152,14 @@ if [[ -z ${AVAIL+x} ]] ; then
   echo "                                    Server:  ${serverName}"
   echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
-  module load mugqic/python/2.7.14
-
   mkdir -p ${GENPIPES_DIR}
   cd ${GENPIPES_DIR}
 
   echo "cloning Genpipes ${branch} from: git@bitbucket.org:mugqic/genpipes.git"
 
-if [ -d "genpipes" ]; then
-  rm -rf genpipes
-fi
+  if [ -d "genpipes" ]; then
+    rm -rf genpipes
+  fi
 
   cd ${GENPIPES_DIR}
   echo cloning to ${GENPIPES_DIR}/genpipes
@@ -184,6 +182,7 @@ fi
 export pipeline
 export technology
 export run_pipeline
+export protocol
 export protocol
 
 prologue () {
