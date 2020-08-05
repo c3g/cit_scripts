@@ -2,6 +2,20 @@
 
 ## Run a test
 
+```bash
+$ ./Jenkins_GenpipesFull.sh -h
+
+usage: ./Jenkins_GenpipesFull.sh create the script for genpipes, submiting them on the HPC system
+
+   -p <pipeline1>[,pipeline2,...]       Pipeline to test, default: do them all
+   -b <branch>                          Genpipe branch to test
+   -c <commit>                          Hash string of the commit to test
+   -s                                   generate scritp only, no HPC submit
+   -u                                   update mode, do not remove latest pipeline run
+   -l                                   deploy genpipe in /tmp dir 
+   -a                                   list all available pipeline and exit 
+   -h                                   print this help 
+```
 
 ## Add a new pipeline to the Jenkins_GenpipesFull.sh test suite
 

@@ -16,11 +16,12 @@ echo "   -s                                   generate scritp only, no HPC submi
 echo "   -u                                   update mode, do not remove latest pipeline run"
 echo "   -l                                   deploy genpipe in /tmp dir "
 echo "   -a                                   list all available pipeline and exit "
+echo "   -h                                   print this help "
 
 }
 
 
-while getopts "ap:b:c:slu" opt; do
+while getopts "hap:b:c:slu" opt; do
   case $opt in
     p)
       IFS=',' read -r -a PIPELINES <<< "${OPTARG}"
@@ -44,6 +45,10 @@ while getopts "ap:b:c:slu" opt; do
       ;;
     u)
       export UPDATE_MODE=true
+      ;;
+   h)
+      usage
+      exit 0
       ;;
    \?)
       usage
