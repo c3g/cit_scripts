@@ -282,14 +282,15 @@ fi
 
 pipeline=rnaseq
 protocol=stringtie
+
 check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
-   prologue "${pipeline}_${protocol}"
+    prologue "${pipeline}_${protocol}"
 
-   generate_script ${pipeline}_${protocol}_commands.sh \
-   -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-   -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
-   -t ${protocol}
+    generate_script ${pipeline}_${protocol}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
+    -t ${protocol}
 
     submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
 
@@ -309,7 +310,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
     -t ${protocol}
 
-      submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
+    submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
 
 fi
 
@@ -326,7 +327,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
     -t ${protocol} -l debug
 
-      submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
+    submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
 
 fi
 
@@ -337,7 +338,6 @@ protocol=mpileup
 check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}"
-
 
     generate_script ${pipeline}_${protocol}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
@@ -399,7 +399,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     -t ${protocol} ${extra}
 
 
-      submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
+    submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
 fi
 
 
@@ -415,7 +415,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${technology}.txt \
     -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${technology}.txt
 
-      submit ${pipeline}/${pipeline}_commands.sh
+    submit ${pipeline}/${pipeline}_commands.sh
 
 fi
 
@@ -440,7 +440,6 @@ fi
 pipeline=methylseq
 protocol=''
 
-
 check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}"
@@ -448,7 +447,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     generate_script ${pipeline}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt
 
-      submit ${pipeline}/${pipeline}_commands.sh
+    submit ${pipeline}/${pipeline}_commands.sh
 
 fi
 
@@ -465,13 +464,12 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
     -t ${protocol}
 
-      submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
+    submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
 fi
 
 
 pipeline=ampliconseq
 protocol=qiime
-
 
 check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
@@ -481,7 +479,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
     -t ${protocol}
 
-      submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
+    submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
 
 fi
 
@@ -490,6 +488,19 @@ fi
 pipeline=nanopore
 protocol=''
 
+check_run "${pipeline}_${protocol}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}"
+
+    generate_script ${pipeline}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt
+
+    submit ${pipeline}/${pipeline}_commands.sh
+fi
+
+
+pipeline=covseq
+protocol=''
 
 check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
@@ -498,9 +509,9 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     generate_script ${pipeline}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt
 
-
-      submit ${pipeline}/${pipeline}_commands.sh
+    submit ${pipeline}/${pipeline}_commands.sh
 fi
+
 
 if [[ ! -z ${AVAIL+x} ]] ; then
    exit 0
