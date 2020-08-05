@@ -504,7 +504,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}"
 
     generate_script ${pipeline}_commands.sh \
-    -r ${pipeline}/readset.${pipeline}.txt
+    -r ~/apps/cit_scripts/${pipeline}/readset.${pipeline}.txt
 
     submit
 fi
