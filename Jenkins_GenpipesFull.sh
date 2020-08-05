@@ -184,23 +184,26 @@ export technology
 export run_pipeline
 export protocol
 export protocol
+export PIPELINE_FOLDER
+export PIPELINE_COMMAND
 
 prologue () {
   # Folder is named pipeline_protocole
-  folder=$1
+  PIPELINE_FOLDER=$1
 
   if [[ -z ${AVAIL+x} ]] ; then
-    if [ -d "${folder}" ] && [[  -z ${UPDATE_MODE} ]] ; then
-      rm -rf ${folder}
+    if [ -d "${PIPELINE_FOLDER}" ] && [[  -z ${UPDATE_MODE} ]] ; then
+      rm -rf ${PIPELINE_FOLDER}
     fi
-    mkdir -p ${folder}
+    mkdir -p ${PIPELINE_FOLDER}
   fi
 }
 
 generate_script () {
-  local commands=${1}
+  local command=${1}
   extra="${@:2}"
-  folder=${commands%_*}
+  folder=${PIPELINE_FOLDER}
+  PIPELINE_COMMAND=command
 
   module load mugqic/python/2.7.14
   echo "************************ running *********************************"
@@ -210,7 +213,7 @@ generate_script () {
   "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini" \
   "${extra}" \
   "-o ${folder}" \
-  "-j $scheduler > ${folder}/${commands}"
+  "-j $scheduler > ${folder}/${command}"
   echo "******************************************************************"
 
   python $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
@@ -219,16 +222,16 @@ generate_script () {
   $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
   ${extra} \
   -o ${folder} \
-  -j $scheduler > ${folder}/${commands}
+  -j $scheduler > ${folder}/${command}
   RET_CODE_CREATE_SCRIPT=$?
   ExitCodes+=(["${pipeline}_${protocol}_create"]="$RET_CODE_CREATE_SCRIPT")
   if [ "$RET_CODE_CREATE_SCRIPT" -ne 0 ] ; then
-    echo ERROR on ${folder}/${commands} creation
+    echo ERROR on ${folder}/${command} creation
   fi
 }
 
 submit () {
-  command=${1}
+  command=${PIPELINE_FOLDER}/PIPELINE_COMMAND
 
   if [[ -z ${SCRIPT_ONLY} && ${RET_CODE_CREATE_SCRIPT} -eq 0 ]] ; then
       module purge
@@ -275,7 +278,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
     -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt
 
-    submit ${pipeline}/${pipeline}_commands.sh
+    submit
 
 fi
 
@@ -291,10 +294,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
    -t ${protocol}
 
-    submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
-
-
-#   cd ../
+    submit
 fi
 
 pipeline=rnaseq
@@ -309,8 +309,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
     -t ${protocol}
 
-      submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
-
+      submit
 fi
 
 
@@ -326,8 +325,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
     -t ${protocol} -l debug
 
-      submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
-
+    submit
 fi
 
 
@@ -343,7 +341,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
     -t ${protocol}
 
-    submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
+    submit
 fi
 
 
@@ -358,9 +356,8 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     generate_script ${pipeline}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${technology}/readset.${technology}.txt
 
-    submit ${pipeline}/${pipeline}_commands.sh
+    submit
 
-#    cd ../
 fi
 
 
@@ -377,8 +374,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}_${protocol}.txt \
     -t ${protocol} ${extra}
 
-    submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
-
+    submit
 fi
 
 
@@ -399,7 +395,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     -t ${protocol} ${extra}
 
 
-      submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
+      submit
 fi
 
 
@@ -415,7 +411,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${technology}.txt \
     -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${technology}.txt
 
-      submit ${pipeline}/${pipeline}_commands.sh
+      submit
 
 fi
 
@@ -433,7 +429,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     -d $MUGQIC_INSTALL_HOME/testdata/${technology}/design.${technology}.txt
 
 
-    submit ${pipeline}/${pipeline}_commands.sh
+    submit
 fi
 
 
@@ -448,7 +444,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     generate_script ${pipeline}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt
 
-      submit ${pipeline}/${pipeline}_commands.sh
+      submit
 
 fi
 
@@ -458,6 +454,7 @@ protocol=dada2
 
 check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
+
     prologue "${pipeline}_${protocol}"
 
     generate_script ${pipeline}_${protocol}_commands.sh \
@@ -465,7 +462,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
     -t ${protocol}
 
-      submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
+      submit
 fi
 
 
@@ -481,7 +478,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
     -t ${protocol}
 
-      submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
+      submit
 
 fi
 
@@ -499,12 +496,16 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt
 
 
-      submit ${pipeline}/${pipeline}_commands.sh
+      submit
 fi
 
 if [[ ! -z ${AVAIL+x} ]] ; then
    exit 0
 fi
+
+
+# Add new test above ^^
+
 
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Testing GenPipes Command Complete ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
