@@ -270,12 +270,11 @@ protocol=''
 check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue ${pipeline}
-    # generate_script ${pipeline} ${steps} -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt -d \
-    # $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt
 
     generate_script ${pipeline}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
     -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt
+
     submit ${pipeline}/${pipeline}_commands.sh
 
 fi
@@ -285,14 +284,14 @@ pipeline=rnaseq
 protocol=stringtie
 check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
-  prologue "${pipeline}_${protocol}"
+   prologue "${pipeline}_${protocol}"
 
    generate_script ${pipeline}_${protocol}_commands.sh \
    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
    -t ${protocol}
 
-     submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
+    submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
 
 
 #   cd ../
@@ -312,7 +311,6 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
       submit ${pipeline}_${protocol}/${pipeline}_${protocol}_commands.sh
 
-#    cd ../
 fi
 
 
@@ -515,7 +513,7 @@ ret_code=0
 for key in "${!ExitCodes[@]}"; do
   echo $key return  ${ExitCodes[$key]}
   if [[ ${ExitCodes[$key]} != 0 ]]; then
-    ret_code=${!ExitCodes[$key]}
+    ret_code=${ExitCodes[$key]}
   fi
 done
 exit $ret_code
