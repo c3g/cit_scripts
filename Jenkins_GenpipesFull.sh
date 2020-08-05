@@ -231,7 +231,7 @@ generate_script () {
 }
 
 submit () {
-  command=${PIPELINE_FOLDER}/PIPELINE_COMMAND
+  command=${PIPELINE_FOLDER}/${PIPELINE_COMMAND}
 
   if [[ -z ${SCRIPT_ONLY} && ${RET_CODE_CREATE_SCRIPT} -eq 0 ]] ; then
       module purge

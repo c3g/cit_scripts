@@ -15,6 +15,7 @@ protocol=<new protocole version> # sometime there is no protocole
 check_run "${pipeline}_${protocol}"  # If there is no protocol, execute check_run "${pipeline}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     # this creates the directory where the pipeline will be ran
+    
     prologue "${pipeline}_${protocol}"
 
     generate_script ${pipeline}_${protocol}_commands.sh \
