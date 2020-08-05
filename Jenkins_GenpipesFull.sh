@@ -203,7 +203,7 @@ generate_script () {
   local command=${1}
   extra="${@:2}"
   folder=${PIPELINE_FOLDER}
-  PIPELINE_COMMAND=command
+  PIPELINE_COMMAND=${command}
 
   module load mugqic/python/2.7.14
   echo "************************ running *********************************"
