@@ -303,6 +303,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     submit
 fi
 
+
 pipeline=rnaseq
 protocol=cufflinks
 
@@ -317,7 +318,6 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
       submit
 fi
-
 
 
 pipeline=dnaseq
@@ -365,7 +365,6 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 fi
 
 
-
 pipeline=hicseq
 protocol=hic
 extra="-e MboI"
@@ -398,7 +397,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
     -t ${protocol} ${extra}
 
-      submit
+    submit
 fi
 
 
@@ -414,7 +413,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${technology}.txt \
     -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${technology}.txt
 
-      submit
+    submit
 fi
 
 
@@ -430,7 +429,6 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     -r $MUGQIC_INSTALL_HOME/testdata/${technology}/readset.${technology}.txt \
     -d $MUGQIC_INSTALL_HOME/testdata/${technology}/design.${technology}.txt
 
-
     submit
 fi
 
@@ -445,7 +443,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     generate_script ${pipeline}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt
 
-      submit
+    submit
 fi
 
 
@@ -462,7 +460,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
     -t ${protocol}
 
-      submit
+    submit
 fi
 
 
@@ -477,9 +475,8 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
     -t ${protocol}
 
-      submit
+    submit
 fi
-
 
 
 pipeline=nanopore
