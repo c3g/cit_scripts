@@ -489,7 +489,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     generate_script ${pipeline}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt
 
-    submit ${pipeline}/${pipeline}_commands.sh
+    submit
 fi
 
 
@@ -501,7 +501,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}"
 
     generate_script ${pipeline}_commands.sh \
-    -r ~/apps/cit_scripts/${pipeline}/readset.${pipeline}.txt
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt
 
     submit
 fi
