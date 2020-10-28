@@ -187,13 +187,12 @@ fi
 export pipeline
 export technology
 export run_pipeline
-export protocol
-export protocol
+export PIPELINE_LONG_NAME
 export PIPELINE_FOLDER
 export PIPELINE_COMMAND
 
 prologue () {
-  # Folder is named pipeline_protocole
+  # Folder is named pipeline_protocol
   PIPELINE_FOLDER=$1
 
   if [[ -z ${AVAIL+x} ]] ; then
@@ -229,7 +228,7 @@ generate_script () {
   -o ${folder} \
   -j $scheduler > ${folder}/${command}
   RET_CODE_CREATE_SCRIPT=$?
-  ExitCodes+=(["${pipeline}_${protocol}_create"]="$RET_CODE_CREATE_SCRIPT")
+  ExitCodes+=(["${PIPELINE_LONG_NAME}_create"]="$RET_CODE_CREATE_SCRIPT")
   if [ "$RET_CODE_CREATE_SCRIPT" -ne 0 ] ; then
     echo ERROR on ${folder}/${command} creation
   fi
@@ -243,7 +242,7 @@ submit () {
       echo submiting $pipeline
       bash ${command}
       RET_CODE_SUBMIT_SCRIPT=$?
-      ExitCodes+=(["${pipeline}_${protocol}_submit"]="$RET_CODE_SUBMIT_SCRIPT")
+      ExitCodes+=(["${PIPELINE_LONG_NAME}_submit"]="$RET_CODE_SUBMIT_SCRIPT")
       echo "${command} submit completed"
   else
       echo "${command} not submitted"
@@ -252,19 +251,19 @@ submit () {
 
 check_run () {
   # if there is not protocol remove the _
-  pip=${1%%_}
+  PIPELINE_LONG_NAME=${1%%_}
   run_pipeline=false
   if [[ ! -z ${AVAIL+x} ]]; then
-    echo - ${pip}
+    echo - ${PIPELINE_LONG_NAME}
     return 0
   fi
   if [[ -z ${PIPELINES} ]]; then
     run_pipeline=true
   else
-    if [[ " ${PIPELINES[@]} " =~ " ${pip} " ]]; then
+    if [[ " ${PIPELINES[@]} " =~ " ${PIPELINE_LONG_NAME} " ]]; then
       run_pipeline=true
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "                                     Now testing ${pip} "
+echo "                                     Now testing ${PIPELINE_LONG_NAME} "
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     fi
   fi
@@ -334,6 +333,58 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     submit
 fi
 
+pipeline=dnaseq
+protocol=mugqic
+reference=gatk4
+extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/gatk4.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit_gatk4.ini"
+
+check_run "${pipeline}_${protocol}_${reference}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}_${protocol}_${reference}"
+
+    generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
+    ${extra} \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    -t ${protocol} -l debug
+
+    submit
+fi
+
+pipeline=dnaseq
+protocol=mugqic
+reference=b38
+extra="$MUGQIC_PIPELINES_HOME/resources/genomes/config/Homo_sapiens.GRCh38.ini"
+
+check_run "${pipeline}_${protocol}_${reference}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}_${protocol}_${reference}"
+
+    generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
+    ${extra} \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    -t ${protocol} -l debug
+
+    submit
+
+fi
+
+pipeline=dnaseq
+protocol=mugqic
+reference=gatk4_b38
+extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/gatk4.ini $MUGQIC_PIPELINES_HOME/resources/genomes/config/Homo_sapiens.GRCh38.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini $MUGQIC_PIPELINE/pipelines/${pipeline}/cit_gatk4.ini"
+
+check_run "${pipeline}_${protocol}_${reference}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}_${protocol}_${reference}"
+
+    generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
+    ${extra} \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    -t ${protocol} -l debug
+
+    submit
+
+fi
 
 pipeline=dnaseq
 protocol=mpileup
@@ -349,6 +400,79 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     submit
 fi
 
+pipeline=dnaseq
+protocol=mpileup
+reference=b38
+extra="$MUGQIC_PIPELINES_HOME/resources/genomes/config/Homo_sapiens.GRCh38.ini"
+
+check_run "${pipeline}_${protocol}_${reference}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}_${protocol}_${reference}"
+
+    generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
+    ${extra} \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    -t ${protocol} -l debug
+
+    submit
+
+fi
+
+#pipeline=dnaseq
+#protocol=sv
+
+#check_run "${pipeline}_${protocol}"
+#if [[ ${run_pipeline} == 'true' ]] ; then
+#    prologue "${pipeline}_${protocol}"
+
+
+#    generate_script ${pipeline}_${protocol}_commands.sh \
+#    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+#    -t ${protocol}
+
+#    submit
+
+#fi
+
+#pipeline=tumor_pair
+#protocol=fastpass
+#extra="$MUGQIC_PIPELINES_HOME/pipelines/tumor_pair/tumor_pair.extras.ini"
+#pair="$MUGQIC_INSTALL_HOME_DEV/testdata/${pipeline}/pair.${pipeline}.csv"
+
+#check_run "${pipeline}_${protocol}"
+#if [[ ${run_pipeline} == 'true' ]] ; then
+#    prologue "${pipeline}_${protocol}"
+
+
+#    generate_script ${pipeline}_${protocol}_commands.sh \
+#    ${extra} \
+#    -r $MUGQIC_INSTALL_HOME_DEV/testdata/${pipeline}/readset.${pipeline}.txt \
+#    -p ${pair} \
+#    -t ${protocol}
+
+#    submit
+
+#fi
+
+#pipeline=tumor_pair
+#protocol=ensemble
+#extra="$MUGQIC_PIPELINES_HOME/pipelines/tumor_pair/tumor_pair.extras.ini"
+#pair="$MUGQIC_INSTALL_HOME_DEV/testdata/${pipeline}/pair.${pipeline}.csv"
+
+#check_run "${pipeline}_${protocol}"
+#if [[ ${run_pipeline} == 'true' ]] ; then
+#    prologue "${pipeline}_${protocol}"
+
+
+#    generate_script ${pipeline}_${protocol}_commands.sh \
+#    ${extra} \
+#    -r $MUGQIC_INSTALL_HOME_DEV/testdata/${pipeline}/readset.${pipeline}.txt \
+#    -p ${pair} \
+#    -t ${protocol}
+
+#    submit
+
+#fi
 
 pipeline=dnaseq_high_coverage
 technology=dnaseq
