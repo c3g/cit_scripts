@@ -187,13 +187,12 @@ fi
 export pipeline
 export technology
 export run_pipeline
-export protocol
-export protocol
+export PIPELINE_LONG_NAME
 export PIPELINE_FOLDER
 export PIPELINE_COMMAND
 
 prologue () {
-  # Folder is named pipeline_protocole
+  # Folder is named pipeline_protocol
   PIPELINE_FOLDER=$1
 
   if [[ -z ${AVAIL+x} ]] ; then
@@ -229,7 +228,7 @@ generate_script () {
   -o ${folder} \
   -j $scheduler > ${folder}/${command}
   RET_CODE_CREATE_SCRIPT=$?
-  ExitCodes+=(["${pipeline}_${protocol}_create"]="$RET_CODE_CREATE_SCRIPT")
+  ExitCodes+=(["${PIPELINE_LONG_NAME}_create"]="$RET_CODE_CREATE_SCRIPT")
   if [ "$RET_CODE_CREATE_SCRIPT" -ne 0 ] ; then
     echo ERROR on ${folder}/${command} creation
   fi
@@ -243,7 +242,7 @@ submit () {
       echo submiting $pipeline
       bash ${command}
       RET_CODE_SUBMIT_SCRIPT=$?
-      ExitCodes+=(["${pipeline}_${protocol}_submit"]="$RET_CODE_SUBMIT_SCRIPT")
+      ExitCodes+=(["${PIPELINE_LONG_NAME}_submit"]="$RET_CODE_SUBMIT_SCRIPT")
       echo "${command} submit completed"
   else
       echo "${command} not submitted"
@@ -252,19 +251,19 @@ submit () {
 
 check_run () {
   # if there is not protocol remove the _
-  pip=${1%%_}
+  PIPELINE_LONG_NAME=${1%%_}
   run_pipeline=false
   if [[ ! -z ${AVAIL+x} ]]; then
-    echo - ${pip}
+    echo - ${PIPELINE_LONG_NAME}
     return 0
   fi
   if [[ -z ${PIPELINES} ]]; then
     run_pipeline=true
   else
-    if [[ " ${PIPELINES[@]} " =~ " ${pip} " ]]; then
+    if [[ " ${PIPELINES[@]} " =~ " ${PIPELINE_LONG_NAME} " ]]; then
       run_pipeline=true
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "                                     Now testing ${pip} "
+echo "                                     Now testing ${PIPELINE_LONG_NAME} "
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     fi
   fi
