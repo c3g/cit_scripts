@@ -110,7 +110,6 @@ $MUGQIC_PIPELINES_HOME/pipelines/chipseq/chipseq.py \
 -c $MUGQIC_PIPELINES_HOME/pipelines/chipseq/chipseq.base.ini $MUGQIC_PIPELINES_HOME/pipelines/chipseq/chipseq.${server}.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/chipseq/readset.chipseq.txt \
 -d $MUGQIC_INSTALL_HOME/testdata/chipseq/design.chipseq.txt \
--s 1-19 \
 -j $scheduler > chipseqCommands.sh
 
 ExitCodes+=(["chipseq"]="$?")
@@ -126,7 +125,6 @@ $MUGQIC_PIPELINES_HOME/pipelines/rnaseq/rnaseq.py \
 -c $MUGQIC_PIPELINES_HOME/pipelines/rnaseq/rnaseq.base.ini $MUGQIC_PIPELINES_HOME/pipelines/rnaseq/rnaseq.${server}.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/rnaseq/readset.rnaseq.txt \
 -d $MUGQIC_INSTALL_HOME/testdata/rnaseq/design.rnaseq.txt \
--s 1-19 \
 -t stringtie \
 -j $scheduler > rnaseqCommands.sh
 
@@ -143,7 +141,6 @@ $MUGQIC_PIPELINES_HOME/pipelines/rnaseq/rnaseq.py \
 -c $MUGQIC_PIPELINES_HOME/pipelines/rnaseq/rnaseq.base.ini $MUGQIC_PIPELINES_HOME/pipelines/rnaseq/rnaseq.${server}.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/rnaseq/readset.rnaseq.txt \
 -d $MUGQIC_INSTALL_HOME/testdata/rnaseq/design.rnaseq.txt \
--s 1-25 \
 -t cufflinks \
 -j $scheduler > rnaseqCommands.sh
 
@@ -158,7 +155,6 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $MUGQIC_PIPELINES_HOME/pipelines/dnaseq/dnaseq.py \
 -c $MUGQIC_PIPELINES_HOME/pipelines/dnaseq/dnaseq.base.ini $MUGQIC_PIPELINES_HOME/pipelines/dnaseq/dnaseq.${server}.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/dnaseq/readset.dnaseq.txt \
--s 1-29 \
 -t mugqic \
 -j $scheduler > dnaseqCommands_mugqic.sh
 
@@ -173,7 +169,6 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $MUGQIC_PIPELINES_HOME/pipelines/dnaseq/dnaseq.py \
 -c $MUGQIC_PIPELINES_HOME/pipelines/dnaseq/dnaseq.base.ini $MUGQIC_PIPELINES_HOME/pipelines/dnaseq/dnaseq.${server}.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/dnaseq/readset.dnaseq.txt \
--s 1-33 \
 -t mpileup \
 -j $scheduler > dnaseqCommands_mpileup.sh
 
@@ -188,7 +183,6 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $MUGQIC_PIPELINES_HOME/pipelines/dnaseq_high_coverage/dnaseq_high_coverage.py \
 -c $MUGQIC_PIPELINES_HOME/pipelines/dnaseq_high_coverage/dnaseq_high_coverage.base.ini $MUGQIC_PIPELINES_HOME/pipelines/dnaseq_high_coverage/dnaseq_high_coverage.${server}.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/dnaseq/readset.dnaseq.txt \
--s 1-15 \
 -j $scheduler > dnaseq_high_coverageCommands.sh
 
 ExitCodes+=(["dnaseq_high_coverage"]="$?")
@@ -217,7 +211,6 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $MUGQIC_PIPELINES_HOME/pipelines/hicseq/hicseq.py \
 -c $MUGQIC_PIPELINES_HOME/pipelines/hicseq/hicseq.base.ini $MUGQIC_PIPELINES_HOME/pipelines/hicseq/hicseq.${server}.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/hicseq/readset.hicseq.txt \
--s 1-16 \
 -t hic \
 -e MboI \
 -j $scheduler > hicseqCommands_hic.sh
@@ -236,7 +229,6 @@ ln -s $MUGQIC_INSTALL_HOME/testdata/hicseq/GSE69600_promoter_capture_bait_coordi
 $MUGQIC_PIPELINES_HOME/pipelines/hicseq/hicseq.py \
 -c $MUGQIC_PIPELINES_HOME/pipelines/hicseq/hicseq.base.ini $MUGQIC_PIPELINES_HOME/pipelines/hicseq/hicseq.${server}.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/hicseq/readset.hicseq.txt \
--s 1-17 \
 -t capture \
 -e MboI \
 -j $scheduler > hicseqCommands_capture.sh
@@ -254,7 +246,6 @@ $MUGQIC_PIPELINES_HOME/pipelines/rnaseq_light/rnaseq_light.py \
 -c $MUGQIC_PIPELINES_HOME/pipelines/rnaseq_light/rnaseq_light.base.ini $MUGQIC_PIPELINES_HOME/pipelines/rnaseq_light/rnaseq_light.${server}.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/rnaseq/readset.rnaseq.txt \
 -d $MUGQIC_INSTALL_HOME/testdata/rnaseq/design.rnaseq.txt \
--s 1-7 \
 -j $scheduler > rnaseqLightCommands.sh
 
 ExitCodes+=(["rnaseq_light"]="$?")
@@ -269,7 +260,6 @@ $MUGQIC_PIPELINES_HOME/pipelines/rnaseq_denovo_assembly/rnaseq_denovo_assembly.p
 -c $MUGQIC_PIPELINES_HOME/pipelines/rnaseq_denovo_assembly/rnaseq_denovo_assembly.base.ini $MUGQIC_PIPELINES_HOME/pipelines/rnaseq_denovo_assembly/rnaseq_denovo_assembly.${server}.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/rnaseq/readset.rnaseq.txt \
 -d $MUGQIC_INSTALL_HOME/testdata/rnaseq/design.rnaseq.txt \
--s 1-23 \
 -j $scheduler > rnaseqDeNovoCommands.sh
 
 ExitCodes+=(["rnaseq_denovo_assembly"]="$?")
@@ -283,7 +273,6 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $MUGQIC_PIPELINES_HOME/pipelines/methylseq/methylseq.py \
 -c $MUGQIC_PIPELINES_HOME/pipelines/methylseq/methylseq.base.ini $MUGQIC_PIPELINES_HOME/pipelines/methylseq/methylseq.${server}.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/methylseq/readset.methylseq.txt \
--s 1-15 \
 -j $scheduler > methylseq.sh
 
 ExitCodes+=(["methylseq"]="$?")
@@ -297,7 +286,6 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $MUGQIC_PIPELINES_HOME/pipelines/pacbio_assembly/pacbio_assembly.py \
 -c $MUGQIC_PIPELINES_HOME/pipelines/pacbio_assembly/pacbio_assembly.base.ini $MUGQIC_PIPELINES_HOME/pipelines/pacbio_assembly/pacbio_assembly.${server}.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/pacbio/readset.pacbio.txt \
--s 1-12 \
 -j $scheduler > pacbioCommands.sh
 
 ExitCodes+=(["pacbio_assembly"]="$?")
@@ -313,7 +301,6 @@ $MUGQIC_PIPELINES_HOME/pipelines/ampliconseq/ampliconseq.py \
 -c $MUGQIC_PIPELINES_HOME/pipelines/ampliconseq/ampliconseq.base.ini $MUGQIC_PIPELINES_HOME/pipelines/ampliconseq/ampliconseq.${server}.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/ampliconseq/readset.ampliconseq.txt \
 -d $MUGQIC_INSTALL_HOME/testdata/ampliconseq/design.ampliconseq.txt \
--s 1-7 \
 -t dada2 \
 -j $scheduler > ampliconseqDadaCommands.sh
 
@@ -327,7 +314,6 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $MUGQIC_PIPELINES_HOME/pipelines/ampliconseq/ampliconseq.py \
 -c $MUGQIC_PIPELINES_HOME/pipelines/ampliconseq/ampliconseq.base.ini $MUGQIC_PIPELINES_HOME/pipelines/ampliconseq/ampliconseq.${server}.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/ampliconseq/readset.ampliconseq.txt \
--s 1-34 \
 -t qiime \
 -j $scheduler > ampliconseqQiimeCommands.sh
 
@@ -342,7 +328,6 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $MUGQIC_PIPELINES_HOME/pipelines/nanopore/nanopore.py \
 -c $MUGQIC_PIPELINES_HOME/pipelines/nanopore/nanopore.base.ini $MUGQIC_PIPELINES_HOME/pipelines/nanopore/nanopore.${server}.ini \
 -r $MUGQIC_INSTALL_HOME/testdata/nanopore/readset.nanopore.txt \
--s 1-5 \
 -j $scheduler > nanoporeCommands.sh
 
 ExitCodes+=(["nanopore"]="$?")
