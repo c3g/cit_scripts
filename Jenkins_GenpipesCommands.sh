@@ -174,7 +174,35 @@ $MUGQIC_PIPELINES_HOME/pipelines/dnaseq/dnaseq.py \
 
 ExitCodes+=(["dnaseq_mpileup"]="$?")
 
-## dnaseq.py -t mpileup:
+## dnaseq.py -t sv:
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing DNASeq SV Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+
+
+$MUGQIC_PIPELINES_HOME/pipelines/dnaseq/dnaseq.py \
+-c $MUGQIC_PIPELINES_HOME/pipelines/dnaseq/dnaseq.base.ini $MUGQIC_PIPELINES_HOME/pipelines/dnaseq/dnaseq.${server}.ini \
+-r $MUGQIC_INSTALL_HOME/testdata/dnaseq/readset.dnaseq.txt \
+-t sv \
+-j $scheduler > dnaseqCommands_sv.sh
+
+ExitCodes+=(["dnaseq_sv"]="$?")
+
+## dnaseq.py -t light:
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing DNASeq Light Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+
+
+$MUGQIC_PIPELINES_HOME/pipelines/dnaseq/dnaseq.py \
+-c $MUGQIC_PIPELINES_HOME/pipelines/dnaseq/dnaseq.base.ini $MUGQIC_PIPELINES_HOME/pipelines/dnaseq/dnaseq.${server}.ini \
+-r $MUGQIC_INSTALL_HOME/testdata/dnaseq/readset.dnaseq.txt \
+-t light \
+-j $scheduler > dnaseqCommands_light.sh
+
+ExitCodes+=(["dnaseq_light"]="$?")
+
+## dnaseq_high_coverage.py:
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing DNASeq High Coverage Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
