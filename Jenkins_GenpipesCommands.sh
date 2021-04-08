@@ -98,7 +98,7 @@ mkdir -p ${TEST_DIR}/GenPipesCommand/scriptTestOutputs
 cd ${TEST_DIR}/GenPipesCommand/scriptTestOutputs
 
 
-#pipelines=(chipseq dnaseq rnaseq hicseq methylseq pacbio_assembly ampliconseq dnaseq_high_coverage rnaseq_denovo_assembly rnaseq_light tumor_pair illumina_run_processing)
+#pipelines=(chipseq dnaseq rnaseq hicseq methylseq ampliconseq dnaseq_high_coverage rnaseq_denovo_assembly rnaseq_light tumor_pair illumina_run_processing)
 
 ## chipseq.py:
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -304,19 +304,6 @@ $MUGQIC_PIPELINES_HOME/pipelines/methylseq/methylseq.py \
 -j $scheduler > methylseq.sh
 
 ExitCodes+=(["methylseq"]="$?")
-
-
-## pacbio_assembly.py:
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Now testing PacBio Assembly Command Creation ~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-
-$MUGQIC_PIPELINES_HOME/pipelines/pacbio_assembly/pacbio_assembly.py \
--c $MUGQIC_PIPELINES_HOME/pipelines/pacbio_assembly/pacbio_assembly.base.ini $MUGQIC_PIPELINES_HOME/pipelines/pacbio_assembly/pacbio_assembly.${server}.ini \
--r $MUGQIC_INSTALL_HOME/testdata/pacbio/readset.pacbio.txt \
--j $scheduler > pacbioCommands.sh
-
-ExitCodes+=(["pacbio_assembly"]="$?")
 
 
 ## ampliconseq.py:
