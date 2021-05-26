@@ -12,20 +12,26 @@ echo
 echo "   -p <pipeline1>[,pipeline2,...]       Pipeline to test, default: do them all"
 echo "   -b <branch>                          Genpipe branch to test"
 echo "   -c <commit>                          Hash string of the commit to test"
-echo "   -s                                   generate scritp only, no HPC submit"
-echo "   -u                                   update mode, do not remove latest pipeline run"
-echo "   -l                                   deploy genpipe in /tmp dir "
-echo "   -a                                   list all available pipeline and exit "
-echo "   -h                                   print this help "
+echo "   -s                                   Generate scritp only, no HPC submit"
+echo "   -u                                   Update mode, do not remove latest pipeline run"
+echo "   -l                                   Deploy genpipe in /tmp dir "
+echo "   -d <genpipe repo_path>               Used preexisting genpipes repo as is (no update)"
+echo "   -a                                   List all available pipeline and exit "
+echo "   -w                                   Test with the container wrapper"
+echo "   -h                                   Print this help "
 
 }
 
 
-while getopts "hap:b:c:slu" opt; do
+while getopts "hap:b:c:slud:w" opt; do
   case $opt in
     p)
       IFS=',' read -r -a PIPELINES <<< "${OPTARG}"
         export PIPELINES
+      ;;
+    d)
+      export GENPIPES_DIR=${OPTARG}
+      NO_GIT_CLONE=TRUE
       ;;
     b)
       BRANCH=${OPTARG}
@@ -38,6 +44,9 @@ while getopts "hap:b:c:slu" opt; do
       ;;
     s)
       export SCRIPT_ONLY=true
+      ;;
+    s)
+      export CONTAINER_WRAPPER='--wrap'
       ;;
     a)
       export AVAIL=is_set
@@ -160,23 +169,27 @@ if [[ -z ${AVAIL+x} ]] ; then
   mkdir -p ${GENPIPES_DIR}
   cd ${GENPIPES_DIR}
 
-  echo "cloning Genpipes ${branch} from: git@bitbucket.org:mugqic/genpipes.git"
+  if [ -z ${NO_GIT_CLONE+x} ]; then
 
-  if [ -d "genpipes" ]; then
-    rm -rf genpipes
+    echo "cloning Genpipes ${branch} from: git@bitbucket.org:mugqic/genpipes.git"
+
+    cd ${GENPIPES_DIR}
+    echo cloning to ${GENPIPES_DIR}/genpipes
+    if [ -d "genpipes" ]; then
+      rm -rf genpipes
+    fi
+    git clone --depth 3 --branch ${branch} https://bitbucket.org/mugqic/genpipes.git
+    if [ -n "${commit}" ]; then
+      cd genpipes
+      git checkout ${commit}
+    fi
+
+    export MUGQIC_PIPELINES_HOME=${GENPIPES_DIR}/genpipes
+  else
+    export MUGQIC_PIPELINES_HOME=${GENPIPES_DIR}
   fi
-
-  cd ${GENPIPES_DIR}
-  echo cloning to ${GENPIPES_DIR}/genpipes
-  git clone --depth 3 --branch ${branch} https://bitbucket.org/mugqic/genpipes.git
-  if [ -n "${commit}" ]; then
-    cd genpipes
-    git checkout ${commit}
-  fi
-
   ## set MUGQIC_PIPELINE_HOME to GenPipes bitbucket install:
   export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/CentOS6
-  export MUGQIC_PIPELINES_HOME=${GENPIPES_DIR}/genpipes
 fi
 
 if [[ -z ${AVAIL+x} ]] ; then
@@ -203,35 +216,36 @@ prologue () {
   fi
 }
 
+
 generate_script () {
-  local command=${1}
-  extra="${@:2}"
-  folder=${PIPELINE_FOLDER}
-  PIPELINE_COMMAND=${command}
+    local command=${1}
+    extra="${@:2}"
+    folder=${PIPELINE_FOLDER}
+    PIPELINE_COMMAND=${command}
 
-  module load mugqic/python/2.7.14
-  echo "************************ running *********************************"
-  echo "python $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py"\
-  "-c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini" \
-  "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini" \
-  "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini" \
-  "${extra}" \
-  "-o ${folder}" \
-  "-j $scheduler > ${folder}/${command}"
-  echo "******************************************************************"
+    module load mugqic/python/2.7.14
+    echo "************************ running *********************************"
+    echo "python $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py"\
+    "-c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini" \
+    "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini" \
+    "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini" \
+    "${extra}" \
+    "-o ${folder} ${CONTAINER_WRAPPER}" \
+    "-j $scheduler --output ${folder}/${command}"
+    echo "******************************************************************"
 
-  python $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
-  -c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
-  $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
-  $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
-  ${extra} \
-  -o ${folder} \
-  -j $scheduler > ${folder}/${command}
-  RET_CODE_CREATE_SCRIPT=$?
-  ExitCodes+=(["${PIPELINE_LONG_NAME}_create"]="$RET_CODE_CREATE_SCRIPT")
-  if [ "$RET_CODE_CREATE_SCRIPT" -ne 0 ] ; then
-    echo ERROR on ${folder}/${command} creation
-  fi
+    python $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
+    -c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
+    $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+    $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
+    ${extra} \
+    -o ${folder} ${CONTAINER_WRAPPER} \
+    -j $scheduler --output ${folder}/${command}
+    RET_CODE_CREATE_SCRIPT=$?
+    ExitCodes+=(["${PIPELINE_LONG_NAME}_create"]="$RET_CODE_CREATE_SCRIPT")
+    if [ "$RET_CODE_CREATE_SCRIPT" -ne 0 ] ; then
+      echo ERROR on ${folder}/${command} creation
+    fi
 }
 
 submit () {
@@ -240,7 +254,7 @@ submit () {
   if [[ -z ${SCRIPT_ONLY} && ${RET_CODE_CREATE_SCRIPT} -eq 0 ]] ; then
       module purge
       echo submiting $pipeline
-      bash ${command}
+      ${command}
       RET_CODE_SUBMIT_SCRIPT=$?
       ExitCodes+=(["${PIPELINE_LONG_NAME}_submit"]="$RET_CODE_SUBMIT_SCRIPT")
       echo "${command} submit completed"
