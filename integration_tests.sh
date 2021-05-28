@@ -47,6 +47,7 @@ while getopts "hap:b:c:slud:w" opt; do
       ;;
     w)
       export CONTAINER_WRAPPER='--wrap'
+      module load singularity > /dev/null 2>&1
       ;;
     a)
       export AVAIL=is_set
