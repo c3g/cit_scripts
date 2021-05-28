@@ -45,7 +45,7 @@ while getopts "hap:b:c:slud:w" opt; do
     s)
       export SCRIPT_ONLY=true
       ;;
-    s)
+    w)
       export CONTAINER_WRAPPER='--wrap'
       ;;
     a)
@@ -68,7 +68,6 @@ done
 
 def=6002326
 rrg=6007512
-
 
 HOST=`hostname`;
 DNSDOMAIN=`dnsdomainname`;
@@ -128,8 +127,9 @@ else
   export serverName=batch
   export server=beluga
   export scheduler="slurm"
+
   read -r -d '' WRAP_CONFIG << EOM
-export GEN_SHARED_CVMFS=/home/cvmfs-cache
+export GEN_SHARED_CVMFS=/home/$USER/cvmfs-cache
 BIND_LIST=/tmp/,/home/
 EOM
 
@@ -200,7 +200,7 @@ if [[ -z ${AVAIL+x} ]] ; then
     get_wrapper=$(find ${GENPIPES_DIR} -type f -name get_wrapper.sh)
     echo yes | ${get_wrapper}
     container_path=$(dirname ${get_wrapper})
-    cat ${WRAP_CONFIG} > ${container_path}/etc/wrapper.conf
+    echo "${WRAP_CONFIG}" > ${container_path}/etc/wrapper.conf
   fi
 
   ## set MUGQIC_PIPELINE_HOME to GenPipes bitbucket install:
