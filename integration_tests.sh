@@ -85,19 +85,10 @@ if [[ $HOST == abacus* || $DNSDOMAIN == ferrier.genome.mcgill.ca ]]; then
   export server=base
   export scheduler="pbs"
 
-elif [[ $HOST == lg-* || $DNSDOMAIN == guillimin.clumeq.ca ]]; then
-
-  export TEST_DIR=/genfs/C3G/projects/jenkins_tests
-  export serverName=guillimin
-  export server=guillimin
-  export scheduler="pbs"
-
-elif [[ $HOST == ip* ]]; then
-
-  export TEST_DIR=/project/${rrg}/C3G/projects/jenkins_tests
-  export serverName=mp2b
-  export server=mp2b
-  export scheduler="slurm"
+  read -r -d '' WRAP_CONFIG << EOM
+export GEN_SHARED_CVMFS=/lb/project/mugqic/cvmfs-container
+BIND_LIST=/tmp/,/home/,/lb
+EOM
 
 elif [[ $HOST == cedar* || $DNSDOMAIN == cedar.computecanada.ca ]]; then
 
@@ -106,24 +97,41 @@ elif [[ $HOST == cedar* || $DNSDOMAIN == cedar.computecanada.ca ]]; then
   export server=cedar
   export scheduler="slurm"
 
+  read -r -d '' WRAP_CONFIG << EOM
+export GEN_SHARED_CVMFS=/scratch/$USER/cvmfs-container
+BIND_LIST=/tmp/,/home/,/project,/scratch,/localscratch
+EOM
+
 elif [[ $HOST == gra-* || $DNSDOMAIN == graham.sharcnet ]]; then
 
   export TEST_DIR=/project/${def}/C3G/projects/jenkins_tests
   export serverName=graham
   export server=graham
   export scheduler="slurm"
+  read -r -d '' WRAP_CONFIG << EOM
+export GEN_SHARED_CVMFS=/scratch/$USER/cvmfs-container
+BIND_LIST=/tmp/,/home/,/project,/scratch,/localscratch
+EOM
 
 elif [[ $HOST == beluga* || $DNSDOMAIN == beluga.computecanada.ca ]]; then
   export TEST_DIR=/project/${rrg}/C3G/projects/jenkins_tests
   export serverName=beluga
   export server=beluga
   export scheduler="slurm"
+  read -r -d '' WRAP_CONFIG << EOM
+export GEN_SHARED_CVMFS=/scratch/$USER/cvmfs-container
+BIND_LIST=/tmp/,/home/,/project,/scratch,/localscratch
+EOM
 
 else
   export TEST_DIR=/tmp/jenkins_tests
   export serverName=batch
   export server=beluga
   export scheduler="slurm"
+  read -r -d '' WRAP_CONFIG << EOM
+export GEN_SHARED_CVMFS=/home/cvmfs-cache
+BIND_LIST=/tmp/,/home/
+EOM
 
 fi
 
@@ -188,6 +196,13 @@ if [[ -z ${AVAIL+x} ]] ; then
   else
     export MUGQIC_PIPELINES_HOME=${GENPIPES_DIR}
   fi
+  if  [ -z ${CONTAINER_WRAPER+x} ]; then
+    get_wrapper=$(find ${GENPIPES_DIR} -type f -name get_wrapper.sh)
+    echo yes | ${get_wrapper}
+    container_path=$(dirname ${get_wrapper})
+    cat ${WRAP_CONFIG} > ${container_path}/etc/wrapper.conf
+  fi
+
   ## set MUGQIC_PIPELINE_HOME to GenPipes bitbucket install:
   export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/CentOS6
 fi
