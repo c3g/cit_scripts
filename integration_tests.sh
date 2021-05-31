@@ -197,7 +197,9 @@ if [[ -z ${AVAIL+x} ]] ; then
   else
     export MUGQIC_PIPELINES_HOME=${GENPIPES_DIR}
   fi
-  if  [ -z ${CONTAINER_WRAPER+x} ]; then
+  if  [ -z ${CONTAINER_WRAPPER+x} ]; then
+     echo 'using local cvmfs' 
+  else
     get_wrapper=$(find ${GENPIPES_DIR} -type f -name get_wrapper.sh)
     echo yes | ${get_wrapper}
     container_path=$(dirname ${get_wrapper})
