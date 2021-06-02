@@ -119,7 +119,7 @@ elif [[ $HOST == beluga* || $DNSDOMAIN == beluga.computecanada.ca ]]; then
   export server=beluga
   export scheduler="slurm"
   read -r -d '' WRAP_CONFIG << EOM
-export GEN_SHARED_CVMFS=/scratch/$USER/cvmfs-container
+export GEN_SHARED_CVMFS=/project/${rrg}/C3G/projects/jenkins_tests
 BIND_LIST=/tmp/,/home/,/project,/scratch,/localscratch
 EOM
 
