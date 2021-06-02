@@ -270,7 +270,8 @@ submit () {
   if [[ -z ${SCRIPT_ONLY} && ${RET_CODE_CREATE_SCRIPT} -eq 0 ]] ; then
       module purge
       echo submiting $pipeline
-      ${command}
+      $MUGQIC_PIPELINES_HOME/utils/chunk_genpipes.sh ${command} ${PIPELINE_FOLDER}/chunk
+      $MUGQIC_PIPELINES_HOME/utils/monitor.sh -n 999 ${PIPELINE_FOLDER}/chunk
       RET_CODE_SUBMIT_SCRIPT=$?
       ExitCodes+=(["${PIPELINE_LONG_NAME}_submit"]="$RET_CODE_SUBMIT_SCRIPT")
       echo "${command} submit completed"
