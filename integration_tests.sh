@@ -30,7 +30,7 @@ while getopts "hap:b:c:slud:w" opt; do
         export PIPELINES
       ;;
     d)
-      export GENPIPES_DIR=${OPTARG}
+      export GENPIPES_DIR=$(realpath ${OPTARG})
       NO_GIT_CLONE=TRUE
       ;;
     b)
@@ -198,7 +198,9 @@ if [[ -z ${AVAIL+x} ]] ; then
     export MUGQIC_PIPELINES_HOME=${GENPIPES_DIR}
   fi
   if  [ -z ${CONTAINER_WRAPPER+x} ]; then
-     echo 'using local cvmfs' 
+     echo 'using local cvmfs'
+  elif [[ ${NO_GIT_CLONE} == TRUE ]]; then
+    echo 'using preinstalled GiaC image'
   else
     get_wrapper=$(find ${GENPIPES_DIR} -type f -name get_wrapper.sh)
     echo yes | ${get_wrapper}
@@ -241,24 +243,24 @@ generate_script () {
     folder=${PIPELINE_FOLDER}
     PIPELINE_COMMAND=${command}
 
-    module load mugqic/python/2.7.14
+    module load mugqic/python/2.7.14 > /dev/null 2>&2
     echo "************************ running *********************************"
-    echo "python $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py"\
+    echo "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py"\
     "-c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini" \
     "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini" \
     "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini" \
     "${extra}" \
     "-o ${folder} ${CONTAINER_WRAPPER}" \
-    "-j $scheduler --output ${folder}/${command}"
+    "-j $scheduler --genpipes_file ${folder}/${command}"
     echo "******************************************************************"
 
-    python $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
+    $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
     -c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
     $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
     $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
     ${extra} \
     -o ${folder} ${CONTAINER_WRAPPER} \
-    -j $scheduler --output ${folder}/${command}
+    -j $scheduler --genpipes_file ${folder}/${command}
     RET_CODE_CREATE_SCRIPT=$?
     ExitCodes+=(["${PIPELINE_LONG_NAME}_create"]="$RET_CODE_CREATE_SCRIPT")
     if [ "$RET_CODE_CREATE_SCRIPT" -ne 0 ] ; then
