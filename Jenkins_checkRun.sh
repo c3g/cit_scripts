@@ -19,7 +19,7 @@ cd $latest_dev && mkdir -p cit_out && cd cit_out
 trap control_c SIGINT
 list=$(find ${latest_dev}  -maxdepth 3  -type d -name 'job_output' | xargs -L 1 -I@ sh -c "ls -t1 @/*job* | head -n 1 ")
 for jl in $list ; do
-  out=$( cut -d '/' -f 10 <<< "$jl" )
+  out=$( echo "$jl" | sed 's|.*scriptTestOutputs/\(.*\)/job_output.*|\1|g' )
   echo processing $out 
   $MUGQIC_PIPELINES_HOME/utils/log_report.py  --loglevel CRITICAL -q --tsv $out.tsv $jl
 done 
