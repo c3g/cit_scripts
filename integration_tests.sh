@@ -168,7 +168,7 @@ if [[ -z ${AVAIL+x} ]] ; then
 
   cd ${GENPIPES_DIR}
   echo cloning to ${GENPIPES_DIR}/genpipes
-  git clone --depth 3 --branch ${branch} git@bitbucket.org:mugqic/genpipes.git
+  git clone --depth 3 --branch ${branch} https://bitbucket.org/mugqic/genpipes.git
   if [ -n "${commit}" ]; then
     cd genpipes
     git checkout ${commit}
