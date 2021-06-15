@@ -275,8 +275,10 @@ submit () {
       module purge
       echo submiting $pipeline
       $MUGQIC_PIPELINES_HOME/utils/chunk_genpipes.sh ${command} ${PIPELINE_FOLDER}/chunk
-      $MUGQIC_PIPELINES_HOME/utils/monitor.sh -n 999 ${PIPELINE_FOLDER}/chunk
-      RET_CODE_SUBMIT_SCRIPT=$?
+      $MUGQIC_PIPELINES_HOME/utils/monitor.sh -n 999 ${PIPELINE_FOLDER}/chunk \
+      | tee -a ${GENPIPES_DIR}/scriptTestOutputs/all_jobs
+      # monitor.sh ensure that the submit was done properly
+      RET_CODE_SUBMIT_SCRIPT=0
       ExitCodes+=(["${PIPELINE_LONG_NAME}_submit"]="$RET_CODE_SUBMIT_SCRIPT")
       echo "${command} submit completed"
   else
@@ -692,5 +694,8 @@ for key in "${!ExitCodes[@]}"; do
   fi
 done | sort
 
+
+cat ${GENPIPES_DIR}/scriptTestOutputs/all_jobs | \
+  xargs -i sbatch "--dependency {} "
 
 exit $ret_code
