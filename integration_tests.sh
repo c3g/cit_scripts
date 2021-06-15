@@ -695,7 +695,4 @@ for key in "${!ExitCodes[@]}"; do
 done | sort
 
 
-cat ${GENPIPES_DIR}/scriptTestOutputs/all_jobs | \
-  xargs -i sbatch "--dependency {} "
-
 exit $ret_code
