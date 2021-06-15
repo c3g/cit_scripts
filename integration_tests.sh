@@ -12,20 +12,26 @@ echo
 echo "   -p <pipeline1>[,pipeline2,...]       Pipeline to test, default: do them all"
 echo "   -b <branch>                          Genpipe branch to test"
 echo "   -c <commit>                          Hash string of the commit to test"
-echo "   -s                                   generate scritp only, no HPC submit"
-echo "   -u                                   update mode, do not remove latest pipeline run"
-echo "   -l                                   deploy genpipe in /tmp dir "
-echo "   -a                                   list all available pipeline and exit "
-echo "   -h                                   print this help "
+echo "   -s                                   Generate scritp only, no HPC submit"
+echo "   -u                                   Update mode, do not remove latest pipeline run"
+echo "   -l                                   Deploy genpipe in /tmp dir "
+echo "   -d <genpipe repo_path>               Used preexisting genpipes repo as is (no update)"
+echo "   -a                                   List all available pipeline and exit "
+echo "   -w                                   Test with the container wrapper"
+echo "   -h                                   Print this help "
 
 }
 
 
-while getopts "hap:b:c:slu" opt; do
+while getopts "hap:b:c:slud:w" opt; do
   case $opt in
     p)
       IFS=',' read -r -a PIPELINES <<< "${OPTARG}"
         export PIPELINES
+      ;;
+    d)
+      export GENPIPES_DIR=$(realpath ${OPTARG})
+      NO_GIT_CLONE=TRUE
       ;;
     b)
       BRANCH=${OPTARG}
@@ -38,6 +44,10 @@ while getopts "hap:b:c:slu" opt; do
       ;;
     s)
       export SCRIPT_ONLY=true
+      ;;
+    w)
+      export CONTAINER_WRAPPER='--wrap'
+      module load singularity > /dev/null 2>&1
       ;;
     a)
       export AVAIL=is_set
@@ -60,7 +70,6 @@ done
 def=6002326
 rrg=6007512
 
-
 HOST=`hostname`;
 DNSDOMAIN=`dnsdomainname`;
 
@@ -76,19 +85,10 @@ if [[ $HOST == abacus* || $DNSDOMAIN == ferrier.genome.mcgill.ca ]]; then
   export server=base
   export scheduler="pbs"
 
-elif [[ $HOST == lg-* || $DNSDOMAIN == guillimin.clumeq.ca ]]; then
-
-  export TEST_DIR=/genfs/C3G/projects/jenkins_tests
-  export serverName=guillimin
-  export server=guillimin
-  export scheduler="pbs"
-
-elif [[ $HOST == ip* ]]; then
-
-  export TEST_DIR=/project/${rrg}/C3G/projects/jenkins_tests
-  export serverName=mp2b
-  export server=mp2b
-  export scheduler="slurm"
+  read -r -d '' WRAP_CONFIG << EOM
+export GEN_SHARED_CVMFS=/lb/project/mugqic/cvmfs-container
+BIND_LIST=/tmp/,/home/,/lb
+EOM
 
 elif [[ $HOST == cedar* || $DNSDOMAIN == cedar.computecanada.ca ]]; then
 
@@ -97,24 +97,42 @@ elif [[ $HOST == cedar* || $DNSDOMAIN == cedar.computecanada.ca ]]; then
   export server=cedar
   export scheduler="slurm"
 
+  read -r -d '' WRAP_CONFIG << EOM
+export GEN_SHARED_CVMFS=/scratch/$USER/cvmfs-container
+BIND_LIST=/tmp/,/home/,/project,/scratch,/localscratch
+EOM
+
 elif [[ $HOST == gra-* || $DNSDOMAIN == graham.sharcnet ]]; then
 
   export TEST_DIR=/project/${def}/C3G/projects/jenkins_tests
   export serverName=graham
   export server=graham
   export scheduler="slurm"
+  read -r -d '' WRAP_CONFIG << EOM
+export GEN_SHARED_CVMFS=/scratch/$USER/cvmfs-container
+BIND_LIST=/tmp/,/home/,/project,/scratch,/localscratch
+EOM
 
 elif [[ $HOST == beluga* || $DNSDOMAIN == beluga.computecanada.ca ]]; then
   export TEST_DIR=/project/${rrg}/C3G/projects/jenkins_tests
   export serverName=beluga
   export server=beluga
   export scheduler="slurm"
+  read -r -d '' WRAP_CONFIG << EOM
+export GEN_SHARED_CVMFS=/project/${rrg}/C3G/projects/jenkins_tests
+BIND_LIST=/tmp/,/home/,/project,/scratch,/localscratch
+EOM
 
 else
   export TEST_DIR=/tmp/jenkins_tests
   export serverName=batch
   export server=beluga
   export scheduler="slurm"
+
+  read -r -d '' WRAP_CONFIG << EOM
+export GEN_SHARED_CVMFS=/home/$USER/cvmfs-cache
+BIND_LIST=/tmp/,/home/
+EOM
 
 fi
 
@@ -160,23 +178,38 @@ if [[ -z ${AVAIL+x} ]] ; then
   mkdir -p ${GENPIPES_DIR}
   cd ${GENPIPES_DIR}
 
-  echo "cloning Genpipes ${branch} from: git@bitbucket.org:mugqic/genpipes.git"
+  if [ -z ${NO_GIT_CLONE+x} ]; then
 
-  if [ -d "genpipes" ]; then
-    rm -rf genpipes
+    echo "cloning Genpipes ${branch} from: git@bitbucket.org:mugqic/genpipes.git"
+
+    cd ${GENPIPES_DIR}
+    echo cloning to ${GENPIPES_DIR}/genpipes
+    if [ -d "genpipes" ]; then
+      rm -rf genpipes
+    fi
+    git clone --depth 3 --branch ${branch} https://bitbucket.org/mugqic/genpipes.git
+    if [ -n "${commit}" ]; then
+      cd genpipes
+      git checkout ${commit}
+    fi
+
+    export MUGQIC_PIPELINES_HOME=${GENPIPES_DIR}/genpipes
+  else
+    export MUGQIC_PIPELINES_HOME=${GENPIPES_DIR}
   fi
-
-  cd ${GENPIPES_DIR}
-  echo cloning to ${GENPIPES_DIR}/genpipes
-  git clone --depth 3 --branch ${branch} https://bitbucket.org/mugqic/genpipes.git
-  if [ -n "${commit}" ]; then
-    cd genpipes
-    git checkout ${commit}
+  if  [ -z ${CONTAINER_WRAPPER+x} ]; then
+     echo 'using local cvmfs'
+  elif [[ ${NO_GIT_CLONE} == TRUE ]]; then
+    echo 'using preinstalled GiaC image'
+  else
+    get_wrapper=$(find ${GENPIPES_DIR} -type f -name get_wrapper.sh)
+    echo yes | ${get_wrapper}
+    container_path=$(dirname ${get_wrapper})
+    echo "${WRAP_CONFIG}" > ${container_path}/etc/wrapper.conf
   fi
 
   ## set MUGQIC_PIPELINE_HOME to GenPipes bitbucket install:
   export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/CentOS6
-  export MUGQIC_PIPELINES_HOME=${GENPIPES_DIR}/genpipes
 fi
 
 if [[ -z ${AVAIL+x} ]] ; then
@@ -203,35 +236,36 @@ prologue () {
   fi
 }
 
+
 generate_script () {
-  local command=${1}
-  extra="${@:2}"
-  folder=${PIPELINE_FOLDER}
-  PIPELINE_COMMAND=${command}
+    local command=${1}
+    extra="${@:2}"
+    folder=${PIPELINE_FOLDER}
+    PIPELINE_COMMAND=${command}
 
-  module load mugqic/python/2.7.14
-  echo "************************ running *********************************"
-  echo "python $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py"\
-  "-c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini" \
-  "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini" \
-  "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini" \
-  "${extra}" \
-  "-o ${folder}" \
-  "-j $scheduler > ${folder}/${command}"
-  echo "******************************************************************"
+    module load mugqic/python/2.7.14 > /dev/null 2>&2
+    echo "************************ running *********************************"
+    echo "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py"\
+    "-c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini" \
+    "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini" \
+    "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini" \
+    "${extra}" \
+    "-o ${folder} ${CONTAINER_WRAPPER}" \
+    "-j $scheduler --genpipes_file ${folder}/${command}"
+    echo "******************************************************************"
 
-  python $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
-  -c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
-  $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
-  $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
-  ${extra} \
-  -o ${folder} \
-  -j $scheduler > ${folder}/${command}
-  RET_CODE_CREATE_SCRIPT=$?
-  ExitCodes+=(["${PIPELINE_LONG_NAME}_create"]="$RET_CODE_CREATE_SCRIPT")
-  if [ "$RET_CODE_CREATE_SCRIPT" -ne 0 ] ; then
-    echo ERROR on ${folder}/${command} creation
-  fi
+    $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
+    -c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
+    $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+    $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
+    ${extra} \
+    -o ${folder} ${CONTAINER_WRAPPER} \
+    -j $scheduler --genpipes_file ${folder}/${command}
+    RET_CODE_CREATE_SCRIPT=$?
+    ExitCodes+=(["${PIPELINE_LONG_NAME}_create"]="$RET_CODE_CREATE_SCRIPT")
+    if [ "$RET_CODE_CREATE_SCRIPT" -ne 0 ] ; then
+      echo ERROR on ${folder}/${command} creation
+    fi
 }
 
 submit () {
@@ -240,7 +274,8 @@ submit () {
   if [[ -z ${SCRIPT_ONLY} && ${RET_CODE_CREATE_SCRIPT} -eq 0 ]] ; then
       module purge
       echo submiting $pipeline
-      bash ${command}
+      $MUGQIC_PIPELINES_HOME/utils/chunk_genpipes.sh ${command} ${PIPELINE_FOLDER}/chunk
+      $MUGQIC_PIPELINES_HOME/utils/monitor.sh -n 999 ${PIPELINE_FOLDER}/chunk
       RET_CODE_SUBMIT_SCRIPT=$?
       ExitCodes+=(["${PIPELINE_LONG_NAME}_submit"]="$RET_CODE_SUBMIT_SCRIPT")
       echo "${command} submit completed"
