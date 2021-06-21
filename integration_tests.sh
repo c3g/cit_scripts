@@ -687,12 +687,14 @@ fi
 
 # Print result of script creation and submit
 ret_code=0
+to_sort=""
 for key in "${!ExitCodes[@]}"; do
-  echo $key return  ${ExitCodes[$key]}
+  to_sort+="$key return  ${ExitCodes[$key]}
+"
   if [[ ${ExitCodes[$key]} != 0 ]]; then
     ret_code=${ExitCodes[$key]}
   fi
-done | sort
+done
 
-
+echo "$to_sort" | sort
 exit $ret_code
