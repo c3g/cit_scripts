@@ -668,6 +668,21 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 fi
 
 
+pipeline=epiqc
+protocol=''
+
+
+check_run "${pipeline}_${protocol}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}"
+
+    generate_script ${pipeline}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+
+    submit
+fi
+
+
 if [[ ! -z ${AVAIL+x} ]] ; then
    exit 0
 fi
