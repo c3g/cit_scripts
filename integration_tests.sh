@@ -7,7 +7,7 @@
 usage (){
 
 echo
-echo "usage: $0 create the script for genpipes, submiting them on the HPC system"
+echo "usage: $0 creates the script for genpipes, submiting them on the HPC system"
 echo
 echo "   -p <pipeline1>[,pipeline2,...]       Pipeline to test, default: do them all"
 echo "   -b <branch>                          Genpipe branch to test"
@@ -15,13 +15,29 @@ echo "   -c <commit>                          Hash string of the commit to test"
 echo "   -s                                   Generate scritp only, no HPC submit"
 echo "   -u                                   Update mode, do not remove latest pipeline run"
 echo "   -l                                   Deploy genpipe in /tmp dir "
-echo "   -d <genpipe repo_path>               Used preexisting genpipes repo as is (no update)"
+echo "   -d <genpipe repo_path>  <outputs path>"
+echo "                                        Used preexisting genpipes repo as is (no update)"
 echo "   -a                                   List all available pipeline and exit "
 echo "   -w                                   Test with the container wrapper"
 echo "   -h                                   Print this help "
 
 }
 
+function getopts-extra () {
+    n=2 #number of needed options
+    i=1
+    # catch all non optional arguments following the flag
+    while [[ ${OPTIND} -le $# && ${!OPTIND:0:1} != '-' ]]; do
+        OPTARG[i]=${!OPTIND}
+        let i++ OPTIND++
+    done
+
+    if [[ $n != $i ]]; then
+      echo "wrong number of arguments ${i}, needed ${n}"
+      usage
+      exit 1
+    fi
+}
 
 while getopts "hap:b:c:slud:w" opt; do
   case $opt in
@@ -30,7 +46,9 @@ while getopts "hap:b:c:slud:w" opt; do
         export PIPELINES
       ;;
     d)
-      export GENPIPES_DIR=$(realpath ${OPTARG})
+      getopts-extra "$@"
+      export GENPIPES_DIR=$(realpath ${OPTARG[0]})
+      TEST_OUTPUT=$(realpath ${OPTARG[1]}) # FEED TWO OPTIONS HERE!
       NO_GIT_CLONE=TRUE
       ;;
     b)
@@ -66,7 +84,6 @@ while getopts "hap:b:c:slud:w" opt; do
       ;;
   esac
 done
-
 def=6002326
 rrg=6007512
 
