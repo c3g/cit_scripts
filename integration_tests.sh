@@ -48,7 +48,7 @@ while getopts "hap:b:c:slud:w" opt; do
     d)
       getopts-extra "$@"
       export GENPIPES_DIR=$(realpath ${OPTARG[0]})
-      TEST_OUTPUT=$(realpath ${OPTARG[1]}) # FEED TWO OPTIONS HERE!
+      export SCRIPT_OUTPUT=$(realpath ${OPTARG[1]}) # FEED TWO OPTIONS HERE!
       NO_GIT_CLONE=TRUE
       ;;
     b)
@@ -92,6 +92,7 @@ DNSDOMAIN=`dnsdomainname`;
 
 export GENPIPES_CIT=
 export server
+
 
 export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/CentOS6
 
@@ -178,6 +179,11 @@ if [[ -z ${GENPIPES_DIR} ]]; then
   fi
 fi
 
+if [[ -z ${SCRIPT_OUTPUT} ]]; then
+  SCRIPT_OUTPUT=${GENPIPES_DIR}/scriptTestOutputs
+fi
+
+
 ## set up a dict to collect exit codes:
 export RET_CODE_CREATE_SCRIPT
 export RET_CODE_SUBMIT_SCRIPT
@@ -230,8 +236,8 @@ if [[ -z ${AVAIL+x} ]] ; then
 fi
 
 if [[ -z ${AVAIL+x} ]] ; then
-  mkdir -p ${GENPIPES_DIR}/scriptTestOutputs
-  cd ${GENPIPES_DIR}/scriptTestOutputs
+  mkdir -p ${SCRIPT_OUTPUT}
+  cd ${SCRIPT_OUTPUT}
 fi
 
 export pipeline
@@ -293,7 +299,7 @@ submit () {
       echo submiting $pipeline
       $MUGQIC_PIPELINES_HOME/utils/chunk_genpipes.sh ${command} ${PIPELINE_FOLDER}/chunk
       $MUGQIC_PIPELINES_HOME/utils/monitor.sh -n 999 ${PIPELINE_FOLDER}/chunk \
-      | tee -a ${GENPIPES_DIR}/scriptTestOutputs/all_jobs
+      | tee -a ${SCRIPT_OUTPUT}/all_jobs
       # monitor.sh ensure that the submit was done properly
       RET_CODE_SUBMIT_SCRIPT=0
       ExitCodes+=(["${PIPELINE_LONG_NAME}_submit"]="$RET_CODE_SUBMIT_SCRIPT")
