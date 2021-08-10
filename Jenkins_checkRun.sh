@@ -1,6 +1,6 @@
 #! /bin/bash
 
-module load mugqic/python/3.7.3 mugqic/genpipes
+module load mugqic/python/2.7.14 mugqic/genpipes
 
 control_c() {
   exit 0
