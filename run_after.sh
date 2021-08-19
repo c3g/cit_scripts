@@ -15,23 +15,15 @@ control_c() {
   exit 0
 }
 
-if [ "\$#" -ne 1 ] ; then
- echo "\$0 <path of cit outputs>"
- exit 1
-fi
 
-RESULT_PATH=\$1
-
-latest_dev=\$(realpath  "\${RESULT_PATH}")
+latest_dev=$(realpath  "${${SCRIPT_OUTPUT}}"
 
 
 
-mkdir -p ~/cit_out && cd ~/cit_out
-rm -f ~/cit_out/*
-
+mkdir -p ${SCRIPT_OUTPUT}/cit_out && cd ${SCRIPT_OUTPUT}/cit_out
 
 trap control_c SIGINT
-list=\$(find \${latest_dev}  -maxdepth 3  -type d -name 'job_output' | xargs -L 1 -I@ sh -c "ls -t1 @/*job* | head -n 1 ")
+list=\$(find ${latest_dev}  -maxdepth 3  -type d -name 'job_output' | xargs -L 1 -I@ sh -c "ls -t1 @/*job* | head -n 1 ")
 
 for jl in \$list ; do
   out=\$( echo "\$jl" | sed 's|.*scriptTestOutputs/\(.*\)/job_output.*|\1|g' )
