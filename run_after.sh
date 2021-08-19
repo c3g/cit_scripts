@@ -1,5 +1,5 @@
 
-job_list=$(cat  $SCRIPT_OUTPUT/*/chunk/*out  | awk -F'=' '{printf(":%s",$1)}'| sed 's/ //g')
+job_list=$(cat  $SCRIPT_OUTPUT/*/chunk/*out  | awk -F'=' '{printf(":%s",$2)}'| sed 's/ //g')
 # job_list=$(cat /tmp/all | awk -F'=' '{printf(":%s",$1)}'| sed 's/ //g')
 
 tmp_file=$(mktemp)
