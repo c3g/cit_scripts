@@ -297,11 +297,11 @@ submit () {
   if [[ -z ${SCRIPT_ONLY} && ${RET_CODE_CREATE_SCRIPT} -eq 0 ]] ; then
       module purge
       echo submiting $pipeline
-      $MUGQIC_PIPELINES_HOME/utils/chunk_genpipes.sh ${command} ${PIPELINE_FOLDER}/chunk
-      $MUGQIC_PIPELINES_HOME/utils/monitor.sh -n 999 ${PIPELINE_FOLDER}/chunk \
+      $MUGQIC_PIPELINES_HOME/utils/chunk_genpipes.sh  ${command} ${PIPELINE_FOLDER}/chunk
+      # will retry submit 10 times
+      $MUGQIC_PIPELINES_HOME/utils/monitor.sh -l 10 -n 999 ${PIPELINE_FOLDER}/chunk \
       | tee -a ${SCRIPT_OUTPUT}/all_jobs
-      # monitor.sh ensure that the submit was done properly
-      RET_CODE_SUBMIT_SCRIPT=0
+      RET_CODE_SUBMIT_SCRIPT=${PIPESTATUS[0]}
       ExitCodes+=(["${PIPELINE_LONG_NAME}_submit"]="$RET_CODE_SUBMIT_SCRIPT")
       echo "${command} submit completed"
   else
@@ -396,7 +396,7 @@ fi
 pipeline=dnaseq
 protocol=mugqic
 reference=gatk4
-extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/gatk4.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit_gatk4.ini"
+extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/gatk4.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit_gatk4.ini"
 
 check_run "${pipeline}_${protocol}_${reference}"
 if [[ ${run_pipeline} == 'true' ]] ; then
