@@ -7,5 +7,5 @@ if [ $# -eq 1 ]; then
   $SCRIPT_DIR/Jenkins_GenpipesFull.sh -b ${BRANCH}
 
 elif [ $# -eq 2 ]; then
-  $SCRIPT_DIR/Jenkins_GenpipesFull.sh -b ${BRANCH} -l
+  $SCRIPT_DIR/Jenkins_GenpipesFull.sh -b ${BRANCH} -l 
 fi
