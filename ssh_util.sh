@@ -3,9 +3,9 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 BRANCH=$1
 echo "running on **** $HOSTNAME ****"
-if [ $# -eq 1 ]; then
-  $SCRIPT_DIR/Jenkins_GenpipesFull.sh -b ${BRANCH}
+if [[ $1 -eq cedar_full || graham_full  ]]; then
+  $SCRIPT_DIR/integration_tests.sh -b dev -l -s
 
-elif [ $# -eq 2 ]; then
-  $SCRIPT_DIR/Jenkins_GenpipesFull.sh -b ${BRANCH} -l 
+elif [ $# -eq beluga_full ]; then
+  $SCRIPT_DIR/integration_tests.sh -b ${BRANCH} -l
 fi
