@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+export SCRIPT_OUTPUT
 
 ## Server set up:
 
@@ -749,7 +750,6 @@ echo "$to_sort" | sort
 
 # that  should be an option, not a hidden condition
 if [[ $server == beluga && $USER == c3g_cit ]]  ; then
-  export SCRIPT_OUTPUT
   ${SCRIPT_DIR}/run_after.sh
 fi
 
