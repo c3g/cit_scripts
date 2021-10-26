@@ -22,6 +22,7 @@ echo "   -d <genpipe repo_path>  <outputs path>"
 echo "                                        Used preexisting genpipes repo as is (no update)"
 echo "   -a                                   List all available pipeline and exit "
 echo "   -w                                   Test with the container wrapper"
+echo "   -f                                   Config file"
 echo "   -h                                   Print this help "
 
 }
@@ -42,7 +43,7 @@ function getopts-extra () {
     fi
 }
 
-while getopts "hap:b:c:slud:w" opt; do
+while getopts "hap:b:c:slud:wf:" opt; do
   case $opt in
     p)
       IFS=',' read -r -a PIPELINES <<< "${OPTARG}"
@@ -59,6 +60,9 @@ while getopts "hap:b:c:slud:w" opt; do
       ;;
     c)
       COMMIT=${OPTARG}
+      ;;
+    f)
+     CONFIG_FILE=${OPTARG}
       ;;
     l)
       export GENPIPES_DIR=$(mktemp -d /tmp/genpipes_XXXX)
@@ -87,6 +91,7 @@ while getopts "hap:b:c:slud:w" opt; do
       ;;
   esac
 done
+
 def=6002326
 rrg=6007512
 
@@ -149,12 +154,15 @@ else
   export serverName=batch
   export server=beluga
   export scheduler="slurm"
-
   read -r -d '' WRAP_CONFIG << EOM
 export GEN_SHARED_CVMFS=/home/$USER/cvmfs-cache
 BIND_LIST=/tmp/,/home/
 EOM
 
+fi
+
+if [ -n "${CONFIG_FILE}" ] ;then
+  source ${CONFIG_FILE}
 fi
 
 ## set up environment:
@@ -223,6 +231,7 @@ if [[ -z ${AVAIL+x} ]] ; then
   else
     export MUGQIC_PIPELINES_HOME=${GENPIPES_DIR}
   fi
+
   if  [ -z ${CONTAINER_WRAPPER+x} ]; then
      echo 'using local cvmfs'
   elif [[ ${NO_GIT_CLONE} == TRUE ]]; then
@@ -269,7 +278,6 @@ generate_script () {
     folder=${PIPELINE_FOLDER}
     PIPELINE_COMMAND=${command}
 
-    module load mugqic/python/2.7.14 > /dev/null 2>&2
     echo "************************ running *********************************"
     echo "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py"\
     "-c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini" \
@@ -280,6 +288,7 @@ generate_script () {
     "-j $scheduler --genpipes_file ${folder}/${command}"
     echo "******************************************************************"
 
+    module load mugqic/python/2.7.14 > /dev/null 2>&2
     $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
     -c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
     $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
@@ -292,13 +301,13 @@ generate_script () {
     if [ "$RET_CODE_CREATE_SCRIPT" -ne 0 ] ; then
       echo ERROR on ${folder}/${command} creation
     fi
+    module unload mugqic/python/2.7.14 > /dev/null 2>&2
 }
 
 submit () {
   command=${PIPELINE_FOLDER}/${PIPELINE_COMMAND}
 
   if [[ -z ${SCRIPT_ONLY} && ${RET_CODE_CREATE_SCRIPT} -eq 0 ]] ; then
-      module purge
       echo submiting $pipeline
       $MUGQIC_PIPELINES_HOME/utils/chunk_genpipes.sh  ${command} ${PIPELINE_FOLDER}/chunk
       # will retry submit 10 times
