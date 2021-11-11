@@ -288,7 +288,7 @@ generate_script () {
     "-j $scheduler --genpipes_file ${folder}/${command}"
     echo "******************************************************************"
 
-    module load mugqic/python/2.7.14 > /dev/null 2>&2
+    module load mugqic/python/3.8.5 > /dev/null 2>&2
     $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
     -c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
     $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
@@ -301,7 +301,7 @@ generate_script () {
     if [ "$RET_CODE_CREATE_SCRIPT" -ne 0 ] ; then
       echo ERROR on ${folder}/${command} creation
     fi
-    module unload mugqic/python/2.7.14 > /dev/null 2>&2
+    module unload mugqic/python/3.8.5 > /dev/null 2>&2
 }
 
 submit () {
