@@ -243,7 +243,7 @@ generate_script () {
     folder=${PIPELINE_FOLDER}
     PIPELINE_COMMAND=${command}
 
-    module load mugqic/python/2.7.14 > /dev/null 2>&2
+    module load mugqic/python/3.9.1 > /dev/null 2>&2
     echo "************************ running *********************************"
     echo "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py"\
     "-c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini" \
