@@ -646,7 +646,8 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
     generate_script ${pipeline}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${technology}/readset.${technology}.txt \
-    -d $MUGQIC_INSTALL_HOME/testdata/${technology}/design.${technology}.txt
+    -d $MUGQIC_INSTALL_HOME/testdata/${technology}/design.${technology}.txt \
+    -t ${protocol}
 
     submit
 fi
@@ -661,7 +662,8 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
     generate_script ${pipeline}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${technology}/readset.${technology}.txt \
-    -d $MUGQIC_INSTALL_HOME/testdata/${technology}/design.${technology}.txt
+    -d $MUGQIC_INSTALL_HOME/testdata/${technology}/design.${technology}.txt \
+    -t ${protocol}
 
     submit
 fi
