@@ -289,7 +289,6 @@ generate_script () {
     "-j $scheduler --genpipes_file ${folder}/${command}"
     echo "******************************************************************"
 
-    module load mugqic/python/3.8.5 > /dev/null 2>&2
     $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
     -c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
     $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
