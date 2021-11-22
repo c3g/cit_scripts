@@ -638,7 +638,7 @@ fi
 
 pipeline=rnaseq_denovo_assembly
 technology=rnaseq
-protocol=''
+protocol='trinity'
 
 check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
@@ -646,7 +646,24 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
     generate_script ${pipeline}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${technology}/readset.${technology}.txt \
-    -d $MUGQIC_INSTALL_HOME/testdata/${technology}/design.${technology}.txt
+    -d $MUGQIC_INSTALL_HOME/testdata/${technology}/design.${technology}.txt \
+    -t ${protocol}
+
+    submit
+fi
+
+pipeline=rnaseq_denovo_assembly
+technology=rnaseq
+protocol='seq2fun'
+
+check_run "${pipeline}_${protocol}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}"
+
+    generate_script ${pipeline}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${technology}/readset.${technology}.txt \
+    -d $MUGQIC_INSTALL_HOME/testdata/${technology}/design.${technology}.txt \
+    -t ${protocol}
 
     submit
 fi
