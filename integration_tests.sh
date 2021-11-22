@@ -278,6 +278,7 @@ generate_script () {
     folder=${PIPELINE_FOLDER}
     PIPELINE_COMMAND=${command}
 
+    module load mugqic/python/3.8.5 > /dev/null 2>&2
     echo "************************ running *********************************"
     echo "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py"\
     "-c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini" \
@@ -721,6 +722,21 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
     generate_script ${pipeline}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt
+
+    submit
+fi
+
+
+pipeline=epiqc
+protocol=''
+
+
+check_run "${pipeline}_${protocol}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}"
+
+    generate_script ${pipeline}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
 
     submit
 fi
