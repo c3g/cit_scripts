@@ -283,7 +283,7 @@ generate_script () {
     PIPELINE_COMMAND=${command}
 
     debug=''
-    if [[  $VERBOSE == 1 ] ; then
+    if [[  $VERBOSE == 1 ]] ; then
       debug='-l debug'
     fi
     module load mugqic/python/3.8.5 > /dev/null 2>&2
