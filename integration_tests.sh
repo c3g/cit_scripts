@@ -2,7 +2,7 @@
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 export SCRIPT_OUTPUT
-
+export VERBOSE=0
 ## Server set up:
 
 ## guillaume's rrg account at CC's id is 6007512; the def account id is 6002326; change based on whether we have a RAC allocation on server or not
@@ -24,6 +24,7 @@ echo "   -a                                   List all available pipeline and ex
 echo "   -w                                   Test with the container wrapper"
 echo "   -f                                   Config file"
 echo "   -h                                   Print this help "
+echo "   -v                                   make the log more verbose"
 
 }
 
@@ -43,7 +44,7 @@ function getopts-extra () {
     fi
 }
 
-while getopts "hap:b:c:slud:wf:" opt; do
+while getopts ":vhap:b:c:slud:wf:" opt; do
   case $opt in
     p)
       IFS=',' read -r -a PIPELINES <<< "${OPTARG}"
@@ -54,6 +55,9 @@ while getopts "hap:b:c:slud:wf:" opt; do
       export GENPIPES_DIR=$(realpath ${OPTARG[0]})
       export SCRIPT_OUTPUT=$(realpath ${OPTARG[1]}) # FEED TWO OPTIONS HERE!
       NO_GIT_CLONE=TRUE
+      ;;
+    v)
+      VERBOSE=1
       ;;
     b)
       BRANCH=${OPTARG}
@@ -278,13 +282,17 @@ generate_script () {
     folder=${PIPELINE_FOLDER}
     PIPELINE_COMMAND=${command}
 
+    debug=''
+    if [[  $VERBOSE == 1 ] ; then
+      debug='-l debug'
+    fi
     module load mugqic/python/3.8.5 > /dev/null 2>&2
     echo "************************ running *********************************"
     echo "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py"\
     "-c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini" \
     "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini" \
     "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini" \
-    "${extra}" \
+    "${extra} ${debug}" \
     "-o ${folder} ${CONTAINER_WRAPPER}" \
     "-j $scheduler --genpipes_file ${folder}/${command}"
     echo "******************************************************************"
@@ -293,7 +301,7 @@ generate_script () {
     -c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
     $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
     $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
-    ${extra} \
+    ${extra} ${debug} \
     -o ${folder} ${CONTAINER_WRAPPER} \
     -j $scheduler --genpipes_file ${folder}/${command}
     RET_CODE_CREATE_SCRIPT=$?
@@ -400,7 +408,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
     generate_script ${pipeline}_${protocol}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-    -t ${protocol} -l debug
+    -t ${protocol}
 
     submit
 fi
@@ -417,7 +425,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
     ${extra} \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-    -t ${protocol} -l debug
+    -t ${protocol}
 
     submit
 fi
@@ -434,7 +442,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
     ${extra} \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-    -t ${protocol} -l debug
+    -t ${protocol}
 
     submit
 
@@ -452,7 +460,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
     ${extra} \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-    -t ${protocol} -l debug
+    -t ${protocol}
 
     submit
 
@@ -484,7 +492,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
     ${extra} \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-    -t ${protocol} -l debug
+    -t ${protocol}
 
     submit
 
