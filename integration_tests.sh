@@ -22,7 +22,7 @@ echo "   -d <genpipe repo_path>  <outputs path>"
 echo "                                        Used preexisting genpipes repo as is (no update)"
 echo "   -a                                   List all available pipeline and exit "
 echo "   -w                                   Test with the container wrapper"
-echo "   -f                                   Config file"
+echo "   -f <config file>                     Config file"
 echo "   -h                                   Print this help "
 echo "   -v                                   make the log more verbose"
 
