@@ -319,7 +319,7 @@ submit () {
       echo submiting $pipeline
       $MUGQIC_PIPELINES_HOME/utils/chunk_genpipes.sh  ${command} ${PIPELINE_FOLDER}/chunk
       # will retry submit 10 times
-      $MUGQIC_PIPELINES_HOME/utils/monitor.sh -l 10 -n 999 ${PIPELINE_FOLDER}/chunk \
+      $MUGQIC_PIPELINES_HOME/utils/watchdog -l 10 -n 999 ${PIPELINE_FOLDER}/chunk \
       | tee -a ${SCRIPT_OUTPUT}/all_jobs
       RET_CODE_SUBMIT_SCRIPT=${PIPESTATUS[0]}
       ExitCodes+=(["${PIPELINE_LONG_NAME}_submit"]="$RET_CODE_SUBMIT_SCRIPT")
