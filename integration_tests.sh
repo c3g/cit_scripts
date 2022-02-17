@@ -153,6 +153,16 @@ export GEN_SHARED_CVMFS=/project/${rrg}/C3G/projects/jenkins_tests
 BIND_LIST=/tmp/,/home/,/project,/scratch,/localscratch
 EOM
 
+elif [[ $HOST == narval* || $DNSDOMAIN == narval.computecanada.ca ]]; then
+  export TEST_DIR=/project/${rrg}/C3G/projects/jenkins_tests
+  export serverName=narval
+  export server=narval
+  export scheduler="slurm"
+  read -r -d '' WRAP_CONFIG << EOM
+export GEN_SHARED_CVMFS=/project/${rrg}/C3G/projects/jenkins_tests
+BIND_LIST=/tmp/,/home/,/project,/scratch,/localscratch
+EOM
+
 else
   export TEST_DIR=/tmp/jenkins_tests
   export serverName=batch
@@ -286,30 +296,24 @@ generate_script () {
     if [[  $VERBOSE == 1 ]] ; then
       debug='-l debug'
     fi
-    module load mugqic/python/3.8.5 > /dev/null 2>&2
-    echo "************************ running *********************************"
-    echo "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py"\
-    "-c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini" \
-    "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini" \
-    "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini" \
-    "${extra} ${debug}" \
-    "-o ${folder} ${CONTAINER_WRAPPER}" \
-    "-j $scheduler --genpipes_file ${folder}/${command}"
-    echo "******************************************************************"
-
+    module load mugqic/python/3.8.5 > /dev/null 2>&1
+    set -x
     $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
     -c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
-    $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+    $MUGQIC_PIPELINES_HOME/pipelines/common_ini/${server}.ini \
     $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
     ${extra} ${debug} \
     -o ${folder} ${CONTAINER_WRAPPER} \
     -j $scheduler --genpipes_file ${folder}/${command}
-    RET_CODE_CREATE_SCRIPT=$?
+
+    { RET_CODE_CREATE_SCRIPT=$?; set +x; } 2>/dev/null
+    echo "******************************************************************"
+
     ExitCodes+=(["${PIPELINE_LONG_NAME}_create"]="$RET_CODE_CREATE_SCRIPT")
     if [ "$RET_CODE_CREATE_SCRIPT" -ne 0 ] ; then
       echo ERROR on ${folder}/${command} creation
     fi
-    module unload mugqic/python/3.8.5 > /dev/null 2>&2
+    module unload mugqic/python/3.8.5 > /dev/null 2>&1
 }
 
 submit () {
@@ -319,7 +323,7 @@ submit () {
       echo submiting $pipeline
       $MUGQIC_PIPELINES_HOME/utils/chunk_genpipes.sh  ${command} ${PIPELINE_FOLDER}/chunk
       # will retry submit 10 times
-      $MUGQIC_PIPELINES_HOME/utils/watchdog -l 10 -n 999 ${PIPELINE_FOLDER}/chunk \
+      $MUGQIC_PIPELINES_HOME/utils/submit_genpipes -l 10 -n 999 ${PIPELINE_FOLDER}/chunk \
       | tee -a ${SCRIPT_OUTPUT}/all_jobs
       RET_CODE_SUBMIT_SCRIPT=${PIPESTATUS[0]}
       ExitCodes+=(["${PIPELINE_LONG_NAME}_submit"]="$RET_CODE_SUBMIT_SCRIPT")
@@ -517,7 +521,7 @@ fi
 pipeline=tumor_pair
 protocol=fastpass
 reference=b38
-extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.extras.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini $MUGQIC_PIPELINES_HOME/resources/genomes/config/Homo_sapiens.GRCh38.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini"
+extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.extras.ini $MUGQIC_PIPELINES_HOME/resources/genomes/config/Homo_sapiens.GRCh38.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini"
 pair="$MUGQIC_INSTALL_HOME/testdata/${pipeline}/pair.${pipeline}.csv"
 
 check_run "${pipeline}_${protocol}_${reference}"
@@ -538,7 +542,7 @@ fi
 pipeline=tumor_pair
 protocol=ensemble
 reference=b38
-extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.extras.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini $MUGQIC_PIPELINES_HOME/resources/genomes/config/Homo_sapiens.GRCh38.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini"
+extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.extras.ini $MUGQIC_PIPELINES_HOME/resources/genomes/config/Homo_sapiens.GRCh38.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini"
 pair="$MUGQIC_INSTALL_HOME/testdata/${pipeline}/pair.${pipeline}.csv"
 
 check_run "${pipeline}_${protocol}_${reference}"
@@ -559,7 +563,7 @@ fi
 pipeline=tumor_pair
 protocol=ensemble
 reference=exome_b38
-extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.extras.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.exome.ini $MUGQIC_PIPELINES_HOME/resources/genomes/config/Homo_sapiens.GRCh38.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini"
+extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.extras.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.exome.ini $MUGQIC_PIPELINES_HOME/resources/genomes/config/Homo_sapiens.GRCh38.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini"
 pair="$MUGQIC_INSTALL_HOME/testdata/${pipeline}/pair.${pipeline}.csv"
 
 check_run "${pipeline}_${protocol}_${reference}"
