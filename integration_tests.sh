@@ -112,7 +112,7 @@ if [[ $HOST == abacus* || $DNSDOMAIN == ferrier.genome.mcgill.ca ]]; then
 
   export TEST_DIR=/lb/project/mugqic/projects/jenkins_tests
   export serverName=Abacus
-  export server=base
+  export server=abacus
   export scheduler="pbs"
 
   read -r -d '' WRAP_CONFIG << EOM
