@@ -154,12 +154,12 @@ BIND_LIST=/tmp/,/home/,/project,/scratch,/localscratch
 EOM
 
 elif [[ $HOST == narval* || $DNSDOMAIN == narval.computecanada.ca ]]; then
-  export TEST_DIR=/project/${rrg}/C3G/projects/jenkins_tests
+  export TEST_DIR=/lustre03/project/rrg-bourqueg-ad/C3G/projects/jenkins_tests/
   export serverName=narval
   export server=narval
   export scheduler="slurm"
   read -r -d '' WRAP_CONFIG << EOM
-export GEN_SHARED_CVMFS=/project/${rrg}/C3G/projects/jenkins_tests
+export GEN_SHARED_CVMFS=/lustre03/project/rrg-bourqueg-ad/C3G/projects/jenkins_tests/
 BIND_LIST=/tmp/,/home/,/project,/scratch,/localscratch
 EOM
 
