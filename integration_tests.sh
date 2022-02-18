@@ -296,9 +296,9 @@ generate_script () {
     if [[  $VERBOSE == 1 ]] ; then
       debug='-l debug'
     fi
+    echo "************************submiting*********************************"
     module load mugqic/python/3.8.5 > /dev/null 2>&1
     set -x
-    echo "************************submiting*********************************"
     $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
     -c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
     $MUGQIC_PIPELINES_HOME/pipelines/common_ini/${server}.ini \
@@ -308,13 +308,13 @@ generate_script () {
     -j $scheduler --genpipes_file ${folder}/${command}
 
     { RET_CODE_CREATE_SCRIPT=$?; set +x; } 2>/dev/null
-    echo "******************************************************************"
-
     ExitCodes+=(["${PIPELINE_LONG_NAME}_create"]="$RET_CODE_CREATE_SCRIPT")
     if [ "$RET_CODE_CREATE_SCRIPT" -ne 0 ] ; then
       echo ERROR on ${folder}/${command} creation
     fi
     module unload mugqic/python/3.8.5 > /dev/null 2>&1
+    echo "******************************************************************"
+
 }
 
 submit () {
