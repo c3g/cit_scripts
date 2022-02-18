@@ -106,10 +106,8 @@ export server
 
 
 export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/CentOS6
-echo HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
 echo $DNSDOMAIN $HOST
 if [[ $HOST == abacus* || $DNSDOMAIN == ferrier.genome.mcgill.ca ]]; then
-echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
   export TEST_DIR=/lb/project/mugqic/projects/jenkins_tests
   export serverName=Abacus
   export server=abacus
@@ -829,7 +827,7 @@ done
 echo "$to_sort" | sort
 
 # that  should be an option, not a hidden condition
-if [[ $server == beluga && $USER == c3g_cit ]]  ; then
+if [[ $server == beluga || $server == narval ]] && [[ $USER == c3g_cit ]]  ; then
   ${SCRIPT_DIR}/run_after.sh
 fi
 
