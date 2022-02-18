@@ -98,18 +98,18 @@ done
 
 def=6002326
 rrg=6007512
-
-HOST=`hostname`;
-DNSDOMAIN=`dnsdomainname`;
+HOST=${HOST:=$(hostname)}
+DNSDOMAIN=${DNSDOMAIN:=$(dnsdomainname)}
 
 export GENPIPES_CIT=
 export server
 
 
 export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/CentOS6
-
+echo HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
+echo $DNSDOMAIN $HOST
 if [[ $HOST == abacus* || $DNSDOMAIN == ferrier.genome.mcgill.ca ]]; then
-
+echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
   export TEST_DIR=/lb/project/mugqic/projects/jenkins_tests
   export serverName=Abacus
   export server=abacus
@@ -796,7 +796,8 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}"
 
     generate_script ${pipeline}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${protocol}.${pipeline}.txt
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${protocol}.${pipeline}.txt \
+    -t  basecalling
 
     submit
 fi
