@@ -6,6 +6,6 @@ OPT=$2
 echo "running on **** $HOSTNAME ****"
 if [ $# -eq 1 ]; then
   $SCRIPT_DIR/integration_tests.sh -b ${BRANCH}
-else [ $# -eq 2 ]; then
+  else [ $# -eq 2 ]; then
   $SCRIPT_DIR/integration_tests.sh -b ${BRANCH} ${OPT}
 fi
