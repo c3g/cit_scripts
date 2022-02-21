@@ -2,6 +2,7 @@
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 BRANCH=$1
+host=$(hostname)
 echo "running on **** $HOSTNAME ****"
 ret_code=0
 if [[ $2 -eq graham_full  ]]; then
