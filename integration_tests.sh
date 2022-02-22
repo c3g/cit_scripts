@@ -769,17 +769,12 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 fi
 
 
-if [[ ! -z ${AVAIL+x} ]] ; then
-   exit 0
-fi
-
 pipeline=nanopore_covseq
 protocol='default'
 
 check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}"
-
     generate_script ${pipeline}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${protocol}.${pipeline}.txt
 
@@ -802,6 +797,9 @@ fi
 
 # Add new test above ^^
 
+if [[ -n ${AVAIL+x} ]] ; then
+   exit 0
+fi
 
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Testing GenPipes Command Complete ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
