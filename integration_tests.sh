@@ -2,7 +2,7 @@
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 export SCRIPT_OUTPUT
-export VERBOSE=0
+export VERBOSE=${VERBOSE:=0}
 ## Server set up:
 
 ## guillaume's rrg account at CC's id is 6007512; the def account id is 6002326; change based on whether we have a RAC allocation on server or not
@@ -294,7 +294,7 @@ generate_script () {
     if [[  $VERBOSE == 1 ]] ; then
       debug='-l debug'
     fi
-    echo "************************submiting*********************************"
+    echo "********************Generating Genpipes File**********************"
     module load mugqic/python/3.8.5 > /dev/null 2>&1
     set -x
     $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
@@ -306,7 +306,7 @@ generate_script () {
     -j $scheduler --genpipes_file ${folder}/${command}
 
     { RET_CODE_CREATE_SCRIPT=$?; set +x; } 2>/dev/null
-    ExitCodes+=(["${PIPELINE_LONG_NAME}_create"]="$RET_CODE_CREATE_SCRIPT")
+    ExitCodes+=(["${PIPELINE_LONG_NAME} create"]="$RET_CODE_CREATE_SCRIPT")
     if [ "$RET_CODE_CREATE_SCRIPT" -ne 0 ] ; then
       echo ERROR on ${folder}/${command} creation
     fi
@@ -325,7 +325,7 @@ submit () {
       $MUGQIC_PIPELINES_HOME/utils/submit_genpipes -l 10 -n 999 ${PIPELINE_FOLDER}/chunk \
       | tee -a ${SCRIPT_OUTPUT}/all_jobs
       RET_CODE_SUBMIT_SCRIPT=${PIPESTATUS[0]}
-      ExitCodes+=(["${PIPELINE_LONG_NAME}_submit"]="$RET_CODE_SUBMIT_SCRIPT")
+      ExitCodes+=(["${PIPELINE_LONG_NAME} submit"]="$RET_CODE_SUBMIT_SCRIPT")
       echo "${command} submit completed"
   else
       echo "${command} not submitted"
