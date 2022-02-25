@@ -498,21 +498,20 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     -t ${protocol}
 
     submit
-
 fi
 
-pipeline=dnaseq
-protocol=sv
-
-check_run "${pipeline}_${protocol}"
-if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}_${protocol}"
-
-    generate_script ${pipeline}_${protocol}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-    -t ${protocol}
-    submit
-fi
+#pipeline=dnaseq
+#protocol=sv
+#
+#check_run "${pipeline}_${protocol}"
+#if [[ ${run_pipeline} == 'true' ]] ; then
+#    prologue "${pipeline}_${protocol}"
+#
+#    generate_script ${pipeline}_${protocol}_commands.sh \
+#    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+#    -t ${protocol}
+#    submit
+#fi
 
 pipeline=tumor_pair
 protocol=fastpass
