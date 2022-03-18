@@ -2,7 +2,7 @@
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 export SCRIPT_OUTPUT
-export VERBOSE=0
+export VERBOSE=${VERBOSE:=0}
 ## Server set up:
 
 ## guillaume's rrg account at CC's id is 6007512; the def account id is 6002326; change based on whether we have a RAC allocation on server or not
@@ -98,21 +98,19 @@ done
 
 def=6002326
 rrg=6007512
-
-HOST=`hostname`;
-DNSDOMAIN=`dnsdomainname`;
+HOST=${HOST:=$(hostname)}
+DNSDOMAIN=${DNSDOMAIN:=$(dnsdomainname)}
 
 export GENPIPES_CIT=
 export server
 
 
 export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/CentOS6
-
+echo $DNSDOMAIN $HOST
 if [[ $HOST == abacus* || $DNSDOMAIN == ferrier.genome.mcgill.ca ]]; then
-
   export TEST_DIR=/lb/project/mugqic/projects/jenkins_tests
   export serverName=Abacus
-  export server=base
+  export server=abacus
   export scheduler="pbs"
 
   read -r -d '' WRAP_CONFIG << EOM
@@ -150,6 +148,16 @@ elif [[ $HOST == beluga* || $DNSDOMAIN == beluga.computecanada.ca ]]; then
   export scheduler="slurm"
   read -r -d '' WRAP_CONFIG << EOM
 export GEN_SHARED_CVMFS=/project/${rrg}/C3G/projects/jenkins_tests
+BIND_LIST=/tmp/,/home/,/project,/scratch,/localscratch
+EOM
+
+elif [[ $HOST == narval* || $DNSDOMAIN == narval.computecanada.ca ]]; then
+  export TEST_DIR=/lustre03/project/rrg-bourqueg-ad/C3G/projects/jenkins_tests/
+  export serverName=narval
+  export server=narval
+  export scheduler="slurm"
+  read -r -d '' WRAP_CONFIG << EOM
+export GEN_SHARED_CVMFS=/lustre03/project/rrg-bourqueg-ad/C3G/projects/jenkins_tests/
 BIND_LIST=/tmp/,/home/,/project,/scratch,/localscratch
 EOM
 
@@ -286,30 +294,25 @@ generate_script () {
     if [[  $VERBOSE == 1 ]] ; then
       debug='-l debug'
     fi
-    module load mugqic/python/3.8.5 > /dev/null 2>&2
-    echo "************************ running *********************************"
-    echo "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py"\
-    "-c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini" \
-    "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini" \
-    "$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini" \
-    "${extra} ${debug}" \
-    "-o ${folder} ${CONTAINER_WRAPPER}" \
-    "-j $scheduler --genpipes_file ${folder}/${command}"
-    echo "******************************************************************"
-
+    echo "********************Generating Genpipes File**********************"
+    module load mugqic/python/3.8.5 > /dev/null 2>&1
+    set -x
     $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.py \
     -c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
-    $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini \
+    $MUGQIC_PIPELINES_HOME/pipelines/common_ini/${server}.ini \
     $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
     ${extra} ${debug} \
     -o ${folder} ${CONTAINER_WRAPPER} \
     -j $scheduler --genpipes_file ${folder}/${command}
-    RET_CODE_CREATE_SCRIPT=$?
-    ExitCodes+=(["${PIPELINE_LONG_NAME}_create"]="$RET_CODE_CREATE_SCRIPT")
+
+    { RET_CODE_CREATE_SCRIPT=$?; set +x; } 2>/dev/null
+    ExitCodes+=(["${PIPELINE_LONG_NAME} create"]="$RET_CODE_CREATE_SCRIPT")
     if [ "$RET_CODE_CREATE_SCRIPT" -ne 0 ] ; then
       echo ERROR on ${folder}/${command} creation
     fi
-    module unload mugqic/python/3.8.5 > /dev/null 2>&2
+    module unload mugqic/python/3.8.5 > /dev/null 2>&1
+    echo "******************************************************************"
+
 }
 
 submit () {
@@ -319,10 +322,10 @@ submit () {
       echo submiting $pipeline
       $MUGQIC_PIPELINES_HOME/utils/chunk_genpipes.sh  ${command} ${PIPELINE_FOLDER}/chunk
       # will retry submit 10 times
-      $MUGQIC_PIPELINES_HOME/utils/watchdog -l 10 -n 999 ${PIPELINE_FOLDER}/chunk \
+      $MUGQIC_PIPELINES_HOME/utils/submit_genpipes -l 10 -n 999 ${PIPELINE_FOLDER}/chunk \
       | tee -a ${SCRIPT_OUTPUT}/all_jobs
       RET_CODE_SUBMIT_SCRIPT=${PIPESTATUS[0]}
-      ExitCodes+=(["${PIPELINE_LONG_NAME}_submit"]="$RET_CODE_SUBMIT_SCRIPT")
+      ExitCodes+=(["${PIPELINE_LONG_NAME} submit"]="$RET_CODE_SUBMIT_SCRIPT")
       echo "${command} submit completed"
   else
       echo "${command} not submitted"
@@ -495,29 +498,25 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     -t ${protocol}
 
     submit
-
 fi
 
 #pipeline=dnaseq
 #protocol=sv
-
+#
 #check_run "${pipeline}_${protocol}"
 #if [[ ${run_pipeline} == 'true' ]] ; then
 #    prologue "${pipeline}_${protocol}"
-
-
+#
 #    generate_script ${pipeline}_${protocol}_commands.sh \
 #    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
 #    -t ${protocol}
-
 #    submit
-
 #fi
 
 pipeline=tumor_pair
 protocol=fastpass
 reference=b38
-extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.extras.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini $MUGQIC_PIPELINES_HOME/resources/genomes/config/Homo_sapiens.GRCh38.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini"
+extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.extras.ini $MUGQIC_PIPELINES_HOME/resources/genomes/config/Homo_sapiens.GRCh38.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini"
 pair="$MUGQIC_INSTALL_HOME/testdata/${pipeline}/pair.${pipeline}.csv"
 
 check_run "${pipeline}_${protocol}_${reference}"
@@ -538,7 +537,7 @@ fi
 pipeline=tumor_pair
 protocol=ensemble
 reference=b38
-extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.extras.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini $MUGQIC_PIPELINES_HOME/resources/genomes/config/Homo_sapiens.GRCh38.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini"
+extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.extras.ini $MUGQIC_PIPELINES_HOME/resources/genomes/config/Homo_sapiens.GRCh38.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini"
 pair="$MUGQIC_INSTALL_HOME/testdata/${pipeline}/pair.${pipeline}.csv"
 
 check_run "${pipeline}_${protocol}_${reference}"
@@ -559,7 +558,7 @@ fi
 pipeline=tumor_pair
 protocol=ensemble
 reference=exome_b38
-extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.extras.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.${server}.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.exome.ini $MUGQIC_PIPELINES_HOME/resources/genomes/config/Homo_sapiens.GRCh38.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini"
+extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.extras.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.exome.ini $MUGQIC_PIPELINES_HOME/resources/genomes/config/Homo_sapiens.GRCh38.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini"
 pair="$MUGQIC_INSTALL_HOME/testdata/${pipeline}/pair.${pipeline}.csv"
 
 check_run "${pipeline}_${protocol}_${reference}"
@@ -650,9 +649,9 @@ protocol='trinity'
 
 check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}"
+    prologue "${pipeline}_${protocol}"
 
-    generate_script ${pipeline}_commands.sh \
+    generate_script ${pipeline}_${protocol}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${technology}/readset.${technology}.txt \
     -d $MUGQIC_INSTALL_HOME/testdata/${technology}/design.${technology}.txt \
     -t ${protocol}
@@ -666,9 +665,9 @@ protocol='seq2fun'
 
 check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}"
+    prologue "${pipeline}_${protocol}"
 
-    generate_script ${pipeline}_commands.sh \
+    generate_script ${pipeline}_${protocol}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${technology}/readset.${technology}.txt \
     -d $MUGQIC_INSTALL_HOME/testdata/${technology}/design.${technology}.txt \
     -t ${protocol}
@@ -766,17 +765,12 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 fi
 
 
-if [[ ! -z ${AVAIL+x} ]] ; then
-   exit 0
-fi
-
 pipeline=nanopore_covseq
 protocol='default'
 
 check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}"
-
     generate_script ${pipeline}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${protocol}.${pipeline}.txt
 
@@ -790,14 +784,18 @@ check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}"
 
-    generate_script ${pipeline}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${protocol}.${pipeline}.txt
+    generate_script ${pipeline}_${protocol}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${protocol}.${pipeline}.txt \
+    -t  basecalling
 
     submit
 fi
 
 # Add new test above ^^
 
+if [[ -n ${AVAIL+x} ]] ; then
+   exit 0
+fi
 
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Testing GenPipes Command Complete ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -823,7 +821,7 @@ done
 echo "$to_sort" | sort
 
 # that  should be an option, not a hidden condition
-if [[ $server == beluga && $USER == c3g_cit ]]  ; then
+if [[ $server == beluga || $server == narval ]] && [[ $USER == c3g_cit ]]  ; then
   ${SCRIPT_DIR}/run_after.sh
 fi
 
