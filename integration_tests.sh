@@ -355,15 +355,33 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## chipseq.py:
 
 pipeline=chipseq
-protocol=''
+protocol='chipseq'
 
 check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue ${pipeline}
+    prologue "${pipeline}_${protocol}"
 
     generate_script ${pipeline}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt
+    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
+    -t ${protocol}
+
+    submit
+
+fi
+
+
+pipeline=chipseq
+protocol='atacseq'
+
+check_run "${pipeline}_${protocol}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}_${protocol}"
+
+    generate_script ${pipeline}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${protocol}.txt \
+    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${protocol}.txt \
+    -t ${protocol}
 
     submit
 
