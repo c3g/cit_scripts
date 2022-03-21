@@ -18,7 +18,9 @@ elif [[ $2 -eq cedar_full  ]]; then
   ret_code=$?
   scancel $USER
 elif [[ $2 -eq narval_full  ]]; then
-  cd /project/6007512/C3G/projects/jenkins_tests
+  #cd /project/6007512/C3G/projects/jenkins_tests
+  # beluga FS mounted on narval 
+  cd /lustre03/project/6007512/C3G/projects/jenkins_tests
   bash ./cleanup_old
   $SCRIPT_DIR/integration_tests.sh -b ${BRANCH}
   ret_code=$?
