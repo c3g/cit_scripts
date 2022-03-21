@@ -5,19 +5,19 @@ BRANCH=$1
 host=$(hostname)
 echo "running on **** $HOSTNAME ****"
 ret_code=0
-if [[ $2 -eq graham_full  ]]; then
+if [[ $2 == graham_full  ]]; then
   cd /project/6002326/C3G/projects/jenkins_tests
   bash ./cleanup_old
   $SCRIPT_DIR/integration_tests.sh -b ${BRANCH} -l
   ret_code=$?
   scancel $USER
-elif [[ $2 -eq cedar_full  ]]; then
+elif [[ $2 == cedar_full  ]]; then
   cd /project/6007512/C3G/projects/jenkins_tests
   bash ./cleanup_old
   $SCRIPT_DIR/integration_tests.sh -b ${BRANCH} -l
   ret_code=$?
   scancel $USER
-elif [[ $2 -eq narval_full  ]]; then
+elif [[ $2 == narval_full  ]]; then
   #cd /project/6007512/C3G/projects/jenkins_tests
   # beluga FS mounted on narval 
   cd /lustre03/project/6007512/C3G/projects/jenkins_tests
@@ -25,7 +25,7 @@ elif [[ $2 -eq narval_full  ]]; then
   $SCRIPT_DIR/integration_tests.sh -b ${BRANCH}
   ret_code=$?
   scancel $USER
-elif [ $2 -eq beluga_full ]; then
+elif [ $2 == beluga_full ]; then
   cd /lustre03/project/6007512/C3G/projects/jenkins_tests
   bash  ./cleanup_old
   $SCRIPT_DIR/integration_tests.sh -b ${BRANCH} -l
