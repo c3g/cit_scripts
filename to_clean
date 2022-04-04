@@ -1,0 +1,29 @@
+#!/bin/bash
+
+
+# on beluga: /lustre03/project/6007512/C3G/projects/jenkins_tests
+TO_CLEAN= <test folder here> 
+# number of week to keep the tests
+delta_clean=5
+
+
+now=$( date +%U)
+kill_array=()
+for path in $(find $TO_CLEAN -maxdepth 1 -user $USER -type d); do
+
+  past=$(echo $path | sed 's/.*_\([0-9]\+-[0-9]\+-[0-9]\+\)T.*/\1/' | xargs -i date -d {}  +%U)
+
+  if [[ $now -lt $past ]]; then
+    past=$((${past}-52))
+  fi
+
+  if [[ $(($now - $past))  -lt $delta_clean ]] ; then
+    kill_array+=("$path")
+    lfs find $path  -type f -print0  | xargs -0 -L1 -P 77 echo rm
+  fi
+
+done
+
+
+
+printf "%s\n" "${FILES[@]}" | xargs -L1 -P 10 echo rm -r

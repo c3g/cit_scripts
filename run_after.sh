@@ -1,4 +1,4 @@
-#!/bin/bash
+  #!/bin/bash
 job_list=$(cat  $SCRIPT_OUTPUT/*/chunk/*out  | awk -F'=' '{printf(":%s",$2)}'| sed 's/ //g')
 # job_list=$(cat /tmp/all | awk -F'=' '{printf(":%s",$1)}'| sed 's/ //g')
 
@@ -39,7 +39,7 @@ grep -v   "COMPLETED\+[[:space:]]\+COMPLETED\+[[:space:]]\+COMPLETED" *tsv \
 | grep -v "log_from_job" | grep -v CANCELLED >> digest.log
 echo "########################################################" >> digest.log
 cat \${SLURM_SUBMIT_DIR}/log_report.log >> digest.log
-cat digest.log | ssh ${HOSTNAME} curl -k  --form '"logfile=<-"'    "\$JENKIN_URL?token=\$API_TOKEN"
+cat digest.log | ssh ${HOSTNAME} curl -k -X GET --form '"logfile=<-"'  "\$JENKIN_URL?token=\$API_TOKEN"
 EOF
 
 sbatch -A ${RAP_ID:-def-bourqueg} $tmp_script
