@@ -34,7 +34,6 @@ elif [[ $2 == cedar_update ]]; then
   ret_code=$?
   scancel $USER
 elif [[ $2 == narval_full ]]; then
-  #cd /project/6007512/C3G/projects/jenkins_tests
   # beluga FS mounted on narval 
   cd /lustre03/project/6007512/C3G/projects/jenkins_tests
   bash ./cleanup_old
@@ -57,7 +56,6 @@ elif [[ $2 == beluga_full ]]; then
   ret_code=$?
   scancel $USER
 elif [[ $2 == beluga_update ]]; then
-  # beluga FS mounted on narval 
   latest=$(ls -d /lustre03/project/6007512/C3G/projects/jenkins_tests/*${BRANCH}* | sort | tail -n1)
   cd ${latest}/genpipes
   git pull
