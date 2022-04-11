@@ -29,11 +29,11 @@ done
 
 
 
-#job_list=$(cat  $SCRIPT_OUTPUT/*/chunk/*out  | awk -F'=' '{printf(":%s",$2)}'| sed 's/ //g')
-# tmp_script=$(mktemp)
-
-job_list=$(cat /tmp/all | awk -F'=' '{printf(":%s",$2)}'| sed 's/ //g')
-tmp_script=/tmp/tata
+job_list=$(cat  $SCRIPT_OUTPUT/*/chunk/*out  | awk -F'=' '{printf(":%s",$2)}'| sed 's/ //g')
+tmp_script=$(mktemp)
+# for debuging
+# job_list=$(cat /tmp/all | awk -F'=' '{printf(":%s",$2)}'| sed 's/ //g')
+# tmp_script=/tmp/tata
 
 
 if [[ -n $JENKINS ]] ; then
