@@ -52,7 +52,7 @@ elif [[ $2 == narval_update ]]; then
 elif [[ $2 == beluga_full ]]; then
   cd /lustre03/project/6007512/C3G/projects/jenkins_tests
   bash  ./cleanup_old
-  $SCRIPT_DIR/integration_tests.sh -b ${BRANCH} -l
+  $SCRIPT_DIR/integration_tests.sh -b ${BRANCH} 
   ret_code=$?
   scancel $USER
 elif [[ $2 == beluga_update ]]; then
