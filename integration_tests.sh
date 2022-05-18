@@ -840,11 +840,15 @@ echo "$to_sort" | sort
 
 # that  should be an option, not a hidden condition
 option=
+
 if [[ $server == beluga || $server == narval ]] && [[ $USER == c3g_cit ]]  ; then
   option="-j"
 fi
-# create the report for the run
-${SCRIPT_DIR}/run_after.sh $option
+
+if [[ -z ${SCRIPT_ONLY}  ]]; then
+  # create the report for the run
+  ${SCRIPT_DIR}/run_after.sh $option
+fi
 
 
 exit $ret_code

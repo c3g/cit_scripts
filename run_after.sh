@@ -82,4 +82,5 @@ cat \${SLURM_SUBMIT_DIR}/log_report.log >> digest.log
 ${SEND_TO_J}
 EOF
 
-sbatch -A ${RAP_ID:-def-bourqueg} $tmp_script
+sbatch -A ${RAP_ID:-def-bourqueg} $tmp_script 
+
