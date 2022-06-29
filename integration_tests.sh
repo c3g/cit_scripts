@@ -702,7 +702,8 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}"
 
     generate_script ${pipeline}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt
 
     submit
 fi
