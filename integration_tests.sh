@@ -399,6 +399,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
     -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
     -t ${protocol}
+    -b $MUGQIC_INSTALL_HOME/testdata/${pipeline}/batch.${pipeline}.txt
 
     submit
 fi
