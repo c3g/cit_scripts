@@ -398,7 +398,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     generate_script ${pipeline}_${protocol}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
     -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
-    -t ${protocol}
+    -t ${protocol} \
     -b $MUGQIC_INSTALL_HOME/testdata/${pipeline}/batch.${pipeline}.txt
 
     submit
