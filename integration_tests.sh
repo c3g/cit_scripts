@@ -398,7 +398,8 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     generate_script ${pipeline}_${protocol}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
     -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
-    -t ${protocol}
+    -t ${protocol} \
+    -b $MUGQIC_INSTALL_HOME/testdata/${pipeline}/batch.${pipeline}.txt
 
     submit
 fi
@@ -518,18 +519,69 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     submit
 fi
 
-#pipeline=dnaseq
-#protocol=sv
-#
-#check_run "${pipeline}_${protocol}"
-#if [[ ${run_pipeline} == 'true' ]] ; then
-#    prologue "${pipeline}_${protocol}"
-#
-#    generate_script ${pipeline}_${protocol}_commands.sh \
-#    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-#    -t ${protocol}
-#    submit
-#fi
+pipeline=dnaseq
+protocol=light
+
+check_run "${pipeline}_${protocol}_${reference}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}_${protocol}_${reference}"
+
+    generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
+    ${extra} \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    -t ${protocol}
+
+    submit
+fi
+
+pipeline=dnaseq
+protocol=light
+reference=b38
+extra="$MUGQIC_PIPELINES_HOME/resources/genomes/config/Homo_sapiens.GRCh38.ini"
+
+check_run "${pipeline}_${protocol}_${reference}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}_${protocol}_${reference}"
+
+    generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
+    ${extra} \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    -t ${protocol}
+
+    submit
+fi
+
+pipeline=dnaseq
+protocol=sv
+
+check_run "${pipeline}_${protocol}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+   prologue "${pipeline}_${protocol}"
+
+   generate_script ${pipeline}_${protocol}_commands.sh \
+   -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.${protocol}.txt \
+   -t ${protocol}
+
+   submit
+fi
+
+pipeline=dnaseq
+protocol=sv
+reference=b38
+extra="$MUGQIC_PIPELINES_HOME/resources/genomes/config/Homo_sapiens.GRCh38.ini"
+
+check_run "${pipeline}_${protocol}_${reference}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+   prologue "${pipeline}_${protocol}_${reference}"
+
+   generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
+   ${extra} \
+   -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.${protocol}.txt \
+   -t ${protocol}
+
+   submit
+fi
+
 
 pipeline=tumor_pair
 protocol=fastpass
