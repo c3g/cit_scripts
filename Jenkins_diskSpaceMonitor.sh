@@ -166,7 +166,7 @@ echo "    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 echo "                                Checking space Usage by folder:"
 echo "    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    "
 
-module use /cvmfs/soft.mugqic/CentOS6/modulefiles/
+module use /cvmfs/soft.mugqic/root/modulefiles/
 module load mugqic/python/3.7.3
 tmpfile=$(mktemp -p $HOME)
 echo ---------- UNSORTED ---------

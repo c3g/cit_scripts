@@ -105,7 +105,7 @@ export GENPIPES_CIT=
 export server
 
 
-export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/CentOS6
+export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/root
 echo $DNSDOMAIN $HOST
 if [[ $HOST == abacus* || $DNSDOMAIN == ferrier.genome.mcgill.ca ]]; then
   export TEST_DIR=/lb/project/mugqic/projects/jenkins_tests
@@ -256,7 +256,7 @@ if [[ -z ${AVAIL+x} ]] ; then
   fi
 
   ## set MUGQIC_PIPELINE_HOME to GenPipes bitbucket install:
-  export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/CentOS6
+  export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/root
 fi
 
 if [[ -z ${AVAIL+x} ]] ; then
