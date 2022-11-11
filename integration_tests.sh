@@ -372,7 +372,7 @@ fi
 
 
 pipeline=chipseq
-protocol='atacseq'
+protocol=atacseq
 
 check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
@@ -455,7 +455,7 @@ fi
 pipeline=dnaseq
 protocol=mugqic
 reference=b38
-extra="$MUGQIC_PIPELINES_HOME/resources/genomes/config/Homo_sapiens.GRCh38.ini"
+extra="$MUGQIC_PIPELINES_HOME/pipelines/common_ini/Homo_sapiens.GRCh38.ini"
 
 check_run "${pipeline}_${protocol}_${reference}"
 if [[ ${run_pipeline} == 'true' ]] ; then
@@ -473,7 +473,7 @@ fi
 pipeline=dnaseq
 protocol=mugqic
 reference=gatk4_b38
-extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/gatk4.ini $MUGQIC_PIPELINES_HOME/resources/genomes/config/Homo_sapiens.GRCh38.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit_gatk4.ini"
+extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/gatk4.ini $MUGQIC_PIPELINES_HOME/pipelines/common_ini/Homo_sapiens.GRCh38.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit_gatk4.ini"
 
 check_run "${pipeline}_${protocol}_${reference}"
 if [[ ${run_pipeline} == 'true' ]] ; then
@@ -505,7 +505,7 @@ fi
 pipeline=dnaseq
 protocol=mpileup
 reference=b38
-extra="$MUGQIC_PIPELINES_HOME/resources/genomes/config/Homo_sapiens.GRCh38.ini"
+extra="$MUGQIC_PIPELINES_HOME/pipelines/common_ini/Homo_sapiens.GRCh38.ini"
 
 check_run "${pipeline}_${protocol}_${reference}"
 if [[ ${run_pipeline} == 'true' ]] ; then
@@ -522,11 +522,11 @@ fi
 pipeline=dnaseq
 protocol=light
 
-check_run "${pipeline}_${protocol}_${reference}"
+check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}_${protocol}_${reference}"
+    prologue "${pipeline}_${protocol}"
 
-    generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
+    generate_script ${pipeline}_${protocol}_commands.sh \
     ${extra} \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
     -t ${protocol}
@@ -537,7 +537,7 @@ fi
 pipeline=dnaseq
 protocol=light
 reference=b38
-extra="$MUGQIC_PIPELINES_HOME/resources/genomes/config/Homo_sapiens.GRCh38.ini"
+extra="$MUGQIC_PIPELINES_HOME/pipelines/common_ini/Homo_sapiens.GRCh38.ini"
 
 check_run "${pipeline}_${protocol}_${reference}"
 if [[ ${run_pipeline} == 'true' ]] ; then
@@ -568,7 +568,7 @@ fi
 pipeline=dnaseq
 protocol=sv
 reference=b38
-extra="$MUGQIC_PIPELINES_HOME/resources/genomes/config/Homo_sapiens.GRCh38.ini"
+extra="$MUGQIC_PIPELINES_HOME/pipelines/common_ini/Homo_sapiens.GRCh38.ini"
 
 check_run "${pipeline}_${protocol}_${reference}"
 if [[ ${run_pipeline} == 'true' ]] ; then
@@ -586,7 +586,7 @@ fi
 pipeline=tumor_pair
 protocol=fastpass
 reference=b38
-extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.extras.ini $MUGQIC_PIPELINES_HOME/resources/genomes/config/Homo_sapiens.GRCh38.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini"
+extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.extras.ini $MUGQIC_PIPELINES_HOME/pipelines/common_ini/Homo_sapiens.GRCh38.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini"
 pair="$MUGQIC_INSTALL_HOME/testdata/${pipeline}/pair.${pipeline}.csv"
 
 check_run "${pipeline}_${protocol}_${reference}"
@@ -595,6 +595,26 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
 
     generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
+    ${extra} \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    -p ${pair} \
+    -t ${protocol}
+
+    submit
+
+fi
+
+pipeline=tumor_pair
+protocol=ensemble
+extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.extras.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini"
+pair="$MUGQIC_INSTALL_HOME/testdata/${pipeline}/pair.${pipeline}.csv"
+
+check_run "${pipeline}_${protocol}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}_${protocol}"
+
+
+    generate_script ${pipeline}_${protocol}_commands.sh \
     ${extra} \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
     -p ${pair} \
@@ -607,7 +627,7 @@ fi
 pipeline=tumor_pair
 protocol=ensemble
 reference=b38
-extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.extras.ini $MUGQIC_PIPELINES_HOME/resources/genomes/config/Homo_sapiens.GRCh38.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini"
+extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.extras.ini $MUGQIC_PIPELINES_HOME/pipelines/common_ini/Homo_sapiens.GRCh38.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini"
 pair="$MUGQIC_INSTALL_HOME/testdata/${pipeline}/pair.${pipeline}.csv"
 
 check_run "${pipeline}_${protocol}_${reference}"
@@ -627,8 +647,8 @@ fi
 
 pipeline=tumor_pair
 protocol=ensemble
-reference=exome_b38
-extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.extras.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.exome.ini $MUGQIC_PIPELINES_HOME/resources/genomes/config/Homo_sapiens.GRCh38.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini"
+reference=exome
+extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.extras.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.exome.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini"
 pair="$MUGQIC_INSTALL_HOME/testdata/${pipeline}/pair.${pipeline}.csv"
 
 check_run "${pipeline}_${protocol}_${reference}"
@@ -646,11 +666,32 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
 fi
 
+pipeline=tumor_pair
+protocol=ensemble
+reference=exome_b38
+extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.extras.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.exome.ini $MUGQIC_PIPELINES_HOME/pipelines/common_ini/Homo_sapiens.GRCh38.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini"
+pair="$MUGQIC_INSTALL_HOME/testdata/${pipeline}/pair.${pipeline}.csv"
+
+check_run "${pipeline}_${protocol}_${reference}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}_${protocol}_${reference}"
+
+
+    generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
+    ${extra} \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.exome.b38.txt \
+    -p ${pair} \
+    -t ${protocol}
+
+    submit
+
+fi
+
+
 pipeline=dnaseq_high_coverage
 technology=dnaseq
-protocol=''
 
-check_run "${pipeline}_${protocol}"
+check_run "${pipeline}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}"
 
