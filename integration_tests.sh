@@ -352,7 +352,37 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   fi
 }
 
-## chipseq.py:
+
+pipeline=ampliconseq
+protocol=dada2
+
+check_run "${pipeline}_${protocol}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+
+    prologue "${pipeline}_${protocol}"
+
+    generate_script ${pipeline}_${protocol}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
+    -t ${protocol}
+
+    submit
+fi
+
+pipeline=ampliconseq
+protocol=qiime
+
+check_run "${pipeline}_${protocol}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}_${protocol}"
+
+    generate_script ${pipeline}_${protocol}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    -t ${protocol}
+
+    submit
+fi
+
 
 pipeline=chipseq
 protocol='chipseq'
@@ -388,36 +418,17 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 fi
 
 
-pipeline=rnaseq
-protocol=stringtie
+pipeline=covseq
+protocol=''
 
 check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}_${protocol}"
+    prologue "${pipeline}"
 
-    generate_script ${pipeline}_${protocol}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
-    -t ${protocol} \
-    -b $MUGQIC_INSTALL_HOME/testdata/${pipeline}/batch.${pipeline}.txt
+    generate_script ${pipeline}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt
 
     submit
-fi
-
-
-pipeline=rnaseq
-protocol=cufflinks
-
-check_run "${pipeline}_${protocol}"
-if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}_${protocol}"
-
-    generate_script ${pipeline}_${protocol}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
-    -t ${protocol}
-
-      submit
 fi
 
 
@@ -583,6 +594,256 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 fi
 
 
+pipeline=dnaseq_high_coverage
+technology=dnaseq
+
+check_run "${pipeline}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}"
+
+    generate_script ${pipeline}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${technology}/readset.${technology}.txt
+
+    submit
+fi
+
+
+pipeline=epiqc
+protocol=''
+
+check_run "${pipeline}_${protocol}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}"
+
+    generate_script ${pipeline}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+
+    submit
+fi
+
+
+pipeline=hicseq
+protocol=hic
+extra="-e MboI"
+
+check_run "${pipeline}_${protocol}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}_${protocol}"
+
+    generate_script ${pipeline}_${protocol}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}_${protocol}.txt \
+    -t ${protocol} ${extra}
+
+    submit
+fi
+
+pipeline=hicseq
+protocol=capture
+extra="-e MboI"
+
+check_run "${pipeline}_${protocol}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}_${protocol}"
+
+    ## soft link to capture bed file
+    ln -s $MUGQIC_INSTALL_HOME/testdata/hicseq/GSE69600_promoter_capture_bait_coordinates.bed \
+    ${pipeline}_${protocol}/GSE69600_promoter_capture_bait_coordinates.bed
+
+    generate_script ${pipeline}_${protocol}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    -t ${protocol} ${extra}
+
+    submit
+fi
+
+
+pipeline=methylseq
+protocol=''
+
+check_run "${pipeline}_${protocol}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}"
+
+    generate_script ${pipeline}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt
+
+    submit
+fi
+
+
+pipeline=nanopore
+protocol=''
+
+check_run "${pipeline}_${protocol}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}"
+
+    generate_script ${pipeline}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt
+
+    submit
+fi
+
+pipeline=nanopore_covseq
+protocol='default'
+
+check_run "${pipeline}_${protocol}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}_${protocol}"
+    generate_script ${pipeline}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${protocol}.${pipeline}.txt
+
+    submit
+fi
+
+pipeline=nanopore_covseq
+protocol='basecalling'
+
+check_run "${pipeline}_${protocol}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}_${protocol}"
+
+    generate_script ${pipeline}_${protocol}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${protocol}.${pipeline}.txt \
+    -t  basecalling
+
+    submit
+fi
+
+
+pipeline=rnaseq
+protocol=stringtie
+
+check_run "${pipeline}_${protocol}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}_${protocol}"
+
+    generate_script ${pipeline}_${protocol}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
+    -t ${protocol} \
+    -b $MUGQIC_INSTALL_HOME/testdata/${pipeline}/batch.${pipeline}.txt
+
+    submit
+fi
+
+pipeline=rnaseq
+protocol=variants
+extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/gatk4.ini"
+
+check_run "${pipeline}_${protocol}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}_${protocol}"
+
+    generate_script ${pipeline}_${protocol}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    -t ${protocol}
+
+      submit
+fi
+
+pipeline=rnaseq
+protocol=variants
+reference=b38
+extra="$MUGQIC_PIPELINES_HOME/pipelines/common_ini/Homo_sapiens.GRCh38.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/gatk4.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini"
+
+check_run "${pipeline}_${protocol}_${reference}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}_${protocol}"
+
+    generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
+    ${extra} \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    -t ${protocol}
+
+      submit
+fi
+
+pipeline=rnaseq
+protocol=cancer
+
+check_run "${pipeline}_${protocol}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}_${protocol}"
+
+    generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.${protocol}.txt \
+    -t ${protocol}
+
+      submit
+fi
+
+pipeline=rnaseq
+protocol=cancer
+reference=b38
+extra="$MUGQIC_PIPELINES_HOME/pipelines/common_ini/Homo_sapiens.GRCh38.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini"
+
+check_run "${pipeline}_${protocol}_${reference}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}_${protocol}"
+
+    generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
+    ${extra} \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.${protocol}.txt \
+    -t ${protocol}
+
+      submit
+fi
+
+
+pipeline=rnaseq_light
+protocol=''
+technology=rnaseq
+
+check_run "${pipeline}_${protocol}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}"
+
+    generate_script ${pipeline}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${technology}.txt \
+    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${technology}.txt
+
+    submit
+fi
+
+
+pipeline=rnaseq_denovo_assembly
+technology=rnaseq
+protocol='trinity'
+
+check_run "${pipeline}_${protocol}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}_${protocol}"
+
+    generate_script ${pipeline}_${protocol}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${technology}/readset.${technology}.txt \
+    -d $MUGQIC_INSTALL_HOME/testdata/${technology}/design.${technology}.txt \
+    -t ${protocol}
+
+    submit
+fi
+
+pipeline=rnaseq_denovo_assembly
+technology=rnaseq
+protocol='seq2fun'
+
+check_run "${pipeline}_${protocol}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}_${protocol}"
+
+    generate_script ${pipeline}_${protocol}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${technology}/readset.${technology}.txt \
+    -d $MUGQIC_INSTALL_HOME/testdata/${technology}/design.${technology}.txt \
+    -t ${protocol}
+
+    submit
+fi
+
+
+
+
+
 pipeline=tumor_pair
 protocol=fastpass
 reference=b38
@@ -687,221 +948,6 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
 fi
 
-
-pipeline=dnaseq_high_coverage
-technology=dnaseq
-
-check_run "${pipeline}"
-if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}"
-
-    generate_script ${pipeline}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${technology}/readset.${technology}.txt
-
-    submit
-fi
-
-
-pipeline=hicseq
-protocol=hic
-extra="-e MboI"
-
-check_run "${pipeline}_${protocol}"
-if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}_${protocol}"
-
-    generate_script ${pipeline}_${protocol}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}_${protocol}.txt \
-    -t ${protocol} ${extra}
-
-    submit
-fi
-
-
-pipeline=hicseq
-protocol=capture
-extra="-e MboI"
-
-check_run "${pipeline}_${protocol}"
-if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}_${protocol}"
-
-    ## soft link to capture bed file
-    ln -s $MUGQIC_INSTALL_HOME/testdata/hicseq/GSE69600_promoter_capture_bait_coordinates.bed \
-    ${pipeline}_${protocol}/GSE69600_promoter_capture_bait_coordinates.bed
-
-    generate_script ${pipeline}_${protocol}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-    -t ${protocol} ${extra}
-
-    submit
-fi
-
-
-pipeline=rnaseq_light
-protocol=''
-technology=rnaseq
-
-check_run "${pipeline}_${protocol}"
-if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}"
-
-    generate_script ${pipeline}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${technology}.txt \
-    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${technology}.txt
-
-    submit
-fi
-
-
-pipeline=rnaseq_denovo_assembly
-technology=rnaseq
-protocol='trinity'
-
-check_run "${pipeline}_${protocol}"
-if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}_${protocol}"
-
-    generate_script ${pipeline}_${protocol}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${technology}/readset.${technology}.txt \
-    -d $MUGQIC_INSTALL_HOME/testdata/${technology}/design.${technology}.txt \
-    -t ${protocol}
-
-    submit
-fi
-
-pipeline=rnaseq_denovo_assembly
-technology=rnaseq
-protocol='seq2fun'
-
-check_run "${pipeline}_${protocol}"
-if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}_${protocol}"
-
-    generate_script ${pipeline}_${protocol}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${technology}/readset.${technology}.txt \
-    -d $MUGQIC_INSTALL_HOME/testdata/${technology}/design.${technology}.txt \
-    -t ${protocol}
-
-    submit
-fi
-
-
-pipeline=methylseq
-protocol=''
-
-check_run "${pipeline}_${protocol}"
-if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}"
-
-    generate_script ${pipeline}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt
-
-    submit
-fi
-
-
-pipeline=ampliconseq
-protocol=dada2
-
-check_run "${pipeline}_${protocol}"
-if [[ ${run_pipeline} == 'true' ]] ; then
-
-    prologue "${pipeline}_${protocol}"
-
-    generate_script ${pipeline}_${protocol}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
-    -t ${protocol}
-
-    submit
-fi
-
-
-pipeline=ampliconseq
-protocol=qiime
-
-check_run "${pipeline}_${protocol}"
-if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}_${protocol}"
-
-    generate_script ${pipeline}_${protocol}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-    -t ${protocol}
-
-    submit
-fi
-
-
-pipeline=nanopore
-protocol=''
-
-check_run "${pipeline}_${protocol}"
-if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}"
-
-    generate_script ${pipeline}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt
-
-    submit
-fi
-
-
-pipeline=covseq
-protocol=''
-
-check_run "${pipeline}_${protocol}"
-if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}"
-
-    generate_script ${pipeline}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt
-
-    submit
-fi
-
-
-pipeline=epiqc
-protocol=''
-
-
-check_run "${pipeline}_${protocol}"
-if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}"
-
-    generate_script ${pipeline}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-
-    submit
-fi
-
-
-pipeline=nanopore_covseq
-protocol='default'
-
-check_run "${pipeline}_${protocol}"
-if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}_${protocol}"
-    generate_script ${pipeline}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${protocol}.${pipeline}.txt
-
-    submit
-fi
-
-pipeline=nanopore_covseq
-protocol='basecalling'
-
-check_run "${pipeline}_${protocol}"
-if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}_${protocol}"
-
-    generate_script ${pipeline}_${protocol}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${protocol}.${pipeline}.txt \
-    -t  basecalling
-
-    submit
-fi
 
 # Add new test above ^^
 
