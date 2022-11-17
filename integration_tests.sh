@@ -294,6 +294,10 @@ generate_script () {
     if [[  $VERBOSE == 1 ]] ; then
       debug='-l debug'
     fi
+    extra_abacus=''
+    if [[ $HOST == abacus* || $DNSDOMAIN == ferrier.genome.mcgill.ca ]]; then
+      extra_abacus='--force_mem_per_cpu'
+    fi
     echo "********************Generating Genpipes File**********************"
     module load mugqic/python/3.8.5 > /dev/null 2>&1
     set -x
@@ -301,7 +305,7 @@ generate_script () {
     -c $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.base.ini \
     $MUGQIC_PIPELINES_HOME/pipelines/common_ini/${server}.ini \
     $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini \
-    ${extra} ${debug} \
+    ${extra} ${debug} ${extra_abacus} \
     -o ${folder} ${CONTAINER_WRAPPER} \
     -j $scheduler --genpipes_file ${folder}/${command}
 
