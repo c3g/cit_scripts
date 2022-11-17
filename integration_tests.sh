@@ -729,8 +729,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 fi
 
 pipeline=rnaseq
-protocol=variants
-extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/gatk4.ini"
+protocol=cufflinks
 
 check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
@@ -738,58 +737,74 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
     generate_script ${pipeline}_${protocol}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
     -t ${protocol}
 
       submit
 fi
 
-pipeline=rnaseq
-protocol=variants
-reference=b38
-extra="$MUGQIC_PIPELINES_HOME/pipelines/common_ini/Homo_sapiens.GRCh38.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/gatk4.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini"
+# pipeline=rnaseq
+# protocol=variants
+# extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/gatk4.ini"
 
-check_run "${pipeline}_${protocol}_${reference}"
-if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}_${protocol}"
+# check_run "${pipeline}_${protocol}"
+# if [[ ${run_pipeline} == 'true' ]] ; then
+#     prologue "${pipeline}_${protocol}"
 
-    generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
-    ${extra} \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-    -t ${protocol}
+#     generate_script ${pipeline}_${protocol}_commands.sh \
+#     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+#     -t ${protocol}
 
-      submit
-fi
+#       submit
+# fi
 
-pipeline=rnaseq
-protocol=cancer
+# pipeline=rnaseq
+# protocol=variants
+# reference=b38
+# extra="$MUGQIC_PIPELINES_HOME/pipelines/common_ini/Homo_sapiens.GRCh38.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/gatk4.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini"
 
-check_run "${pipeline}_${protocol}"
-if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}_${protocol}"
+# check_run "${pipeline}_${protocol}_${reference}"
+# if [[ ${run_pipeline} == 'true' ]] ; then
+#     prologue "${pipeline}_${protocol}"
 
-    generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.${protocol}.txt \
-    -t ${protocol}
+#     generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
+#     ${extra} \
+#     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+#     -t ${protocol}
 
-      submit
-fi
+#       submit
+# fi
 
-pipeline=rnaseq
-protocol=cancer
-reference=b38
-extra="$MUGQIC_PIPELINES_HOME/pipelines/common_ini/Homo_sapiens.GRCh38.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini"
+# pipeline=rnaseq
+# protocol=cancer
 
-check_run "${pipeline}_${protocol}_${reference}"
-if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}_${protocol}"
+# check_run "${pipeline}_${protocol}"
+# if [[ ${run_pipeline} == 'true' ]] ; then
+#     prologue "${pipeline}_${protocol}"
 
-    generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
-    ${extra} \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.${protocol}.txt \
-    -t ${protocol}
+#     generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
+#     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.${protocol}.txt \
+#     -t ${protocol}
 
-      submit
-fi
+#       submit
+# fi
+
+# pipeline=rnaseq
+# protocol=cancer
+# reference=b38
+# extra="$MUGQIC_PIPELINES_HOME/pipelines/common_ini/Homo_sapiens.GRCh38.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini"
+
+# check_run "${pipeline}_${protocol}_${reference}"
+# if [[ ${run_pipeline} == 'true' ]] ; then
+#     prologue "${pipeline}_${protocol}"
+
+#     generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
+#     ${extra} \
+#     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.${protocol}.txt \
+#     -t ${protocol}
+
+#       submit
+# fi
 
 
 pipeline=rnaseq_light
@@ -919,7 +934,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
     generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
     ${extra} \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.exome.b38.txt \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.exome.txt \
     -p ${pair} \
     -t ${protocol}
 
