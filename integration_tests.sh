@@ -296,7 +296,7 @@ generate_script () {
     fi
     extra_abacus=''
     if [[ $HOST == abacus* || $DNSDOMAIN == ferrier.genome.mcgill.ca ]]; then
-      extra_abacus='--force_mem_per_cpu'
+      extra_abacus='--force_mem_per_cpu 5G'
     fi
     echo "********************Generating Genpipes File**********************"
     module load mugqic/python/3.8.5 > /dev/null 2>&1
