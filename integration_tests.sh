@@ -658,7 +658,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
     generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
     ${extra} \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.exome.b38.txt \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.exome.txt \
     -p ${pair} \
     -t ${protocol}
 
