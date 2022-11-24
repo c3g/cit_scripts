@@ -60,7 +60,7 @@ elif [[ $2 == beluga_update ]]; then
   cd ${latest}/genpipes
   git pull
   cd ../..
-  $SCRIPT_DIR/integration_tests.sh -u -d ${latest}/genpipes ${latest}/scriptTestOutputs
+  $SCRIPT_DIR/integration_tests.sh -u -v -d ${latest}/genpipes ${latest}/scriptTestOutputs
   ret_code=$?
   scancel $USER
 fi
