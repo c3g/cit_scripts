@@ -108,7 +108,7 @@ export server
 export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/root
 echo $DNSDOMAIN $HOST
 if [[ $HOST == abacus* || $DNSDOMAIN == ferrier.genome.mcgill.ca ]]; then
-  export TEST_DIR=/lb/project/mugqic/projects/jenkins_tests
+  export TEST_DIR=$(realpath /lb/project/mugqic/projects/jenkins_tests)
   export serverName=Abacus
   export server=abacus
   export scheduler="pbs"
@@ -120,7 +120,7 @@ EOM
 
 elif [[ $HOST == cedar* || $DNSDOMAIN == cedar.computecanada.ca ]]; then
 
-  export TEST_DIR=/project/${rrg}/C3G/projects/jenkins_tests
+  export TEST_DIR=$(realpath /project/${rrg}/C3G/projects/jenkins_tests)
   export serverName=cedar
   export server=cedar
   export scheduler="slurm"
@@ -132,7 +132,7 @@ EOM
 
 elif [[ $HOST == gra-* || $DNSDOMAIN == graham.sharcnet ]]; then
 
-  export TEST_DIR=/project/${def}/C3G/projects/jenkins_tests
+  export TEST_DIR=$(realpath /project/${def}/C3G/projects/jenkins_tests)
   export serverName=graham
   export server=graham
   export scheduler="slurm"
@@ -142,7 +142,7 @@ BIND_LIST=/tmp/,/home/,/project,/scratch,/localscratch
 EOM
 
 elif [[ $HOST == beluga* || $DNSDOMAIN == beluga.computecanada.ca ]]; then
-  export TEST_DIR=/project/${rrg}/C3G/projects/jenkins_tests
+  export TEST_DIR=$(realpath /project/${rrg}/C3G/projects/jenkins_tests)
   export serverName=beluga
   export server=beluga
   export scheduler="slurm"
@@ -152,7 +152,7 @@ BIND_LIST=/tmp/,/home/,/project,/scratch,/localscratch
 EOM
 
 elif [[ $HOST == narval* || $DNSDOMAIN == narval.computecanada.ca ]]; then
-  export TEST_DIR=/lustre03/project/rrg-bourqueg-ad/C3G/projects/jenkins_tests/
+  export TEST_DIR=$(realpath /lustre03/project/rrg-bourqueg-ad/C3G/projects/jenkins_tests/)
   export serverName=narval
   export server=narval
   export scheduler="slurm"
@@ -162,7 +162,7 @@ BIND_LIST=/tmp/,/home/,/project,/scratch,/localscratch
 EOM
 
 else
-  export TEST_DIR=/tmp/jenkins_tests
+  export TEST_DIR=$(realpath /tmp/jenkins_tests)
   export serverName=batch
   export server=beluga
   export scheduler="slurm"
