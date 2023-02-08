@@ -733,18 +733,21 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 fi
 
 pipeline=rnaseq
-protocol=cufflinks
+protocol=stringtie
+reference=b38
+extra="$MUGQIC_PIPELINES_HOME/pipelines/common_ini/Homo_sapiens.GRCh38.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini"
 
-check_run "${pipeline}_${protocol}"
+check_run "${pipeline}_${protocol}_${reference}"
 if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}_${protocol}"
+    prologue "${pipeline}_${protocol}_${reference}"
 
     generate_script ${pipeline}_${protocol}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
     -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
-    -t ${protocol}
+    -t ${protocol} \
+    -b $MUGQIC_INSTALL_HOME/testdata/${pipeline}/batch.${pipeline}.txt
 
-      submit
+    submit
 fi
 
 pipeline=rnaseq
@@ -857,9 +860,6 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
     submit
 fi
-
-
-
 
 
 pipeline=tumor_pair
@@ -1037,7 +1037,7 @@ if [[ $server == beluga || $server == narval ]] && [[ $USER == c3g_cit ]]  ; the
   option="-j"
 fi
 
-if [[ -z ${SCRIPT_ONLY}  ]]; then
+if [[ -z ${SCRIPT_ONLY}  ]] && [[ $scheduler == "slurm" ]]; then
   # create the report for the run
   ${SCRIPT_DIR}/run_after.sh $option
 fi
