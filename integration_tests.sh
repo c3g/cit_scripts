@@ -323,14 +323,19 @@ submit () {
   command=${PIPELINE_FOLDER}/${PIPELINE_COMMAND}
 
   if [[ -z ${SCRIPT_ONLY} && ${RET_CODE_CREATE_SCRIPT} -eq 0 ]] ; then
-      echo submiting $pipeline
-      $MUGQIC_PIPELINES_HOME/utils/chunk_genpipes.sh  ${command} ${PIPELINE_FOLDER}/chunk
-      # will retry submit 10 times
-      $MUGQIC_PIPELINES_HOME/utils/submit_genpipes -l 10 -n 999 ${PIPELINE_FOLDER}/chunk \
-      | tee -a ${SCRIPT_OUTPUT}/all_jobs
-      RET_CODE_SUBMIT_SCRIPT=${PIPESTATUS[0]}
-      ExitCodes+=(["${PIPELINE_LONG_NAME} submit"]="$RET_CODE_SUBMIT_SCRIPT")
-      echo "${command} submit completed"
+      # first check if there are jobs to submit
+      if grep --quiet "TOTAL: 0 job... skipping" ${command} ; then
+        echo "Nothing to submit in ${command}..."
+      else
+        echo submiting $pipeline
+        $MUGQIC_PIPELINES_HOME/utils/chunk_genpipes.sh  ${command} ${PIPELINE_FOLDER}/chunk
+        # will retry submit 10 times
+        $MUGQIC_PIPELINES_HOME/utils/submit_genpipes -l 10 -n 999 ${PIPELINE_FOLDER}/chunk \
+        | tee -a ${SCRIPT_OUTPUT}/all_jobs
+        RET_CODE_SUBMIT_SCRIPT=${PIPESTATUS[0]}
+        ExitCodes+=(["${PIPELINE_LONG_NAME} submit"]="$RET_CODE_SUBMIT_SCRIPT")
+        echo "${command} submit completed"
+      fi
   else
       echo "${command} not submitted"
   fi
