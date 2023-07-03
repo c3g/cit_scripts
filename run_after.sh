@@ -76,7 +76,7 @@ done
 
 echo "########################################################" > digest.log
 grep -v   "COMPLETED\+[[:space:]]\+COMPLETED\+[[:space:]]\+COMPLETED" *tsv \
-| grep -v "log_from_job" | grep -v CANCELLED >> digest.log
+| grep -v "log_from_job" | grep -e 'TIMEOUT' -e 'FAILED' >> digest.log
 echo "########################################################" >> digest.log
 cat \${SLURM_SUBMIT_DIR}/log_report.log >> digest.log
 ${SEND_TO_J}
