@@ -895,14 +895,14 @@ pipeline=tumor_pair
 protocol=ensemble
 reference=b38
 extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.extras.ini $MUGQIC_PIPELINES_HOME/pipelines/common_ini/Homo_sapiens.GRCh38.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit_b38.ini"
-pair="$MUGQIC_INSTALL_HOME/testdata/${pipeline}/pair.${pipeline}.csv"
+pair="$MUGQIC_INSTALL_HOME/testdata/${pipeline}/pair.${pipeline}.${protocol}_${reference}.csv"
 check_run "${pipeline}_${protocol}_${reference}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}_${reference}"
 
     generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
     ${extra} \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.${protocol}_${reference}.txt \
     -p ${pair} \
     -t ${protocol}
 
@@ -914,14 +914,14 @@ pipeline=tumor_pair
 protocol=ensemble
 reference=gatk4_b38
 extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.extras.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/gatk4.ini $MUGQIC_PIPELINES_HOME/pipelines/common_ini/Homo_sapiens.GRCh38.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit_b38.ini"
-pair="$MUGQIC_INSTALL_HOME/testdata/${pipeline}/pair.${pipeline}.csv"
+pair="$MUGQIC_INSTALL_HOME/testdata/${pipeline}/pair.${pipeline}.${protocol}_b38.csv"
 check_run "${pipeline}_${protocol}_${reference}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}_${reference}"
 
     generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
     ${extra} \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.${protocol}_b38.txt \
     -p ${pair} \
     -t ${protocol}
 
@@ -952,14 +952,14 @@ pipeline=tumor_pair
 protocol=ensemble
 reference=exome_b38
 extra="$MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.extras.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.exome.ini $MUGQIC_PIPELINES_HOME/pipelines/common_ini/Homo_sapiens.GRCh38.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit.ini  $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit_b38.ini"
-pair="$MUGQIC_INSTALL_HOME/testdata/${pipeline}/pair.${pipeline}.csv"
+pair="$MUGQIC_INSTALL_HOME/testdata/${pipeline}/pair.${pipeline}.${protocol}_b38.csv"
 check_run "${pipeline}_${protocol}_${reference}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}_${reference}"
 
     generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
     ${extra} \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.exome.b38.txt \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.exome.b38_chr19.txt \
     -p ${pair} \
     -t ${protocol}
 
