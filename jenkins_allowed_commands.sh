@@ -17,7 +17,49 @@ function disk_space_monitor_mini() {
 }
 
 function genpipes_full() {
-    cd cit_scripts && git checkout master && git pull && bash ssh_util.sh "$(${SSH_ORIGINAL_COMMAND#*genpipes_full })"
+    args="$(echo "${SSH_ORIGINAL_COMMAND#*GenPipes_Full }")"
+    cluster="$(echo "$args" | cut -d " " -f 1)"
+    if [[ $cluster == "graham" ]]; then
+        path="/project/6002326/C3G/projects/jenkins_tests"
+    elif [[ $cluster == "cedar" ]]; then
+        path="/project/6007512/C3G/projects/jenkins_tests"
+    elif [[ $cluster == "narval" ]]; then
+        path="/lustre03/project/6007512/C3G/projects/jenkins_tests"
+    elif [[ $cluster == "beluga" ]]; then
+        path="/lustre03/project/6007512/C3G/projects/jenkins_tests"
+    fi
+    branch="$(echo "$args" | cut -d " " -f 2)"
+    options="$(echo "$args" | cut -d " " -f 3)"
+    cd "$(realpath $path)"
+    bash ./cleanup_old
+    # shellcheck disable=SC2086
+    $SCRIPT_DIR/integration_tests.sh -b ${branch} $options
+    ret_code=$?
+    scancel "$USER"
+}
+
+function genpipes_update() {
+    args="$(echo "${SSH_ORIGINAL_COMMAND#*GenPipes_dev_update }")"
+    cluster="$(echo "$args" | cut -d " " -f 1)"
+    if [[ $cluster == "graham" ]]; then
+        path="/project/6002326/C3G/projects/jenkins_tests"
+    elif [[ $cluster == "cedar" ]]; then
+        path="/project/6007512/C3G/projects/jenkins_tests"
+    elif [[ $cluster == "narval" ]]; then
+        path="/lustre03/project/6007512/C3G/projects/jenkins_tests"
+    elif [[ $cluster == "beluga" ]]; then
+        path="/lustre03/project/6007512/C3G/projects/jenkins_tests"
+    fi
+    branch="$(echo "$args" | cut -d " " -f 2)"
+    latest=$(ls -d "$(realpath ${path}/*"${branch}"*)" | sort | tail -n1)
+    options="$(echo "$args" | cut -d " " -f 3)"
+    cd ${latest}/genpipes
+    git pull
+    cd ../..
+    # shellcheck disable=SC2086
+    $SCRIPT_DIR/integration_tests.sh -d ${latest}/genpipes -u $options
+    ret_code=$?
+    scancel "$USER"
 }
 
 function genpipes_command() {
@@ -47,6 +89,9 @@ case "$SSH_ORIGINAL_COMMAND" in
     ;;
     GenPipes_Full*)
         genpipes_full
+    ;;
+    GenPipes_dev_update*)
+        genpipes_update
     ;;
     GenPipes_Command)
         genpipes_command
