@@ -17,7 +17,7 @@ function disk_space_monitor_mini() {
 }
 
 function genpipes_full() {
-    args="$(echo "${SSH_ORIGINAL_COMMAND#*GenPipes_Full }")"
+    args="$(${SSH_ORIGINAL_COMMAND#*GenPipes_Full })"
     cluster="$(echo "$args" | cut -d " " -f 1)"
     if [[ $cluster == "graham" ]]; then
         path="/project/6002326/C3G/projects/jenkins_tests"
@@ -39,7 +39,7 @@ function genpipes_full() {
 }
 
 function genpipes_update() {
-    args="$(echo "${SSH_ORIGINAL_COMMAND#*GenPipes_dev_update }")"
+    args="$(${SSH_ORIGINAL_COMMAND#*GenPipes_dev_update })"
     cluster="$(echo "$args" | cut -d " " -f 1)"
     if [[ $cluster == "graham" ]]; then
         path="/project/6002326/C3G/projects/jenkins_tests"
@@ -67,7 +67,15 @@ function genpipes_command() {
 }
 
 function update_cache() {
+    args="$(${SSH_ORIGINAL_COMMAND#*cvmfs_cache_update })"
+    cluster="$(echo "$args" | cut -d " " -f 1)"
+    if [[ $cluster == "narval" ]]; then
+        /project/def-bourqueg/LMOD_CACHE/update_cache.sh
+    elif [[ $cluster == "beluga" ]]; then
+        /lustre03/project/6002326/poq/lmod_caching/update_cache.sh
+    fi
     /lustre03/project/6002326/poq/lmod_caching/update_cache.sh
+    /project/def-bourqueg/LMOD_CACHE/update_cache.sh
 }
 
 function moh_genpipes() {
@@ -96,7 +104,7 @@ case "$SSH_ORIGINAL_COMMAND" in
     GenPipes_Command)
         genpipes_command
     ;;
-    cvmfs_cache_update)
+    cvmfs_cache_update*)
         update_cache
     ;;
     MoH_GenPipes*)
