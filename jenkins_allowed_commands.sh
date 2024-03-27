@@ -74,8 +74,6 @@ function update_cache() {
     elif [[ $cluster == "beluga" ]]; then
         /lustre03/project/6002326/poq/lmod_caching/update_cache.sh
     fi
-    /lustre03/project/6002326/poq/lmod_caching/update_cache.sh
-    /project/def-bourqueg/LMOD_CACHE/update_cache.sh
 }
 
 function moh_genpipes() {
