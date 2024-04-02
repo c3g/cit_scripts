@@ -1,6 +1,7 @@
 #!/bin/bash
 
 THIS_SCRIPT=$(basename "$0")
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
 function reject_command() {
     echo "Command rejected by $THIS_SCRIPT: $SSH_ORIGINAL_COMMAND"
