@@ -9,7 +9,7 @@ function reject_command() {
 }
 
 function disk_space_monitor() {
-    bash Jenkins_diskSpaceMonitor.sh
+    cd cit_scripts && git checkout master && git pull && bash Jenkins_diskSpaceMonitor.sh
 }
 
 function disk_space_monitor_mini() {
@@ -17,7 +17,7 @@ function disk_space_monitor_mini() {
 }
 
 function genpipes_full() {
-    args="$(${SSH_ORIGINAL_COMMAND#*GenPipes_Full })"
+    args="${SSH_ORIGINAL_COMMAND#*GenPipes_Full }"
     cluster="$(echo "$args" | cut -d " " -f 1)"
     if [[ $cluster == "graham" ]]; then
         path="/project/6002326/C3G/projects/jenkins_tests"
@@ -39,7 +39,7 @@ function genpipes_full() {
 }
 
 function genpipes_update() {
-    args="$(${SSH_ORIGINAL_COMMAND#*GenPipes_dev_update })"
+    args="${SSH_ORIGINAL_COMMAND#*GenPipes_dev_update }"
     cluster="$(echo "$args" | cut -d " " -f 1)"
     if [[ $cluster == "graham" ]]; then
         path="/project/6002326/C3G/projects/jenkins_tests"
@@ -67,7 +67,7 @@ function genpipes_command() {
 }
 
 function update_cache() {
-    args="$(${SSH_ORIGINAL_COMMAND#*cvmfs_cache_update })"
+    args="${SSH_ORIGINAL_COMMAND#*cvmfs_cache_update }"
     cluster="$(echo "$args" | cut -d " " -f 1)"
     if [[ $cluster == "narval" ]]; then
         /project/def-bourqueg/LMOD_CACHE/update_cache.sh
