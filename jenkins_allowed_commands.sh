@@ -13,7 +13,7 @@ function pull_repo() {
     cd "$1" || return
     git checkout "$2"
     git pull
-    echo "cit_scripts pulled"
+    echo "Pulled repo $1 on branch $2"
 }
 
 function disk_space_monitor() {
