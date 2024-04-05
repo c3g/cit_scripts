@@ -9,15 +9,26 @@ function reject_command() {
 
 }
 
+function pull_repo() {
+    cd "$1" || return
+    git checkout "$2"
+    git pull
+    echo "Pulled repo $1 on branch $2"
+}
+
 function disk_space_monitor() {
-    cd cit_scripts && git checkout master && git pull && bash Jenkins_diskSpaceMonitor.sh
+    pull_repo cit_scripts master
+    bash Jenkins_diskSpaceMonitor.sh
 }
 
 function disk_space_monitor_mini() {
-    cd cit_scripts && git checkout master && git pull && bash Jenkins_diskSpaceMonitorMini.sh
+    pull_repo cit_scripts master
+    bash Jenkins_diskSpaceMonitorMini.sh
 }
 
 function genpipes_full() {
+    pull_repo cit_scripts master
+    echo "running GenPipes Full on **** $HOSTNAME ****"
     args="${SSH_ORIGINAL_COMMAND#*GenPipes_Full }"
     cluster="$(echo "$args" | cut -d " " -f 1)"
     if [[ $cluster == "graham" ]]; then
@@ -31,15 +42,14 @@ function genpipes_full() {
     fi
     branch="$(echo "$args" | cut -d " " -f 2)"
     options="$(echo "$args" | cut -d " " -f 3)"
-    cd "$(realpath $path)"
+    cd "$(realpath "$path")" || return
     bash ./cleanup_old
     # shellcheck disable=SC2086
     $SCRIPT_DIR/integration_tests.sh -b ${branch} $options
-    ret_code=$?
-    scancel "$USER"
 }
 
 function genpipes_update() {
+    pull_repo cit_scripts master
     args="${SSH_ORIGINAL_COMMAND#*GenPipes_dev_update }"
     cluster="$(echo "$args" | cut -d " " -f 1)"
     if [[ $cluster == "graham" ]]; then
@@ -52,19 +62,18 @@ function genpipes_update() {
         path="/lustre03/project/6007512/C3G/projects/jenkins_tests"
     fi
     branch="$(echo "$args" | cut -d " " -f 2)"
-    latest=$(ls -d "$(realpath ${path}/*"${branch}"*)" | sort | tail -n1)
+    latest=$(find "$path" -maxdepth 1 -type d -name "GenPipesFull_${branch}*" | sort | tail -n 1)
     options="$(echo "$args" | cut -d " " -f 3)"
-    cd ${latest}/genpipes
+    cd "${latest}/genpipes" || return
     git pull
     cd ../..
     # shellcheck disable=SC2086
     $SCRIPT_DIR/integration_tests.sh -d ${latest}/genpipes -u $options
-    ret_code=$?
-    scancel "$USER"
 }
 
 function genpipes_command() {
-    cd cit_scripts && git checkout master && git pull && bash Jenkins_GenpipesCommands.sh
+    pull_repo cit_scripts master
+    bash Jenkins_GenpipesCommands.sh
 }
 
 function update_cache() {
@@ -78,11 +87,13 @@ function update_cache() {
 }
 
 function moh_genpipes() {
-    cd moh_automation && git checkout main && git pull && bash jenkins_genpipes.sh "$(${SSH_ORIGINAL_COMMAND#*moh_genpipes } | tr -d '\"')"
+    pull_repo moh_automation main
+    bash jenkins_genpipes.sh "$(${SSH_ORIGINAL_COMMAND#*moh_genpipes } | tr -d '\"')"
 }
 
 function moh_wrapper() {
-    cd moh_automation && git checkout main && git pull && bash jenkins_wrapper.sh
+    pull_repo moh_automation main
+    bash jenkins_wrapper.sh
 }
 
 logger -t automation -p local0.info "Command called by $THIS_SCRIPT for user $USER: $SSH_ORIGINAL_COMMAND"
