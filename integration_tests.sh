@@ -1015,7 +1015,7 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Testing GenPipes Command Complete ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 # Warning for ini files with dev configuration
-WARNING=$(find $GENPIPES_DIR  -type f -name "*ini" | xargs grep "mugqic_dev\|HOME_DEV")
+WARNING=$(find $GENPIPES_DIR  -type f -name "*.ini" | xargs grep "mugqic_dev\|HOME_DEV")
 if [[ $? ==  0 ]] ; then
   printf 'WARNING, Genpipes in not production ready, it still has reference to DEV software and references in ini files: \n%s\n' "$WARNING" | sed 's|^[^W]|\t|'
 fi
