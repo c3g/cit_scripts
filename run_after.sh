@@ -6,15 +6,19 @@ usage (){
 echo
 echo "usage: $0 create log report for all pipelines ran in interation testing"
 echo
-echo "   -h                                   Print this help "
-echo "   -j                                   Sends the report to jenkins"
+echo "   -h                         Print this help "
+echo "   -j                         Sends the report to jenkins"
+echo "   -p                         Path to the directory containing the pipeline output ending by scriptTestOutputs"
 
 }
 
-while getopts ":jh" opt; do
+while getopts ":j:ph" opt; do
   case $opt in
     j)
       JENKINS=1
+      ;;
+    p)
+      path="$OPTARG"
       ;;
     h)
       usage
@@ -29,7 +33,7 @@ done
 
 
 
-job_list=$(cat "$SCRIPT_OUTPUT"/*/chunk/*out  | awk -F'=' '{printf(":%s",$2)}'| sed 's/ //g')
+job_list=$(cat "$path"/*/chunk/*out  | awk -F'=' '{printf(":%s",$2)}'| sed 's/ //g')
 tmp_script=$(mktemp)
 # for debuging
 # job_list=$(cat /tmp/all | awk -F'=' '{printf(":%s",$2)}'| sed 's/ //g')
@@ -59,7 +63,7 @@ control_c() {
 }
 
 
-latest_dev=$(realpath  "${SCRIPT_OUTPUT}")
+latest_dev=$(realpath  "${path}")
 
 
 mkdir -p \${latest_dev}/cit_out && cd \${latest_dev}/cit_out

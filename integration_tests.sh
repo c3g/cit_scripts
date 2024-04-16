@@ -1043,7 +1043,7 @@ fi
 
 if [[ -z ${SCRIPT_ONLY}  ]] && [[ $scheduler == "slurm" ]]; then
   # create the report for the run
-  ${SCRIPT_DIR}/run_after.sh $option
+  ${SCRIPT_DIR}/run_after.sh -p $SCRIPT_OUTPUT $option
 fi
 
 
