@@ -12,7 +12,7 @@ echo "   -p                         Path to the directory containing the pipelin
 
 }
 
-while getopts ":j:ph" opt; do
+while getopts "j::ph" opt; do
   case $opt in
     j)
       JENKINS=1
@@ -54,6 +54,7 @@ cat > "$tmp_script" << EOF
 #!/bin/bash
 #SBATCH -d afterany${job_list}
 #SBATCH --mem 500M
+#SBATCH --time 00:30:00
 #SBATCH --output=log_report.log
 
 module load python/3
