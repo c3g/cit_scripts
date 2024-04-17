@@ -12,7 +12,7 @@ echo "   -p                         Path to the directory containing the pipelin
 
 }
 
-while getopts "j::ph" opt; do
+while getopts "p:jh" opt; do
   case $opt in
     j)
       JENKINS=1
