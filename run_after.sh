@@ -8,7 +8,7 @@ echo "usage: $0 create log report for all pipelines ran in interation testing"
 echo
 echo "   -h                         Print this help "
 echo "   -j                         Sends the report to jenkins"
-echo "   -p                         Path to the directory containing the pipeline output ending by scriptTestOutputs"
+echo "   -p                         Path to the directory containing the cit result"
 
 }
 
@@ -33,7 +33,7 @@ done
 
 
 
-job_list=$(cat "$path"/*/chunk/*out  | awk -F'=' '{printf(":%s",$2)}'| sed 's/ //g')
+job_list=$(cat "$path"/scriptTestOutputs/*/chunk/*out  | awk -F'=' '{printf(":%s",$2)}'| sed 's/ //g')
 tmp_script=$(mktemp)
 # for debuging
 # job_list=$(cat /tmp/all | awk -F'=' '{printf(":%s",$2)}'| sed 's/ //g')
@@ -64,7 +64,7 @@ control_c() {
 }
 
 
-latest_dev=$(realpath  "${path}")
+latest_dev=$(realpath  "${path}/scriptTestOutputs")
 
 
 mkdir -p \${latest_dev}/cit_out && cd \${latest_dev}/cit_out
@@ -75,7 +75,7 @@ list=\$(find \${latest_dev}  -maxdepth 3  -type d -name 'job_output' | xargs -I@
 for jl in \$list ; do
   out=\$( echo "\$jl" | sed 's|.*scriptTestOutputs/\(.*\)/job_output.*|\1|g' )
   echo processing \$out
-  \${MUGQIC_PIPELINES_HOME}/utils/log_report.py  --loglevel CRITICAL  --tsv \$out.tsv \$jl
+  ${path}/genpipes/utils/log_report.py  --loglevel CRITICAL  --tsv \$out.tsv \$jl
 done
 
 echo "########################################################" > digest.log
