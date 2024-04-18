@@ -83,8 +83,8 @@ grep -v   "COMPLETED\+[[:space:]]\+COMPLETED\+[[:space:]]\+COMPLETED" *tsv \
 | grep -v "log_from_job" | grep -e 'TIMEOUT' -e 'FAILED' -e 'OUT_OF_MEMORY' >> digest.log
 echo "########################################################" >> digest.log
 cat \${SLURM_SUBMIT_DIR}/log_report.log >> digest.log
-${SEND_TO_J}
 EOF
 
-sbatch -A "${RAP_ID:-def-bourqueg}" "$tmp_script"
-
+sbatch -W -A "${RAP_ID:-def-bourqueg}" "$tmp_script"
+wait
+${SEND_TO_J}

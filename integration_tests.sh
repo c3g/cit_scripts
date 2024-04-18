@@ -238,9 +238,10 @@ if [[ -z ${AVAIL+x} ]] ; then
       cd genpipes
       git checkout ${commit}
     fi
-
+    CIT_DIR=${GENPIPES_DIR}
     export MUGQIC_PIPELINES_HOME=${GENPIPES_DIR}/genpipes
   else
+    CIT_DIR=${GENPIPES_DIR%/genpipes}
     export MUGQIC_PIPELINES_HOME=${GENPIPES_DIR}
   fi
 
@@ -1043,7 +1044,7 @@ fi
 
 if [[ -z ${SCRIPT_ONLY}  ]] && [[ $scheduler == "slurm" ]]; then
   # create the report for the run
-  ${SCRIPT_DIR}/run_after.sh -p ${GENPIPES_DIR} $option
+  ${SCRIPT_DIR}/run_after.sh -p ${CIT_DIR} $option
 fi
 
 
