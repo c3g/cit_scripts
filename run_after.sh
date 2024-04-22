@@ -44,7 +44,7 @@ if [[ -n $JENKINS ]] ; then
 ## curl call to jenkens server via ssh
   SEND_TO_J=$(cat << EOF
 JENKINS_URL=https://jenkins.vhost38.genap.ca/job/report_on_full_run/buildWithParameters
-ssh ${HOSTNAME} curl -k -X GET --form logfile=@digest.log  "\$JENKINS_URL?token=\$API_TOKEN"
+ssh ${HOSTNAME} curl -k -X GET --form logfile=@${path}/scriptTestOutputs/cit_out/digest.log  "\$JENKINS_URL?token=\$API_TOKEN"
 EOF
 )
 fi
