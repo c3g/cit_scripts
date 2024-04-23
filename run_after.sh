@@ -1,4 +1,4 @@
-  #!/bin/bash
+#!/bin/bash
 
 
 usage (){
@@ -6,15 +6,19 @@ usage (){
 echo
 echo "usage: $0 create log report for all pipelines ran in interation testing"
 echo
-echo "   -h                                   Print this help "
-echo "   -j                                   Sends the report to jenkins"
+echo "   -h                         Print this help "
+echo "   -j                         Sends the report to jenkins"
+echo "   -p                         Path to the directory containing the cit result"
 
 }
 
-while getopts ":jh" opt; do
+while getopts "p:jh" opt; do
   case $opt in
     j)
       JENKINS=1
+      ;;
+    p)
+      path="$OPTARG"
       ;;
     h)
       usage
@@ -29,7 +33,7 @@ done
 
 
 
-job_list=$(cat  $SCRIPT_OUTPUT/*/chunk/*out  | awk -F'=' '{printf(":%s",$2)}'| sed 's/ //g')
+job_list=$(cat "$path"/scriptTestOutputs/*/chunk/*out  | awk -F'=' '{printf(":%s",$2)}'| sed 's/ //g')
 tmp_script=$(mktemp)
 # for debuging
 # job_list=$(cat /tmp/all | awk -F'=' '{printf(":%s",$2)}'| sed 's/ //g')
@@ -39,17 +43,18 @@ tmp_script=$(mktemp)
 if [[ -n $JENKINS ]] ; then
 ## curl call to jenkens server via ssh
   SEND_TO_J=$(cat << EOF
-JENKIN_URL=https://jenkins.vhost38.genap.ca/job/report_on_full_run/buildWithParameters
-cat digest.log | ssh ${HOSTNAME} curl -k -X GET --form '"logfile=<-"'  "\$JENKIN_URL?token=\$API_TOKEN"
+JENKINS_URL=https://jenkins.vhost38.genap.ca/job/report_on_full_run/buildWithParameters
+ssh ${HOSTNAME} curl -k -X GET --form logfile=@${path}/scriptTestOutputs/cit_out/digest.log  "\$JENKINS_URL?token=\$API_TOKEN"
 EOF
 )
 fi
 
 
-cat > $tmp_script << EOF
-#! /bin/bash
+cat > "$tmp_script" << EOF
+#!/bin/bash
 #SBATCH -d afterany${job_list}
 #SBATCH --mem 500M
+#SBATCH --time 00:30:00
 #SBATCH --output=log_report.log
 
 module load python/3
@@ -59,19 +64,18 @@ control_c() {
 }
 
 
-latest_dev=$(realpath  "${SCRIPT_OUTPUT}")
-
+latest_dev=$(realpath  "${path}/scriptTestOutputs")
 
 
 mkdir -p \${latest_dev}/cit_out && cd \${latest_dev}/cit_out
 
 trap control_c SIGINT
-list=\$(find \${latest_dev}  -maxdepth 3  -type d -name 'job_output' | xargs -L 1 -I@ sh -c "ls -t1 @/*job* | head -n 1 ")
+list=\$(find \${latest_dev}  -maxdepth 3  -type d -name 'job_output' | xargs -I@ sh -c "ls -t1 @/*job* | head -n 1 ")
 
 for jl in \$list ; do
   out=\$( echo "\$jl" | sed 's|.*scriptTestOutputs/\(.*\)/job_output.*|\1|g' )
   echo processing \$out
-  \${MUGQIC_PIPELINES_HOME}/utils/log_report.py  --loglevel CRITICAL  --tsv \$out.tsv \$jl
+  ${path}/genpipes/utils/log_report.py  --loglevel CRITICAL  --tsv \$out.tsv \$jl
 done
 
 echo "########################################################" > digest.log
@@ -82,5 +86,4 @@ cat \${SLURM_SUBMIT_DIR}/log_report.log >> digest.log
 ${SEND_TO_J}
 EOF
 
-sbatch -A ${RAP_ID:-def-bourqueg} $tmp_script 
-
+sbatch -A "${RAP_ID:-def-bourqueg}" "$tmp_script"
