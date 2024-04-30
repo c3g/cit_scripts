@@ -152,7 +152,7 @@ BIND_LIST=/tmp/,/home/,/project,/scratch,/localscratch
 EOM
 
 elif [[ $HOST == narval* || $DNSDOMAIN == narval.computecanada.ca ]]; then
-  export TEST_DIR=$(realpath /lustre03/project/rrg-bourqueg-ad/C3G/projects/jenkins_tests/)
+  export TEST_DIR=$(realpath /lustre06/project/rrg-bourqueg-ad/C3G/projects/jenkins_tests/)
   export serverName=narval
   export server=narval
   export scheduler="slurm"
