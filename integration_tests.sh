@@ -364,7 +364,7 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 pipeline=ampliconseq
-protocol=dada2
+protocol=''
 check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
 
@@ -372,25 +372,10 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
     generate_script ${pipeline}_${protocol}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
-    -t ${protocol}
+    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt
 
     submit
 fi
-
-pipeline=ampliconseq
-protocol=qiime
-check_run "${pipeline}_${protocol}"
-if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}_${protocol}"
-
-    generate_script ${pipeline}_${protocol}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-    -t ${protocol}
-
-    submit
-fi
-
 
 pipeline=chipseq
 protocol='chipseq'
@@ -601,52 +586,6 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 fi
 
 
-pipeline=epiqc
-protocol=''
-check_run "${pipeline}_${protocol}"
-if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}"
-
-    generate_script ${pipeline}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-
-    submit
-fi
-
-
-pipeline=hicseq
-protocol=hic
-extra="-e MboI"
-check_run "${pipeline}_${protocol}"
-if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}_${protocol}"
-
-    generate_script ${pipeline}_${protocol}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}_${protocol}.txt \
-    -t ${protocol} ${extra}
-
-    submit
-fi
-
-pipeline=hicseq
-protocol=capture
-extra="-e MboI"
-check_run "${pipeline}_${protocol}"
-if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}_${protocol}"
-
-    ## soft link to capture bed file
-    ln -s $MUGQIC_INSTALL_HOME/testdata/hicseq/GSE69600_promoter_capture_bait_coordinates.bed \
-    ${pipeline}_${protocol}/GSE69600_promoter_capture_bait_coordinates.bed
-
-    generate_script ${pipeline}_${protocol}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-    -t ${protocol} ${extra}
-
-    submit
-fi
-
-
 pipeline=methylseq
 protocol=''
 check_run "${pipeline}_${protocol}"
@@ -659,7 +598,6 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
     submit
 fi
-
 
 pipeline=nanopore
 protocol=''
