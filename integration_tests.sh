@@ -15,10 +15,10 @@ echo
 echo "   -p <pipeline1>[,pipeline2,...]       Pipeline to test, default: do them all"
 echo "   -b <branch>                          Genpipe branch to test"
 echo "   -c <commit>                          Hash string of the commit to test"
-echo "   -s                                   Generate scritp only, no HPC submit"
+echo "   -s                                   Generate script only, no HPC submit"
 echo "   -u                                   Update mode, do not remove latest pipeline run"
-echo "   -l                                   Deploy genpipe in /tmp dir "
-echo "   -d <genpipe repo_path>  <outputs path>"
+echo "   -l                                   Deploy genpipes in /tmp dir "
+echo "   -d <genpipes repo_path>  <outputs path>"
 echo "                                        Used preexisting genpipes repo as is (no update)"
 echo "   -a                                   List all available pipeline and exit "
 echo "   -w                                   Test with the container wrapper"
@@ -152,7 +152,7 @@ BIND_LIST=/tmp/,/home/,/project,/scratch,/localscratch
 EOM
 
 elif [[ $HOST == narval* || $DNSDOMAIN == narval.computecanada.ca ]]; then
-  export TEST_DIR=$(realpath /lustre03/project/rrg-bourqueg-ad/C3G/projects/jenkins_tests/)
+  export TEST_DIR=$(realpath /lustre06/project/rrg-bourqueg-ad/C3G/projects/jenkins_tests/)
   export serverName=narval
   export server=narval
   export scheduler="slurm"
@@ -238,9 +238,10 @@ if [[ -z ${AVAIL+x} ]] ; then
       cd genpipes
       git checkout ${commit}
     fi
-
+    CIT_DIR=${GENPIPES_DIR}
     export MUGQIC_PIPELINES_HOME=${GENPIPES_DIR}/genpipes
   else
+    CIT_DIR=${GENPIPES_DIR%/genpipes}
     export MUGQIC_PIPELINES_HOME=${GENPIPES_DIR}
   fi
 
@@ -363,7 +364,7 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 pipeline=ampliconseq
-protocol=dada2
+protocol=''
 check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
 
@@ -371,25 +372,10 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
     generate_script ${pipeline}_${protocol}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
-    -t ${protocol}
+    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt
 
     submit
 fi
-
-pipeline=ampliconseq
-protocol=qiime
-check_run "${pipeline}_${protocol}"
-if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}_${protocol}"
-
-    generate_script ${pipeline}_${protocol}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-    -t ${protocol}
-
-    submit
-fi
-
 
 pipeline=chipseq
 protocol='chipseq'
@@ -702,53 +688,6 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     submit
 fi
 
-
-pipeline=epiqc
-protocol=''
-check_run "${pipeline}_${protocol}"
-if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}"
-
-    generate_script ${pipeline}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-
-    submit
-fi
-
-
-pipeline=hicseq
-protocol=hic
-extra="-e MboI"
-check_run "${pipeline}_${protocol}"
-if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}_${protocol}"
-
-    generate_script ${pipeline}_${protocol}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}_${protocol}.txt \
-    -t ${protocol} ${extra}
-
-    submit
-fi
-
-pipeline=hicseq
-protocol=capture
-extra="-e MboI"
-check_run "${pipeline}_${protocol}"
-if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}_${protocol}"
-
-    ## soft link to capture bed file
-    ln -s $MUGQIC_INSTALL_HOME/testdata/hicseq/GSE69600_promoter_capture_bait_coordinates.bed \
-    ${pipeline}_${protocol}/GSE69600_promoter_capture_bait_coordinates.bed
-
-    generate_script ${pipeline}_${protocol}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-    -t ${protocol} ${extra}
-
-    submit
-fi
-
-
 pipeline=methylseq
 protocol=''
 check_run "${pipeline}_${protocol}"
@@ -947,7 +886,7 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Testing GenPipes Command Complete ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 # Warning for ini files with dev configuration
-WARNING=$(find $GENPIPES_DIR  -type f -name "*ini" | xargs grep "mugqic_dev\|HOME_DEV")
+WARNING=$(find $GENPIPES_DIR  -type f -name "*.ini" | xargs grep "mugqic_dev\|HOME_DEV")
 if [[ $? ==  0 ]] ; then
   printf 'WARNING, Genpipes in not production ready, it still has reference to DEV software and references in ini files: \n%s\n' "$WARNING" | sed 's|^[^W]|\t|'
 fi
@@ -975,7 +914,7 @@ fi
 
 if [[ -z ${SCRIPT_ONLY}  ]] && [[ $scheduler == "slurm" ]]; then
   # create the report for the run
-  ${SCRIPT_DIR}/run_after.sh $option
+  ${SCRIPT_DIR}/run_after.sh -p ${CIT_DIR} $option
 fi
 
 
