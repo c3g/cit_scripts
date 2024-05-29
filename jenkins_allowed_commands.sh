@@ -107,8 +107,7 @@ function check_genpipes() {
     elif [[ $cluster == "cardinal" ]]; then
         path="/project/def-c3g/MOH/MAIN/genpipes_submission"
     fi
-    two_weeks_ago=$(date -d "2 weeks ago 13:00" "+%Y-%m-%d")
-    folder_to_be_checked=$(find "$path" -mindepth 1 -maxdepth 1 -type d -newermt "$two_weeks_ago" '!' -exec test -e "{}.checked" ';' -print)
+    folder_to_be_checked=$(find "$path" -mindepth 1 -maxdepth 1 -type d '!' -exec test -e "{}.checked" ';' -print)
     for folder in $folder_to_be_checked; do
         json=$(find "$folder" -name "*.json")
         job_list=$(find "$folder" -name "*job_list*")
