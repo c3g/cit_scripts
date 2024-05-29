@@ -88,12 +88,33 @@ function update_cache() {
 
 function moh_genpipes() {
     pull_repo moh_automation main
-    bash jenkins_genpipes.sh "$(${SSH_ORIGINAL_COMMAND#*moh_genpipes } | tr -d '\"')"
+    bash jenkins_genpipes.sh "$(${SSH_ORIGINAL_COMMAND#*MoH_GenPipes } | tr -d '\"')"
 }
 
 function moh_wrapper() {
     pull_repo moh_automation main
     bash jenkins_wrapper.sh
+}
+
+function check_genpipes() {
+    pull_repo moh_automation main
+    args="${SSH_ORIGINAL_COMMAND#*MoH_check_GenPipes }"
+    cluster="$(echo "$args" | cut -d " " -f 1)"
+    if [[ $cluster == "abacus" ]]; then
+        path="/lb/project/mugqic/projects/MOH_PROCESSING/MAIN/genpipes_submission"
+    elif [[ $cluster == "beluga" ]]; then
+        path="/lustre03/project/6007512/C3G/projects/MOH_PROCESSING/MAIN/genpipes_submission"
+    elif [[ $cluster == "cardinal" ]]; then
+        path="/project/def-c3g/MOH/MAIN/genpipes_submission"
+    fi
+    folder_to_be_checked=$(find "$path" -mindepth 1 -maxdepth 1 -type d '!' -exec test -e "{}.checked" ';' -print)
+    for folder in $folder_to_be_checked; do
+        json=$(find "$folder" -name "*.json")
+        job_list=$(find "$folder" -name "*job_list*")
+        readset=$(find "$folder" -name "*readset.tsv")
+        # shellcheck disable=SC2086
+        bash check_GenPipes.sh -c $cluster -j $json -r $readset -l $job_list
+    done
 }
 
 logger -t automation -p local0.info "Command called by $THIS_SCRIPT for user $USER: $SSH_ORIGINAL_COMMAND"
@@ -122,6 +143,9 @@ case "$SSH_ORIGINAL_COMMAND" in
     ;;
     MoH_wrapper)
         moh_wrapper
+    ;;
+    MoH_check_GenPipes)
+        check_genpipes
     ;;
     *)
         reject_command
