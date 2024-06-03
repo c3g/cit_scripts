@@ -428,7 +428,7 @@ check_run "${pipeline}_${protocol}_${reference}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}_${reference}"
 
-    generate_script ${pipeline}_${protocol}_${reference}_commands.sh
+    generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
     -t ${protocol} --json-pt
 
