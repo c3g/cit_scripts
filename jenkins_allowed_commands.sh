@@ -109,9 +109,9 @@ function check_genpipes() {
     fi
     folder_to_be_checked=$(find "$path" -mindepth 1 -maxdepth 1 -type d '!' -exec test -e "{}.checked" ';' -print)
     for folder in $folder_to_be_checked; do
-        json=$(find "$folder" -name "*.json")
-        job_list=$(find "$folder" -name "*job_list*")
-        readset=$(find "$folder" -name "*readset.tsv")
+        json=$(find "$folder" -lname "*.json")
+        job_list=$(find "$folder" -lname "*job_list*")
+        readset=$(find "$folder" -lname "*readset.tsv")
         # shellcheck disable=SC2086
         bash check_GenPipes.sh -c $cluster -j $json -r $readset -l $job_list
     done
