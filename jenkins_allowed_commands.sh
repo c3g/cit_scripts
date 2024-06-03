@@ -144,7 +144,7 @@ case "$SSH_ORIGINAL_COMMAND" in
     MoH_wrapper)
         moh_wrapper
     ;;
-    MoH_check_GenPipes)
+    MoH_check_GenPipes*)
         check_genpipes
     ;;
     *)
