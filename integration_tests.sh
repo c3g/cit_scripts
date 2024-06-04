@@ -10,7 +10,7 @@ export VERBOSE=${VERBOSE:=0}
 usage (){
 
 echo
-echo "usage: $0 creates the script for genpipes, submiting them on the HPC system"
+echo "usage: $0 creates the script for genpipes, submitting them on the HPC system"
 echo
 echo "   -p <pipeline1>[,pipeline2,...]       Pipeline to test, default: do them all"
 echo "   -b <branch>                          Genpipe branch to test"
@@ -328,7 +328,7 @@ submit () {
       if grep --quiet "TOTAL: 0 job... skipping" ${command} ; then
         echo "Nothing to submit in ${command}..."
       else
-        echo submiting $pipeline
+        echo submitting $pipeline
         $MUGQIC_PIPELINES_HOME/utils/chunk_genpipes.sh  ${command} ${PIPELINE_FOLDER}/chunk
         # will retry submit 10 times
         $MUGQIC_PIPELINES_HOME/utils/submit_genpipes -l 10 -n 999 ${PIPELINE_FOLDER}/chunk \
