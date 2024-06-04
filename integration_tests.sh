@@ -506,7 +506,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
    prologue "${pipeline}_${protocol}"
 
    generate_script ${pipeline}_${protocol}_commands.sh \
-   -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${protocol}.txt \
+   -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
    -t ${protocol}
 
    submit
