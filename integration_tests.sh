@@ -501,11 +501,13 @@ fi
 
 pipeline=dnaseq
 protocol=germline_sv
+extra="$MUGQIC_PIPELINES_HOME/pipelines/dnaseq/dnaseq.sv.ini"
 check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
    prologue "${pipeline}_${protocol}"
 
    generate_script ${pipeline}_${protocol}_commands.sh \
+   ${extra} \
    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
    -t ${protocol}
 
