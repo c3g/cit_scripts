@@ -368,7 +368,7 @@ protocol=''
 check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
 
-    prologue "${pipeline}_${protocol}"
+    prologue "${pipeline}"
 
     generate_script ${pipeline}_${protocol}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
