@@ -370,7 +370,7 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
     prologue "${pipeline}"
 
-    generate_script ${pipeline}_${protocol}_commands.sh \
+    generate_script ${pipeline}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
     -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt
 
@@ -383,7 +383,7 @@ check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}"
 
-    generate_script ${pipeline}_commands.sh \
+    generate_script ${pipeline}_${protocol}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
     -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
     -t ${protocol}
@@ -398,7 +398,7 @@ check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}"
 
-    generate_script ${pipeline}_commands.sh \
+    generate_script ${pipeline}_${protocol}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${protocol}.txt \
     -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${protocol}.txt \
     -t ${protocol}
@@ -755,8 +755,8 @@ fi
 
 pipeline=rnaseq
 protocol=stringtie
-reference=b38
-extra="$MUGQIC_PIPELINES_HOME/pipelines/common_ini/Homo_sapiens.GRCh38.ini"
+reference=b37
+extra="$MUGQIC_PIPELINES_HOME/pipelines/common_ini/Homo_sapiens.GRCh37.ini"
 check_run "${pipeline}_${protocol}_${reference}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}_${reference}"
@@ -815,8 +815,8 @@ fi
 
 pipeline=rnaseq
 protocol=cancer
-reference=b38
-extra="$MUGQIC_PIPELINES_HOME/pipelines/common_ini/Homo_sapiens.GRCh38.ini"
+reference=b37
+extra="$MUGQIC_PIPELINES_HOME/pipelines/common_ini/Homo_sapiens.GRCh37.ini"
 check_run "${pipeline}_${protocol}_${reference}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}_${reference}"
