@@ -98,23 +98,40 @@ function moh_wrapper() {
 
 function check_genpipes() {
     pull_repo moh_automation main
+    timestamp=$(date "+%Y-%m-%dT%H.%M.%S")
     args="${SSH_ORIGINAL_COMMAND#*MoH_check_GenPipes }"
     cluster="$(echo "$args" | cut -d " " -f 1)"
     if [[ $cluster == "abacus" ]]; then
-        path="/lb/project/mugqic/projects/MOH_PROCESSING/MAIN/genpipes_submission"
+        path="/lb/project/mugqic/projects/MOH_PROCESSING/MAIN"
     elif [[ $cluster == "beluga" ]]; then
-        path="/lustre03/project/6007512/C3G/projects/MOH_PROCESSING/MAIN/genpipes_submission"
+        path="/lustre03/project/6007512/C3G/projects/MOH_PROCESSING/MAIN"
     elif [[ $cluster == "cardinal" ]]; then
-        path="/project/def-c3g/MOH/MAIN/genpipes_submission"
+        path="/project/def-c3g/MOH/MAIN"
     fi
-    folder_to_be_checked=$(find "$path" -mindepth 1 -maxdepth 1 -type d '!' -exec test -e "{}.checked" ';' -print)
+    logs_folder="$path/check_genpipes_logs/$timestamp"
+    mkdir -p "$logs_folder"
+    log_file="$logs_folder/check_genpipes_$timestamp.log"
+    cat /dev/null > "$log_file"
+    folder_to_be_checked=$(find "$path/genpipes_submission" -mindepth 1 -maxdepth 1 -type d '!' -exec test -e "{}.checked" ';' -print)
     for folder in $folder_to_be_checked; do
         json=$(find "$folder" -lname "*.json")
         job_list=$(find "$folder" -lname "*job_list*")
         readset=$(find "$folder" -lname "*readset.tsv")
-        # shellcheck disable=SC2086
-        bash check_GenPipes.sh -c $cluster -j $json -r $readset -l $job_list
+        if [[ -z $json ]] || [[ -z $readset ]] || [[ -z $job_list ]]; then
+            echo "WARNING: Missing files in $folder. Skipping..." 2>&1 | tee -a "$log_file"
+        else
+            # shellcheck disable=SC2086
+            bash check_GenPipes.sh -c $cluster -j $json -r $readset -l $job_list 2>&1 | tee -a "$log_file"
+        fi
     done
+    failures=$(grep "Failure found in " "$log_file" | awk -F'Cf. ' '{print $2}' | xargs grep --no-filename "FAILED" | awk -F'\t' '{print $9}')
+    if [[ -n $failures ]]; then
+        echo "$failures" > "$logs_folder/check_genpipes_$timestamp.err"
+    fi
+    transfers=$(grep "Transferring GenPipes run" "$log_file" | awk -F'run ' '{print $2}' | sed 's/\.\.\.//g')
+    if [[ -n $transfers ]]; then
+        echo "$transfers" > "$logs_folder/check_genpipes_$timestamp.transfers"
+    fi
 }
 
 logger -t automation -p local0.info "Command called by $THIS_SCRIPT for user $USER: $SSH_ORIGINAL_COMMAND"
