@@ -18,7 +18,7 @@ echo "   -c <commit>                          Hash string of the commit to test"
 echo "   -s                                   Generate script only, no HPC submit"
 echo "   -u                                   Update mode, do not remove latest pipeline run"
 echo "   -l                                   Deploy genpipes in /tmp dir "
-echo "   -d <genpipe repo_path>  <outputs path>"
+echo "   -d <genpipes repo_path>  <outputs path>"
 echo "                                        Used preexisting genpipes repo as is (no update)"
 echo "   -a                                   List all available pipeline and exit "
 echo "   -w                                   Test with the container wrapper"
@@ -152,7 +152,7 @@ BIND_LIST=/tmp/,/home/,/project,/scratch,/localscratch
 EOM
 
 elif [[ $HOST == narval* || $DNSDOMAIN == narval.computecanada.ca ]]; then
-  export TEST_DIR=$(realpath /lustre03/project/rrg-bourqueg-ad/C3G/projects/jenkins_tests/)
+  export TEST_DIR=$(realpath /lustre06/project/rrg-bourqueg-ad/C3G/projects/jenkins_tests/)
   export serverName=narval
   export server=narval
   export scheduler="slurm"
