@@ -102,7 +102,7 @@ function check_genpipes() {
     args="${SSH_ORIGINAL_COMMAND#*MoH_check_GenPipes }"
     cluster="$(echo "$args" | cut -d " " -f 1)"
     if [[ $cluster == "abacus" ]]; then
-        path="/lb/project/mugqic/projects/MOH_PROCESSING/MAIN"
+        path="/lb/project/mugqic/projects/MOH/MAIN"
     elif [[ $cluster == "beluga" ]]; then
         path="/lustre03/project/6007512/C3G/projects/MOH_PROCESSING/MAIN"
     elif [[ $cluster == "cardinal" ]]; then
