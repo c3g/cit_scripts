@@ -711,12 +711,10 @@ fi
 pipeline=methylseq
 protocol='gembs'
 check_run "${pipeline}_${protocol}"
-extra="$MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.${protocol}.ini $MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/cit.ini"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}"
 
     generate_script ${pipeline}_${protocol}_commands.sh \
-    ${extra} \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
     -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
     -t ${protocol}
