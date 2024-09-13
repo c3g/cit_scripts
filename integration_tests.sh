@@ -696,14 +696,28 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 fi
 
 pipeline=methylseq
-protocol=''
+protocol='bismark'
 check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}"
+    prologue "${pipeline}_${protocol}"
 
-    generate_script ${pipeline}_commands.sh \
+    generate_script ${pipeline}_${protocol}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
     -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt
+
+    submit
+fi
+
+pipeline=methylseq
+protocol='gembs'
+check_run "${pipeline}_${protocol}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}_${protocol}"
+
+    generate_script ${pipeline}_${protocol}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
+    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
+    -t ${protocol}
 
     submit
 fi
