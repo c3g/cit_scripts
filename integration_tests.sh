@@ -312,7 +312,7 @@ generate_script () {
     $MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/cit.ini \
     ${extra} ${debug} ${extra_abacus} \
     -o ${folder} ${CONTAINER_WRAPPER} \
-    -j $scheduler --genpipes_file ${folder}/${command}
+    -j $scheduler > ${folder}/${command}
 
     { RET_CODE_CREATE_SCRIPT=$?; set +x; } 2>/dev/null
     ExitCodes+=(["${PIPELINE_LONG_NAME} create"]="$RET_CODE_CREATE_SCRIPT")
