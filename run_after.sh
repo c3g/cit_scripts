@@ -57,7 +57,7 @@ cat > "$tmp_script" << EOF
 #SBATCH --time 00:30:00
 #SBATCH --output=log_report.log
 
-module load python/3
+module load mugqic/python/3.12.2
 
 control_c() {
   exit 0
@@ -75,7 +75,7 @@ list=\$(find \${latest_dev}  -maxdepth 3  -type d -name 'job_output' | xargs -I@
 for jl in \$list ; do
   out=\$( echo "\$jl" | sed 's|.*scriptTestOutputs/\(.*\)/job_output.*|\1|g' )
   echo processing \$out
-  ${path}/genpipes/genpipes/utils/log_report.py  --loglevel CRITICAL  --tsv \$out.tsv \$jl
+  ${path}/genpipes/genpipes/tools/log_report.py  --loglevel CRITICAL  --tsv \$out.tsv \$jl
 done
 
 echo "########################################################" > digest.log
