@@ -75,7 +75,7 @@ list=\$(find \${latest_dev}  -maxdepth 3  -type d -name 'job_output' | xargs -I@
 for jl in \$list ; do
   out=\$( echo "\$jl" | sed 's|.*scriptTestOutputs/\(.*\)/job_output.*|\1|g' )
   echo processing \$out
-  ${path}/genpipes/genpipes/tools/log_report.py  --loglevel CRITICAL  --tsv \$out.tsv \$jl
+  genpipes tools log_report  --loglevel CRITICAL  --tsv \$out.tsv \$jl
 done
 
 echo "########################################################" > digest.log
