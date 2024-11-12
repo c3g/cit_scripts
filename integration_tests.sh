@@ -241,9 +241,9 @@ if [[ -z ${AVAIL+x} ]] ; then
 
     CIT_DIR=${GENPIPES_DIR}
     export MUGQIC_PIPELINES_HOME=${GENPIPES_DIR}/genpipes
-    module load mugqic/python/3.11.1
+    module load mugqic/python/3.12.2
     pip install -e $MUGQIC_PIPELINES_HOME
-    module unload mugqic/python/3.11.1
+    module unload mugqic/python/3.12.2
   else
     CIT_DIR=${GENPIPES_DIR%/genpipes}
     export MUGQIC_PIPELINES_HOME=${GENPIPES_DIR}
@@ -304,7 +304,7 @@ generate_script () {
       extra_abacus='--force_mem_per_cpu 5G'
     fi
     echo "********************Generating Genpipes File**********************"
-    module load mugqic/python/3.11.1 > /dev/null 2>&1
+    module load mugqic/python/3.12.2 > /dev/null 2>&1
     set -x
     genpipes ${pipeline} \
     -c $MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.base.ini \
@@ -319,7 +319,7 @@ generate_script () {
     if [ "$RET_CODE_CREATE_SCRIPT" -ne 0 ] ; then
       echo ERROR on ${folder}/${command} creation
     fi
-    module unload mugqic/python/3.11.1 > /dev/null 2>&1
+    module unload mugqic/python/3.12.2 > /dev/null 2>&1
     echo "******************************************************************"
 
 }
@@ -333,9 +333,9 @@ submit () {
         echo "Nothing to submit in ${command}..."
       else
         echo submitting $pipeline
-        $MUGQIC_PIPELINES_HOME/genpipes/utils/chunk_genpipes.sh  ${command} ${PIPELINE_FOLDER}/chunk
+        genpipes tools chunk_genpipes ${command} ${PIPELINE_FOLDER}/chunk
         # will retry submit 10 times
-        $MUGQIC_PIPELINES_HOME/genpipes/utils/submit_genpipes -l 10 -n 999 ${PIPELINE_FOLDER}/chunk \
+        genpipes tools submit_genpipes -l 10 -n 999 ${PIPELINE_FOLDER}/chunk \
         | tee -a ${SCRIPT_OUTPUT}/all_jobs
         RET_CODE_SUBMIT_SCRIPT=${PIPESTATUS[0]}
         ExitCodes+=(["${PIPELINE_LONG_NAME} submit"]="$RET_CODE_SUBMIT_SCRIPT")
