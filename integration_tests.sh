@@ -242,7 +242,8 @@ if [[ -z ${AVAIL+x} ]] ; then
     CIT_DIR=${GENPIPES_DIR}
     export MUGQIC_PIPELINES_HOME=${GENPIPES_DIR}/genpipes
     module load mugqic/python/3.12.2
-    pip install -e $MUGQIC_PIPELINES_HOME
+    pip install --prefix=$MUGQIC_PIPELINES_HOME -e $MUGQIC_PIPELINES_HOME
+    PATH=$PATH:$MUGQIC_PIPELINES_HOME/bin
     module unload mugqic/python/3.12.2
   else
     CIT_DIR=${GENPIPES_DIR%/genpipes}
