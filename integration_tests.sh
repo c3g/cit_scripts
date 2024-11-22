@@ -307,6 +307,10 @@ generate_script () {
     fi
     echo "********************Generating Genpipes File**********************"
     set -x
+    if ! command -v genpipes &> /dev/null
+    then
+      source genpipes_venv/bin/activate
+    fi
     genpipes ${pipeline} \
     -c $GENPIPES_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.base.ini \
     $GENPIPES_PIPELINES_HOME/genpipes/pipelines/common_ini/${server}.ini \
