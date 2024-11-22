@@ -7,6 +7,9 @@ export VERBOSE=${VERBOSE:=0}
 
 ## guillaume's rrg account at CC's id is 6007512; the def account id is 6002326; change based on whether we have a RAC allocation on server or not
 
+SCHEDULER=slurm
+type squeue > /dev/null 2>&1 || SCHEDULER=pbs
+
 usage (){
 
 echo
@@ -16,6 +19,7 @@ echo "   -p <pipeline1>[,pipeline2,...]       Pipeline to test, default: do them
 echo "   -b <branch>                          Genpipe branch to test"
 echo "   -c <commit>                          Hash string of the commit to test"
 echo "   -s                                   Generate script only, no HPC submit"
+echo "   -S                                   Scheduler running on the cluster (slurm or pbs) default=$SCHEDULER"
 echo "   -u                                   Update mode, do not remove latest pipeline run"
 echo "   -l                                   Deploy genpipes in /tmp dir "
 echo "   -d <genpipes repo_path>  <outputs path>"
@@ -44,7 +48,7 @@ function getopts-extra () {
     fi
 }
 
-while getopts ":vhap:b:c:slud:wf:" opt; do
+while getopts ":vhap:b:c:sS:lud:wf:" opt; do
   case $opt in
     p)
       IFS=',' read -r -a PIPELINES <<< "${OPTARG}"
@@ -73,6 +77,14 @@ while getopts ":vhap:b:c:slud:wf:" opt; do
       ;;
     s)
       export SCRIPT_ONLY=true
+      ;;
+    S)
+      SCHEDULER=${OPTARG}
+      if [[ ${SCHEDULER} != 'slurm'  && ${SCHEDULER} != 'pbs' ]] ;then
+        echo "only slurm and pbs scheduler are supported"
+        usage
+        exit 1
+      fi
       ;;
     w)
       export CONTAINER_WRAPPER='--wrap'
@@ -339,7 +351,7 @@ submit () {
         echo submitting $pipeline
         genpipes tools chunk_genpipes ${command} ${PIPELINE_FOLDER}/chunk
         # will retry submit 10 times
-        genpipes tools submit_genpipes -l 10 -n 999 ${PIPELINE_FOLDER}/chunk \
+        genpipes tools submit_genpipes -l 10 -n 999 -S $SCHEDULER ${PIPELINE_FOLDER}/chunk \
         | tee -a ${SCRIPT_OUTPUT}/all_jobs
         RET_CODE_SUBMIT_SCRIPT=${PIPESTATUS[0]}
         ExitCodes+=(["${PIPELINE_LONG_NAME} submit"]="$RET_CODE_SUBMIT_SCRIPT")
