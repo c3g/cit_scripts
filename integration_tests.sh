@@ -309,7 +309,7 @@ generate_script () {
     set -x
     if ! command -v genpipes &> /dev/null
     then
-      source genpipes_venv/bin/activate
+      source $GENPIPES_PIPELINES_HOME/genpipes_venv/bin/activate
     fi
     genpipes ${pipeline} \
     -c $GENPIPES_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.base.ini \
