@@ -234,20 +234,21 @@ if [[ -z ${AVAIL+x} ]] ; then
       rm -rf genpipes
     fi
     git clone --depth 3 --branch ${branch} https://bitbucket.org/mugqic/genpipes.git
+    cd genpipes
     if [ -n "${commit}" ]; then
-      cd genpipes
       git checkout ${commit}
     fi
 
     CIT_DIR=${GENPIPES_DIR}
-    export MUGQIC_PIPELINES_HOME=${GENPIPES_DIR}/genpipes
+    export GENPIPES_PIPELINES_HOME=${GENPIPES_DIR}/genpipes
     module load mugqic/python/3.12.2
-    pip install --prefix=$MUGQIC_PIPELINES_HOME -e $MUGQIC_PIPELINES_HOME
-    PATH=$PATH:$MUGQIC_PIPELINES_HOME/bin
+    python3 -m venv genpipes_venv
+    source genpipes_venv/bin/activate
+    pip install --ignore-installed -e .
     module unload mugqic/python/3.12.2
   else
     CIT_DIR=${GENPIPES_DIR%/genpipes}
-    export MUGQIC_PIPELINES_HOME=${GENPIPES_DIR}
+    export GENPIPES_PIPELINES_HOME=${GENPIPES_DIR}
   fi
 
   if  [ -z ${CONTAINER_WRAPPER+x} ]; then
@@ -305,12 +306,11 @@ generate_script () {
       extra_abacus='--force_mem_per_cpu 5G'
     fi
     echo "********************Generating Genpipes File**********************"
-    module load mugqic/python/3.12.2 > /dev/null 2>&1
     set -x
     genpipes ${pipeline} \
-    -c $MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.base.ini \
-    $MUGQIC_PIPELINES_HOME/genpipes/pipelines/common_ini/${server}.ini \
-    $MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/cit.ini \
+    -c $GENPIPES_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.base.ini \
+    $GENPIPES_PIPELINES_HOME/genpipes/pipelines/common_ini/${server}.ini \
+    $GENPIPES_PIPELINES_HOME/genpipes/pipelines/${pipeline}/cit.ini \
     ${extra} ${debug} ${extra_abacus} \
     -o ${folder} ${CONTAINER_WRAPPER} \
     -j $scheduler --genpipes_file ${folder}/${command}
@@ -320,7 +320,6 @@ generate_script () {
     if [ "$RET_CODE_CREATE_SCRIPT" -ne 0 ] ; then
       echo ERROR on ${folder}/${command} creation
     fi
-    module unload mugqic/python/3.12.2 > /dev/null 2>&1
     echo "******************************************************************"
 
 }
@@ -438,26 +437,10 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     submit
 fi
 
-#pipeline=dnaseq
-#protocol=germline_snv
-#reference=b37
-#extra="$MUGQIC_PIPELINES_HOME/genpipes/pipelines/common_ini/Homo_sapiens.hs37d5.ini"
-#check_run "${pipeline}_${protocol}_${reference}"
-#if [[ ${run_pipeline} == 'true' ]] ; then
-#    prologue "${pipeline}_${protocol}_${reference}"
-#
-#    generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
-#    ${extra} \
-#    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-#    -t ${protocol} --json-pt
-#
-#    submit
-#fi
-
 pipeline=dnaseq
 protocol=germline_snv
 reference=exome
-extra="$MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.exome.ini $MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/cit.ini"
+extra="$GENPIPES_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.exome.ini $GENPIPES_PIPELINES_HOME/genpipes/pipelines/${pipeline}/cit.ini"
 check_run "${pipeline}_${protocol}_${reference}"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}_${reference}"
@@ -470,23 +453,6 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     submit
 
 fi
-
-#pipeline=dnaseq
-#protocol=germline_snv
-#reference=b37
-#extra="$MUGQIC_PIPELINES_HOME/genpipes/pipelines/common_ini/Homo_sapiens.hs37d5.ini $MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/cit.ini $MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/cit_b37.ini"
-#check_run "${pipeline}_${protocol}_${reference}"
-#if [[ ${run_pipeline} == 'true' ]] ; then
-#    prologue "${pipeline}_${protocol}_${reference}"
-#
-#    generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
-#    ${extra} \
-#    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-#    -t ${protocol} 
-
-#    submit
-
-#fi
 
 pipeline=dnaseq
 protocol=somatic_tumor_only
@@ -501,25 +467,9 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     submit
 fi
 
-#pipeline=dnaseq
-#protocol=somatic_tumor_only
-#reference=b37
-#extra="$MUGQIC_PIPELINES_HOME/genpipes/pipelines/common_ini/Homo_sapiens.hs37d5.ini $MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/cit.ini $MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/cit_b37.ini $MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.dev.ini"
-#check_run "${pipeline}_${protocol}_${reference}"
-#if [[ ${run_pipeline} == 'true' ]] ; then
-#    prologue "${pipeline}_${protocol}_${reference}"
-#
-#    generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
-#    ${extra} \
-#    -r $MUGQIC_INSTALL_HOME_DEV/testdata/${pipeline}/readset.${protocol}.txt \
-#    -t ${protocol}
-#
-#    submit
-#fi
-
 pipeline=dnaseq
 protocol=germline_sv
-extra="$MUGQIC_PIPELINES_HOME/genpipes/pipelines/dnaseq/dnaseq.sv.ini"
+extra="$GENPIPES_PIPELINES_HOME/genpipes/pipelines/dnaseq/dnaseq.sv.ini"
 check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
    prologue "${pipeline}_${protocol}"
@@ -532,25 +482,9 @@ if [[ ${run_pipeline} == 'true' ]] ; then
    submit
 fi
 
-#pipeline=dnaseq
-#protocol=germline_sv
-#reference=b37
-#extra="$MUGQIC_PIPELINES_HOME/genpipes/pipelines/common_ini/Homo_sapiens.hs37d5.ini $MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.dev.ini"
-#check_run "${pipeline}_${protocol}_${reference}"
-#if [[ ${run_pipeline} == 'true' ]] ; then
-#   prologue "${pipeline}_${protocol}_${reference}"
-
-#   generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
-#   ${extra} \
-#   -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${protocol}.txt \
-#   -t ${protocol}
-
-#   submit
-#fi
-
 pipeline=dnaseq
 protocol=somatic_fastpass
-extra="$MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.cancer.ini $MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/cit.ini"
+extra="$GENPIPES_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.cancer.ini $GENPIPES_PIPELINES_HOME/genpipes/pipelines/${pipeline}/cit.ini"
 pair="$MUGQIC_INSTALL_HOME/testdata/${pipeline}/pairs.${protocol}.csv"
 check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
@@ -566,29 +500,9 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
 fi
 
-#pipeline=tumor_pair
-#pipeline=dnaseq
-#protocol=somatic_fastpass
-#reference=b37
-#extra="$MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.cancer.ini $MUGQIC_PIPELINES_HOME/genpipes/pipelines/common_ini/Homo_sapiens.hs37d5.ini $MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/cit.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/cit_b37.ini $MUGQIC_PIPELINES_HOME/pipelines/${pipeline}/${pipeline}.dev.ini"
-#pair="$MUGQIC_INSTALL_HOME_DEV/testdata/${pipeline}/pairs.${protocol}.csv"
-#check_run "${pipeline}_${protocol}_${reference}"
-#if [[ ${run_pipeline} == 'true' ]] ; then
-#    prologue "${pipeline}_${protocol}_${reference}"
-#
-#    generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
-#    ${extra} \
-#    -r $MUGQIC_INSTALL_HOME_DEV/testdata/${pipeline}/readset.${protocol}.txt \
-#    -p ${pair} \
-#    -t ${protocol}
-
-#    submit
-
-#fi
-
 pipeline=dnaseq
 protocol=somatic_ensemble
-extra="$MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.cancer.ini $MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/cit.ini"
+extra="$GENPIPES_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.cancer.ini $GENPIPES_PIPELINES_HOME/genpipes/pipelines/${pipeline}/cit.ini"
 pair="$MUGQIC_INSTALL_HOME/testdata/${pipeline}/pairs.${protocol}.csv"
 check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
@@ -607,7 +521,7 @@ fi
 pipeline=dnaseq
 protocol=somatic_ensemble
 reference=exome
-extra="$MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.cancer.ini $MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.exome.ini $MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/cit.ini"
+extra="$GENPIPES_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.cancer.ini $GENPIPES_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.exome.ini $GENPIPES_PIPELINES_HOME/genpipes/pipelines/${pipeline}/cit.ini"
 pair="$MUGQIC_INSTALL_HOME/testdata/${pipeline}/pairs.${protocol}.csv"
 check_run "${pipeline}_${protocol}_${reference}"
 if [[ ${run_pipeline} == 'true' ]] ; then
@@ -623,29 +537,9 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
 fi
 
-#pipeline=tumor_pair
-#pipeline=dnaseq
-#protocol=somatic_ensemble
-#reference=exome_b37
-#extra="$MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.cancer.ini $MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.exome.ini $MUGQIC_PIPELINES_HOME/genpipes/pipelines/common_ini/Homo_sapiens.hs37d5.ini $MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/cit.ini $MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/cit_b37.ini"
-#pair="$MUGQIC_INSTALL_HOME_DEV/testdata/${pipeline}/pairs.${protocol}.csv"
-#check_run "${pipeline}_${protocol}_${reference}"
-#if [[ ${run_pipeline} == 'true' ]] ; then
-#    prologue "${pipeline}_${protocol}_${reference}"
-
-#    generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
-#    ${extra} \
-#    -r $MUGQIC_INSTALL_HOME_DEV/testdata/${pipeline}/readset.${protocol}.exome.txt \
-#    -p ${pair} \
-#    -t ${protocol}
-
-#    submit
-
-#fi
-
 pipeline=dnaseq
 protocol=somatic_sv
-extra="$MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.cancer.ini $MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/cit.ini"
+extra="$GENPIPES_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.cancer.ini $GENPIPES_PIPELINES_HOME/genpipes/pipelines/${pipeline}/cit.ini"
 pair="$MUGQIC_INSTALL_HOME/testdata/${pipeline}/pairs.${protocol}.csv"
 check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
@@ -661,30 +555,10 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
 fi
 
-#pipeline=tumor_pair
-#pipeline=dnaseq
-#protocol=somatic_sv
-#reference=b37
-#extra="$MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.cancer.ini $MUGQIC_PIPELINES_HOME/genpipes/pipelines/common_ini/Homo_sapiens.hs37d5.ini $MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/cit.ini $MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/cit_b37.ini $MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.dev.ini"
-#pair="$MUGQIC_INSTALL_HOME_DEV/testdata/${pipeline}/pairs.${protocol}.csv"
-#check_run "${pipeline}_${protocol}_${reference}"
-#if [[ ${run_pipeline} == 'true' ]] ; then
-#    prologue "${pipeline}_${protocol}_${reference}"
-
-#    generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
-#    ${extra} \
-#    -r $MUGQIC_INSTALL_HOME_DEV/testdata/${pipeline}/readset.${protocol}.txt \
-#    -p ${pair} \
-#    -t ${protocol}
-
-#    submit
-
-#fi
-
 pipeline=dnaseq
 protocol=germline_high_cov
 check_run "${pipeline}_${protocol}"
-extra="$MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.high_cov.ini $MUGQIC_PIPELINES_HOME/genpipes/pipelines/${pipeline}/cit.ini"
+extra="$GENPIPES_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.high_cov.ini $GENPIPES_PIPELINES_HOME/genpipes/pipelines/${pipeline}/cit.ini"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}"
 
@@ -776,24 +650,6 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     submit
 fi
 
-#pipeline=rnaseq
-#protocol=stringtie
-#reference=b37
-#extra="$MUGQIC_PIPELINES_HOME/genpipes/pipelines/common_ini/Homo_sapiens.GRCh37.ini"
-#check_run "${pipeline}_${protocol}_${reference}"
-#if [[ ${run_pipeline} == 'true' ]] ; then
-#    prologue "${pipeline}_${protocol}_${reference}"
-
-#    generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
-#    ${extra} \
-#    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-#    -d $MUGQIC_INSTALL_HOME/testdata/${pipeline}/design.${pipeline}.txt \
-#    -t ${protocol} \
-#    -b $MUGQIC_INSTALL_HOME/testdata/${pipeline}/batch.${pipeline}.txt
-
-#    submit
-#fi
-
 pipeline=rnaseq
 protocol=variants
 check_run "${pipeline}_${protocol}"
@@ -807,22 +663,6 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     submit
 fi
 
-#pipeline=rnaseq
-#protocol=variants
-#reference=b37
-#extra="$MUGQIC_PIPELINES_HOME/genpipes/pipelines/common_ini/Homo_sapiens.GRCh37.ini"
-#check_run "${pipeline}_${protocol}_${reference}"
-#if [[ ${run_pipeline} == 'true' ]] ; then
-#    prologue "${pipeline}_${protocol}_${reference}"
-#
-#    generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
-#    ${extra} \
-#    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.txt \
-#    -t ${protocol}
-#
-#    submit
-#fi
-
 pipeline=rnaseq
 protocol=cancer
 check_run "${pipeline}_${protocol}"
@@ -835,23 +675,6 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 
     submit
 fi
-
-#pipeline=rnaseq
-#protocol=cancer
-#reference=b37
-#extra="$MUGQIC_PIPELINES_HOME/genpipes/pipelines/common_ini/Homo_sapiens.GRCh37.ini"
-#check_run "${pipeline}_${protocol}_${reference}"
-#if [[ ${run_pipeline} == 'true' ]] ; then
-#    prologue "${pipeline}_${protocol}_${reference}"
-
-#    generate_script ${pipeline}_${protocol}_${reference}_commands.sh \
-#    ${extra} \
-#    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${pipeline}.${protocol}.txt \
-#    -t ${protocol}
-
-#    submit
-#fi
-
 
 pipeline=rnaseq_light
 protocol=''
@@ -940,5 +763,4 @@ if [[ -z ${SCRIPT_ONLY}  ]] && [[ $scheduler == "slurm" ]]; then
   ${SCRIPT_DIR}/run_after.sh -p ${CIT_DIR} $option
 fi
 
-
-exit $ret_code
+exit "$ret_code"
