@@ -41,7 +41,7 @@ tmp_script=$(mktemp)
 
 
 if [[ -n $JENKINS ]] ; then
-## curl call to jenkens server via ssh
+## curl call to jenkins server via ssh
   SEND_TO_J=$(cat << EOF
 JENKINS_URL=https://jenkins.c3g-app.sd4h.ca/job/report_on_full_run/buildWithParameters
 ssh ${HOSTNAME} curl -k -X GET --form logfile=@${path}/scriptTestOutputs/cit_out/digest.log  "\$JENKINS_URL?token=\$API_TOKEN"
@@ -57,25 +57,22 @@ cat > "$tmp_script" << EOF
 #SBATCH --time 00:30:00
 #SBATCH --output=log_report.log
 
-module load mugqic/python/3.12.2
-
 control_c() {
   exit 0
 }
 
-
 latest_dev=$(realpath  "${path}/scriptTestOutputs")
-
+source ${path}/genpipes/genpipes_venv/bin/activate
 
 mkdir -p \${latest_dev}/cit_out && cd \${latest_dev}/cit_out
 
 trap control_c SIGINT
-list=\$(find \${latest_dev}  -maxdepth 3  -type d -name 'job_output' | xargs -I@ sh -c "ls -t1 @/*job* | head -n 1 ")
+list=\$(find \${latest_dev} -maxdepth 3 -type d -name 'job_output' | xargs -I@ sh -c "ls -t1 @/*job* | head -n 1 ")
 
 for jl in \$list ; do
   out=\$( echo "\$jl" | sed 's|.*scriptTestOutputs/\(.*\)/job_output.*|\1|g' )
   echo processing \$out
-  genpipes tools log_report  --loglevel CRITICAL  --tsv \$out.tsv \$jl
+  genpipes tools log_report --tsv \$out.tsv \$jl
 done
 
 echo "########################################################" > digest.log
