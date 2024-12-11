@@ -324,17 +324,18 @@ generate_script () {
       source $GENPIPES_PIPELINES_HOME/genpipes_venv/bin/activate
     fi
     genpipes ${pipeline} \
+    -l debug \
     -c $GENPIPES_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.base.ini \
     $GENPIPES_PIPELINES_HOME/genpipes/pipelines/common_ini/${server}.ini \
     $GENPIPES_PIPELINES_HOME/genpipes/pipelines/${pipeline}/cit.ini \
     ${extra} ${debug} ${extra_abacus} \
     -o ${folder} ${CONTAINER_WRAPPER} \
-    -j $scheduler --genpipes_file ${folder}/${command}
+    -j $scheduler --genpipes_file ${folder}/${command} 2>${folder}/${command/.sh/.log}
 
     { RET_CODE_CREATE_SCRIPT=$?; set +x; } 2>/dev/null
     ExitCodes+=(["${PIPELINE_LONG_NAME} create"]="$RET_CODE_CREATE_SCRIPT")
     if [ "$RET_CODE_CREATE_SCRIPT" -ne 0 ] ; then
-      echo ERROR on ${folder}/${command} creation
+      echo "ERROR on ${folder}/${command} creation"
     fi
     echo "******************************************************************"
 
