@@ -777,7 +777,7 @@ fi
 
 if [[ -z ${SCRIPT_ONLY}  ]] ; then
   # create the report for the run
-  ${SCRIPT_DIR}/run_after.sh -p ${CIT_DIR} -S $scheduler $option
+  ${SCRIPT_DIR}/run_after.sh -p ${CIT_DIR} -S $SCHEDULER $option
 fi
 
 exit "$ret_code"
