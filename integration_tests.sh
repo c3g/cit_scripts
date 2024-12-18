@@ -225,7 +225,7 @@ export RET_CODE_SUBMIT_SCRIPT
 declare -A ExitCodes=()
 export ExitCodes
 
-## clone GenPipes from bitbucket
+## clone GenPipes from GitHub
 
 if [[ -z ${AVAIL+x} ]] ; then
   echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -238,14 +238,14 @@ if [[ -z ${AVAIL+x} ]] ; then
 
   if [ -z ${NO_GIT_CLONE+x} ]; then
 
-    echo "cloning Genpipes ${branch} from: git@bitbucket.org:mugqic/genpipes.git"
+    echo "cloning Genpipes ${branch} from: https://github.com/c3g/GenPipes.git"
 
     cd ${GENPIPES_DIR}
     echo cloning to ${GENPIPES_DIR}/genpipes
     if [ -d "genpipes" ]; then
       rm -rf genpipes
     fi
-    git clone --depth 3 --branch ${branch} https://bitbucket.org/mugqic/genpipes.git
+    git clone --depth 3 --branch ${branch} https://github.com/c3g/GenPipes.git
     cd genpipes
     if [ -n "${commit}" ]; then
       git checkout ${commit}
@@ -771,13 +771,13 @@ echo "$to_sort" | sort
 # that  should be an option, not a hidden condition
 option=
 
-if [[ $server == beluga || $server == narval ]] && [[ $USER == c3g_cit ]]  ; then
+if [[ $server == beluga || $server == narval ]] && [[ $USER == c3g_cit ]] ; then
   option="-j"
 fi
 
-if [[ -z ${SCRIPT_ONLY}  ]] && [[ $scheduler == "slurm" ]]; then
+if [[ -z ${SCRIPT_ONLY}  ]] ; then
   # create the report for the run
-  ${SCRIPT_DIR}/run_after.sh -p ${CIT_DIR} $option
+  ${SCRIPT_DIR}/run_after.sh -p ${CIT_DIR} -S $scheduler $option
 fi
 
 exit "$ret_code"
