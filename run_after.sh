@@ -60,7 +60,7 @@ fi
 if [[ $SCHEDULER == 'pbs' ]] ; then
   cat > "$tmp_script" << EOF
 #!/bin/bash
-#PBS -W depend=afterany:${job_list}
+#PBS -W depend=afterany${job_list}
 #PBS -l mem=500mb
 #PBS -l walltime=00:30:00
 #PBS -o log_report.log
