@@ -14,7 +14,7 @@ echo "   -S                         Scheduler running on the cluster (slurm or p
 
 }
 
-while getopts "p:jSh" opt; do
+while getopts "p:S:jh" opt; do
   case $opt in
     j)
       JENKINS=1
