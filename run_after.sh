@@ -41,7 +41,6 @@ while getopts "p:S:jh" opt; do
   esac
 done
 
-job_list=$(cat "$path"/scriptTestOutputs/*/chunk/*out  | awk -F'=' '{printf(":%s",$2)}'| sed 's/ //g')
 tmp_script=$(mktemp)
 # for debuging
 # job_list=$(cat /tmp/all | awk -F'=' '{printf(":%s",$2)}'| sed 's/ //g')
@@ -58,6 +57,16 @@ EOF
 fi
 
 if [[ $SCHEDULER == 'pbs' ]] ; then
+  # This is needed for Abacus/PBS because the jobs already done can't be used as deopen dependency
+  # So here we get the jobid from the last chunk of each pipeline and use them as dependency as it shouldn't be completed when cit script ends
+  job_list=""
+  for pipeline_dir in $(find "$path"/scriptTestOutputs -maxdepth 1 -type d); do
+    if find "$pipeline_dir/chunk" -maxdepth 1 -name "chunk_*.out" 2>/dev/null | grep -q .; then
+      latest_file=$(find "$pipeline_dir/chunk" -maxdepth 1 -name "chunk_*.out" -printf "%T@ %p\n" | sort -n | tail -n 1 | cut -d' ' -f2-)
+      jobid=$(awk -F'=' '{print $2}' "$latest_file" | tail -n 1 | sed 's/ //g')
+      job_list="${job_list}:${jobid}"
+    fi
+  done
   cat > "$tmp_script" << EOF
 #!/bin/bash
 #PBS -W depend=afterany${job_list}
@@ -93,6 +102,7 @@ EOF
   qsub "$tmp_script"
 # slurm
 else
+  job_list=$(cat "$path"/scriptTestOutputs/*/chunk/*out  | awk -F'=' '{printf(":%s",$2)}'| sed 's/ //g')
   cat > "$tmp_script" << EOF
 #!/bin/bash
 #SBATCH -d afterany${job_list}
