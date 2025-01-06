@@ -117,8 +117,20 @@ function check_genpipes() {
         json=$(find "$folder" -lname "*.json")
         job_list=$(find "$folder" -lname "*job_list*")
         readset=$(find "$folder" -lname "*readset.tsv")
-        if [[ -z $json ]] || [[ -z $readset ]] || [[ -z $job_list ]]; then
-            echo "WARNING: Missing files in $folder. Skipping..." 2>&1 | tee -a "$log_file"
+        missing_files=""
+        if [[ -z $json ]]; then
+            missing_files+="json "
+        fi
+
+        if [[ -z $readset ]]; then
+            missing_files+="readset "
+        fi
+
+        if [[ -z $job_list ]]; then
+            missing_files+="job_list "
+        fi
+        if [[ -n $missing_files ]]; then
+            echo "WARNING: Missing files ($missing_files) in $folder. Skipping..." 2>&1 | tee -a "$log_file"
         else
             # shellcheck disable=SC2086
             bash check_GenPipes.sh -c $cluster -j $json -r $readset -l $job_list 2>&1 | tee -a "$log_file"
