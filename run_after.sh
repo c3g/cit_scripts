@@ -72,6 +72,7 @@ if [[ $SCHEDULER == 'pbs' ]] ; then
 #PBS -W depend=afterany${job_list}
 #PBS -l mem=500mb
 #PBS -l walltime=00:30:00
+#PBS -j oe
 #PBS -o log_report.log
 
 control_c() {
@@ -92,11 +93,7 @@ for jl in \$list ; do
   genpipes tools log_report --tsv \$out.tsv \$jl
 done
 
-echo "########################################################" > digest.log
-grep -v   "COMPLETED\+[[:space:]]\+COMPLETED\+[[:space:]]\+COMPLETED" *tsv \
-| grep -v "log_from_job" | grep -e 'TIMEOUT' -e 'FAILED' -e 'OUT_OF_MEMORY' >> digest.log
-echo "########################################################" >> digest.log
-cat \${SLURM_SUBMIT_DIR}/log_report.log >> digest.log
+cat \${SLURM_SUBMIT_DIR}/log_report.log > digest.log
 ${SEND_TO_J}
 EOF
   qsub "$tmp_script"
@@ -128,11 +125,7 @@ for jl in \$list ; do
   genpipes tools log_report --tsv \$out.tsv \$jl
 done
 
-echo "########################################################" > digest.log
-grep -v   "COMPLETED\+[[:space:]]\+COMPLETED\+[[:space:]]\+COMPLETED" *tsv \
-| grep -v "log_from_job" | grep -e 'TIMEOUT' -e 'FAILED' -e 'OUT_OF_MEMORY' >> digest.log
-echo "########################################################" >> digest.log
-cat \${SLURM_SUBMIT_DIR}/log_report.log >> digest.log
+cat \${SLURM_SUBMIT_DIR}/log_report.log > digest.log
 ${SEND_TO_J}
 EOF
   sbatch -A "${RAP_ID:-def-bourqueg}" "$tmp_script"
