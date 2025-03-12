@@ -17,17 +17,17 @@ function pull_repo() {
 }
 
 function disk_space_monitor() {
-    pull_repo cit_scripts master
+    pull_repo cit_scripts main
     bash Jenkins_diskSpaceMonitor.sh
 }
 
 function disk_space_monitor_mini() {
-    pull_repo cit_scripts master
+    pull_repo cit_scripts main
     bash Jenkins_diskSpaceMonitorMini.sh
 }
 
 function genpipes_full() {
-    pull_repo cit_scripts master
+    pull_repo cit_scripts main
     echo "running GenPipes Full on **** $HOSTNAME ****"
     args="${SSH_ORIGINAL_COMMAND#*GenPipes_Full }"
     cluster="$(echo "$args" | cut -d " " -f 1)"
@@ -49,7 +49,7 @@ function genpipes_full() {
 }
 
 function genpipes_update() {
-    pull_repo cit_scripts master
+    pull_repo cit_scripts main
     args="${SSH_ORIGINAL_COMMAND#*GenPipes_dev_update }"
     cluster="$(echo "$args" | cut -d " " -f 1)"
     if [[ $cluster == "graham" ]]; then
@@ -72,7 +72,7 @@ function genpipes_update() {
 }
 
 function genpipes_command() {
-    pull_repo cit_scripts master
+    pull_repo cit_scripts main
     bash Jenkins_GenpipesCommands.sh
 }
 
