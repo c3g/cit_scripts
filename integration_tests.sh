@@ -194,7 +194,7 @@ fi
 if [ -n "${BRANCH}" ] ;then
   branch=${BRANCH}
 elif [ -z ${GENPIPES_BRANCH+x} ]; then
-  branch=master
+  branch=main
 else
   branch=${GENPIPES_BRANCH}
 fi
