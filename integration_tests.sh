@@ -245,7 +245,7 @@ if [[ -z ${AVAIL+x} ]] ; then
     if [ -d "genpipes" ]; then
       rm -rf genpipes
     fi
-    git clone --depth 3 --branch ${branch} https://github.com/c3g/GenPipes.git
+    git clone --depth 3 --branch ${branch} https://github.com/c3g/GenPipes.git genpipes
     cd genpipes
     if [ -n "${commit}" ]; then
       git checkout ${commit}
