@@ -619,10 +619,11 @@ pipeline=longread_dnaseq
 protocol='nanopore'
 check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}"
+    prologue "${pipeline}_${protocol}"
 
-    generate_script ${pipeline}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${protocol}.txt
+    generate_script ${pipeline}_${protocol}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${protocol}.txt \
+    -t ${protocol}
 
     submit
 fi
@@ -631,10 +632,11 @@ pipeline=longread_dnaseq
 protocol='revio'
 check_run "${pipeline}_${protocol}"
 if [[ ${run_pipeline} == 'true' ]] ; then
-    prologue "${pipeline}"
+    prologue "${pipeline}_${protocol}"
 
-    generate_script ${pipeline}_commands.sh \
-    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${protocol}.txt
+    generate_script ${pipeline}_${protocol}_commands.sh \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${protocol}.txt \
+    -t ${protocol}
 
     submit
 fi
