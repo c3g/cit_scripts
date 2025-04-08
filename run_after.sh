@@ -125,7 +125,10 @@ for jl in \$list ; do
   genpipes tools log_report --tsv \$out.tsv \$jl
 done
 
-cat \${SLURM_SUBMIT_DIR}/log_report.log > digest.log
+echo "########################################################" > digest.log
+grep "job_output" *tsv | grep -v "COMPLETE" >> digest.log
+echo "########################################################" >> digest.log
+cat \${SLURM_SUBMIT_DIR}/log_report.log >> digest.log
 ${SEND_TO_J}
 EOF
   sbatch -A "${RAP_ID:-def-bourqueg}" "$tmp_script"
