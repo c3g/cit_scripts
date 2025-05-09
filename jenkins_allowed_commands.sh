@@ -136,10 +136,8 @@ function check_genpipes() {
             bash check_GenPipes.sh -c $cluster -j $json -r $readset -l $job_list 2>&1 | tee -a "$log_file"
         fi
     done
-    failures=$(grep "Failure found in " "$log_file" | awk -F'Cf. ' '{print $2}' | xargs grep --no-filename "FAILED" | awk -F'\t' '{print $9}')
-    if [[ -n $failures ]]; then
-        echo "$failures" > "$logs_folder/check_genpipes_$timestamp.err"
-    fi
+    # shellcheck disable=SC2086
+    bash parse_check_GenPipes_log.sh -l $log_file -o $logs_folder
     transfers=$(grep "Transferring GenPipes run" "$log_file" | awk -F'run ' '{print $2}' | sed 's/\.\.\.//g')
     if [[ -n $transfers ]]; then
         echo "$transfers" > "$logs_folder/check_genpipes_$timestamp.transfers"
