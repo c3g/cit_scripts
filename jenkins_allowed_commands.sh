@@ -39,6 +39,8 @@ function genpipes_full() {
         path="/lustre03/project/6007512/C3G/projects/jenkins_tests"
     elif [[ $cluster == "beluga" ]]; then
         path="/lustre03/project/6007512/C3G/projects/jenkins_tests"
+    elif [[ $cluster == "rorqual" ]]; then
+        path="/project/rrg-bourqueg-ad/C3G/projects/jenkins_tests"
     fi
     branch="$(echo "$args" | cut -d " " -f 2)"
     options="$(echo "$args" | cut -d " " -f 3)"
@@ -60,6 +62,8 @@ function genpipes_update() {
         path="/lustre03/project/6007512/C3G/projects/jenkins_tests"
     elif [[ $cluster == "beluga" ]]; then
         path="/lustre03/project/6007512/C3G/projects/jenkins_tests"
+    elif [[ $cluster == "rorqual" ]]; then
+        path="/project/rrg-bourqueg-ad/C3G/projects/jenkins_tests"
     fi
     branch="$(echo "$args" | cut -d " " -f 2)"
     latest=$(find "$path" -maxdepth 1 -type d -name "GenPipesFull_${branch}*" | sort | tail -n 1)
@@ -83,6 +87,8 @@ function update_cache() {
         /project/def-bourqueg/LMOD_CACHE/update_cache.sh
     elif [[ $cluster == "beluga" ]]; then
         /lustre03/project/6002326/poq/lmod_caching/update_cache.sh
+    elif [[ $cluster == "rorqual" ]]; then
+        /project/def-bourqueg/LMOD_CACHE/update_cache.sh
     fi
 }
 
