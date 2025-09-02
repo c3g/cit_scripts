@@ -173,6 +173,16 @@ export GEN_SHARED_CVMFS=/lustre06/project/rrg-bourqueg-ad/C3G/projects/jenkins_t
 BIND_LIST=/tmp/,/home/,/project,/scratch,/localscratch
 EOM
 
+elif [[ $HOST == rorqual* || $DNSDOMAIN == rorqual.computecanada.ca ]]; then
+  export TEST_DIR=$(realpath /lustre09/project/6007512/shared/C3G/projects/jenkins_tests/)
+  export serverName=rorqual
+  export server=rorqual
+  export scheduler="slurm"
+  read -r -d '' WRAP_CONFIG << EOM
+export GEN_SHARED_CVMFS=/lustre09/project/6007512/shared/C3G/projects/jenkins_tests/
+BIND_LIST=/tmp/,/home/,/project,/scratch,/localscratch
+EOM
+
 else
   export TEST_DIR=$(realpath /tmp/jenkins_tests)
   export serverName=batch
