@@ -795,7 +795,7 @@ echo "$to_sort" | sort
 # that  should be an option, not a hidden condition
 option=
 
-if [[ $server == beluga || $server == narval ]] && [[ $USER == c3g_cit ]] ; then
+if [[ $server == rorqual || $server == narval ]] && [[ $USER == c3g_cit ]] ; then
   option="-j"
 fi
 
