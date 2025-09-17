@@ -632,6 +632,21 @@ if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}"
 
     generate_script ${pipeline}_${protocol}_commands.sh \
+    ${extra} \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${protocol}.txt \
+    -t ${protocol}
+
+    submit
+fi
+
+pipeline=longread_dnaseq
+protocol='nanopore_somatic'
+check_run "${pipeline}_${protocol}"
+extra="$GENPIPES_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.cancer.ini $GENPIPES_PIPELINES_HOME/genpipes/pipelines/${pipeline}/cit.ini"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}_${protocol}"
+
+    generate_script ${pipeline}_${protocol}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${protocol}.txt \
     -t ${protocol}
 
