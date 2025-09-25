@@ -640,14 +640,16 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 fi
 
 pipeline=longread_dnaseq
-protocol='nanopore_somatic'
+protocol='nanopore_paired_somatic'
 check_run "${pipeline}_${protocol}"
 extra="$GENPIPES_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.cancer.ini $GENPIPES_PIPELINES_HOME/genpipes/pipelines/${pipeline}/cit.ini"
+pair="$MUGQIC_INSTALL_HOME/testdata/${pipeline}/pairs.${protocol}.csv"
 if [[ ${run_pipeline} == 'true' ]] ; then
     prologue "${pipeline}_${protocol}"
 
     generate_script ${pipeline}_${protocol}_commands.sh \
     -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${protocol}.txt \
+    -p ${pair} \
     -t ${protocol}
 
     submit
