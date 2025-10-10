@@ -113,6 +113,8 @@ function check_genpipes() {
         path="/lustre03/project/6007512/C3G/projects/MOH_PROCESSING/MAIN"
     elif [[ $cluster == "cardinal" ]]; then
         path="/project/def-c3g/MOH/MAIN"
+    elif [[ $cluster == "rorqual" ]]; then
+        path="/project/6007512/shared/C3G/projects/MOH_PROCESSING/MAIN"
     fi
     logs_folder="$path/check_genpipes_logs/$timestamp"
     mkdir -p "$logs_folder"
