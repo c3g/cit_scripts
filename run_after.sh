@@ -46,12 +46,39 @@ tmp_script=$(mktemp)
 # job_list=$(cat /tmp/all | awk -F'=' '{printf(":%s",$2)}'| sed 's/ //g')
 # tmp_script=/tmp/tata
 
-
-if [[ -n $JENKINS ]] ; then
-## curl call to jenkins server via ssh
+if [[ -n $JENKINS ]]; then
   SEND_TO_J=$(cat << EOF
-JENKINS_URL=https://jenkins.c3g-app.sd4h.ca/job/report_on_full_run/buildWithParameters
-ssh ${HOSTNAME} curl -k -X GET --form logfile=@${path}/scriptTestOutputs/cit_out/digest.log  "\$JENKINS_URL?token=\$API_TOKEN"
+# Requires env vars: JENKINS_USER, JENKINS_API_TOKEN, JOB_REMOTE_TOKEN
+JENKINS_URL="https://jenkins.c3g-app.sd4h.ca"
+JOB_PATH="/job/report_on_full_run"
+TRIGGER_URL="\${JENKINS_URL}\${JOB_PATH}/buildWithParameters"
+LOGFILE="${path}/scriptTestOutputs/cit_out/digest.log"
+
+ssh "\${HOSTNAME}" bash -lc '
+set -euo pipefail
+
+# Get CSRF crumb
+CRUMB_JSON=\$(curl -s -L --fail -u "\${JENKINS_USER}:\${JENKINS_API_TOKEN}" \
+  "\${JENKINS_URL}/crumbIssuer/api/json" || true)
+
+# Extract the crumb value from JSON
+CRUMB=\$(printf "%s" "\${CRUMB_JSON}" | sed -n '\''s/.*"crumb"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'\'')
+
+# Build curl command
+CURL_ARGS=(
+  -sS -L --fail
+  -u "\${JENKINS_USER}:\${JENKINS_API_TOKEN}"
+  -X POST
+  -F "logfile=@\${LOGFILE}"
+)
+
+# Add crumb header if obtained one
+if [ -n "\${CRUMB}" ]; then
+  CURL_ARGS+=( -H "Jenkins-Crumb: \${CRUMB}" )
+fi
+
+curl "\${CURL_ARGS[@]}" "\${TRIGGER_URL}?token=\${JOB_REMOTE_TOKEN}"
+'
 EOF
 )
 fi
