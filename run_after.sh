@@ -41,7 +41,7 @@ while getopts "p:S:jh" opt; do
   esac
 done
 
-tmp_script=$(mktemp)
+# tmp_script=$(mktemp)
 # for debuging
 # job_list=$(cat /tmp/all | awk -F'=' '{printf(":%s",$2)}'| sed 's/ //g')
 # tmp_script=/tmp/tata
@@ -95,7 +95,7 @@ if [[ $SCHEDULER == 'pbs' ]] ; then
     fi
   done
 
-  tmp_script="${path}/scriptTestOutputs/cit_out/report_on_full_run.sh"
+  tmp_script="${path}/scriptTestOutputs/report_on_full_run.sh"
 
   cat > "$tmp_script" << EOF
 #!/bin/bash
@@ -135,7 +135,7 @@ EOF
 else
   job_list=$(cat "$path"/scriptTestOutputs/*/chunk/*out  | awk -F'=' '{printf(":%s",$2)}' | sed 's/ //g')
 
-  tmp_script="${path}/scriptTestOutputs/cit_out/report_on_full_run.sh"
+  tmp_script="${path}/scriptTestOutputs/report_on_full_run.sh"
 
   cat > "$tmp_script" << EOF
 #!/bin/bash
