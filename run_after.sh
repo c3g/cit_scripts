@@ -54,15 +54,11 @@ JOB_PATH="/job/report_on_full_run"
 TRIGGER_URL="\${JENKINS_URL}\${JOB_PATH}/buildWithParameters"
 LOGFILE="${path}/scriptTestOutputs/cit_out/digest.log"
 
-ssh "\${HOSTNAME}" bash -lc '
-set -euo pipefail
-
 # Get CSRF crumb
-CRUMB_JSON=\$(curl -s -L --fail -u "\${JENKINS_USER}:\${JENKINS_API_TOKEN}" \
-  "\${JENKINS_URL}/crumbIssuer/api/json" || true)
+CRUMB_JSON=\$(ssh ${HOSTNAME} curl -s -L --fail -u "\${JENKINS_USER}:\${JENKINS_API_TOKEN}" "\${JENKINS_URL}/crumbIssuer/api/json" || true)
 
 # Extract the crumb value from JSON
-CRUMB=\$(printf "%s" "\${CRUMB_JSON}" | sed -n '\''s/.*"crumb"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'\'')
+CRUMB=\$(printf "%s" "\${CRUMB_JSON}" | sed -n 's/.*"crumb"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
 
 # Build curl command
 CURL_ARGS=(
@@ -74,11 +70,10 @@ CURL_ARGS=(
 
 # Add crumb header if obtained one
 if [ -n "\${CRUMB}" ]; then
-  CURL_ARGS+=( -H "Jenkins-Crumb: \${CRUMB}" )
+  CURL_ARGS+=( -H "Jenkins-Crumb:\${CRUMB}" )
 fi
 
-curl "\${CURL_ARGS[@]}" "\${TRIGGER_URL}?token=\${JOB_REMOTE_TOKEN}"
-'
+ssh ${HOSTNAME} curl "\${CURL_ARGS[@]}" "\${TRIGGER_URL}?token=\${JOB_REMOTE_TOKEN}"
 EOF
 )
 fi
