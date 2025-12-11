@@ -94,6 +94,9 @@ if [[ $SCHEDULER == 'pbs' ]] ; then
       job_list="${job_list}:${jobid}"
     fi
   done
+
+  tmp_script="${path}/scriptTestOutputs/cit_out/report_on_full_run.sh"
+
   cat > "$tmp_script" << EOF
 #!/bin/bash
 #PBS -W depend=afterany${job_list}
@@ -123,10 +126,17 @@ done
 cat \${SLURM_SUBMIT_DIR}/log_report.log > digest.log
 ${SEND_TO_J}
 EOF
+
+  chmod +x "$tmp_script"
+  echo "Saved PBS run_after script to: $tmp_script"
   qsub "$tmp_script"
+
 # slurm
 else
-  job_list=$(cat "$path"/scriptTestOutputs/*/chunk/*out  | awk -F'=' '{printf(":%s",$2)}'| sed 's/ //g')
+  job_list=$(cat "$path"/scriptTestOutputs/*/chunk/*out  | awk -F'=' '{printf(":%s",$2)}' | sed 's/ //g')
+
+  tmp_script="${path}/scriptTestOutputs/cit_out/report_on_full_run.sh"
+
   cat > "$tmp_script" << EOF
 #!/bin/bash
 #SBATCH -d afterany${job_list}
@@ -158,5 +168,8 @@ echo "########################################################" >> digest.log
 cat \${SLURM_SUBMIT_DIR}/log_report.log >> digest.log
 ${SEND_TO_J}
 EOF
+
+  chmod +x "$tmp_script"
+  echo "Saved SLURM run_after script to: $tmp_script"
   sbatch -A "${RAP_ID:-def-bourqueg}" "$tmp_script"
 fi
