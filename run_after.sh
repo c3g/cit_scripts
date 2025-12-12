@@ -41,17 +41,39 @@ while getopts "p:S:jh" opt; do
   esac
 done
 
-tmp_script=$(mktemp)
+# tmp_script=$(mktemp)
 # for debuging
 # job_list=$(cat /tmp/all | awk -F'=' '{printf(":%s",$2)}'| sed 's/ //g')
 # tmp_script=/tmp/tata
 
-
-if [[ -n $JENKINS ]] ; then
-## curl call to jenkins server via ssh
+if [[ -n $JENKINS ]]; then
   SEND_TO_J=$(cat << EOF
-JENKINS_URL=https://jenkins.c3g-app.sd4h.ca/job/report_on_full_run/buildWithParameters
-ssh ${HOSTNAME} curl -k -X GET --form logfile=@${path}/scriptTestOutputs/cit_out/digest.log  "\$JENKINS_URL?token=\$API_TOKEN"
+# Requires env vars: JENKINS_USER, JENKINS_API_TOKEN, JOB_REMOTE_TOKEN
+JENKINS_URL="https://jenkins.c3g-app.sd4h.ca"
+JOB_PATH="/job/report_on_full_run"
+TRIGGER_URL="\${JENKINS_URL}\${JOB_PATH}/buildWithParameters"
+LOGFILE="${path}/scriptTestOutputs/cit_out/digest.log"
+
+# Get CSRF crumb
+CRUMB_JSON=\$(ssh ${HOSTNAME} curl -s -L --fail -u "\${JENKINS_USER}:\${JENKINS_API_TOKEN}" "\${JENKINS_URL}/crumbIssuer/api/json" || true)
+
+# Extract the crumb value from JSON
+CRUMB=\$(printf "%s" "\${CRUMB_JSON}" | sed -n 's/.*"crumb"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+
+# Build curl command
+CURL_ARGS=(
+  -sS -L --fail
+  -u "\${JENKINS_USER}:\${JENKINS_API_TOKEN}"
+  -X POST
+  -F "logfile=@\${LOGFILE}"
+)
+
+# Add crumb header if obtained one
+if [ -n "\${CRUMB}" ]; then
+  CURL_ARGS+=( -H "Jenkins-Crumb:\${CRUMB}" )
+fi
+
+ssh ${HOSTNAME} curl "\${CURL_ARGS[@]}" "\${TRIGGER_URL}?token=\${JOB_REMOTE_TOKEN}"
 EOF
 )
 fi
@@ -67,6 +89,9 @@ if [[ $SCHEDULER == 'pbs' ]] ; then
       job_list="${job_list}:${jobid}"
     fi
   done
+
+  tmp_script="${path}/scriptTestOutputs/report_on_full_run.sh"
+
   cat > "$tmp_script" << EOF
 #!/bin/bash
 #PBS -W depend=afterany${job_list}
@@ -96,10 +121,17 @@ done
 cat \${SLURM_SUBMIT_DIR}/log_report.log > digest.log
 ${SEND_TO_J}
 EOF
+
+  chmod +x "$tmp_script"
+  echo "Saved PBS run_after script to: $tmp_script"
   qsub "$tmp_script"
+
 # slurm
 else
-  job_list=$(cat "$path"/scriptTestOutputs/*/chunk/*out  | awk -F'=' '{printf(":%s",$2)}'| sed 's/ //g')
+  job_list=$(cat "$path"/scriptTestOutputs/*/chunk/*out  | awk -F'=' '{printf(":%s",$2)}' | sed 's/ //g')
+
+  tmp_script="${path}/scriptTestOutputs/report_on_full_run.sh"
+
   cat > "$tmp_script" << EOF
 #!/bin/bash
 #SBATCH -d afterany${job_list}
@@ -131,5 +163,8 @@ echo "########################################################" >> digest.log
 cat \${SLURM_SUBMIT_DIR}/log_report.log >> digest.log
 ${SEND_TO_J}
 EOF
+
+  chmod +x "$tmp_script"
+  echo "Saved SLURM run_after script to: $tmp_script"
   sbatch -A "${RAP_ID:-def-bourqueg}" "$tmp_script"
 fi
