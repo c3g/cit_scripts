@@ -85,8 +85,6 @@ function update_cache() {
     cluster="$(echo "$args" | cut -d " " -f 1)"
     if [[ $cluster == "narval" ]]; then
         /project/def-bourqueg/LMOD_CACHE/update_cache.sh
-    elif [[ $cluster == "beluga" ]]; then
-        /lustre03/project/6002326/poq/lmod_caching/update_cache.sh
     elif [[ $cluster == "rorqual" ]]; then
         /project/def-bourqueg/LMOD_CACHE/update_cache.sh
     fi
