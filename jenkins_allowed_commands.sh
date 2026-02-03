@@ -33,7 +33,7 @@ function genpipes_full() {
     cluster="$(echo "$args" | cut -d " " -f 1)"
     if [[ $cluster == "graham" ]]; then
         path="/project/6002326/C3G/projects/jenkins_tests"
-    elif [[ $cluster == "cedar" ]]; then
+    elif [[ $cluster == "fir" ]]; then
         path="/project/6007512/C3G/projects/jenkins_tests"
     elif [[ $cluster == "narval" ]]; then
         path="/lustre03/project/6007512/C3G/projects/jenkins_tests"
@@ -56,7 +56,7 @@ function genpipes_update() {
     cluster="$(echo "$args" | cut -d " " -f 1)"
     if [[ $cluster == "graham" ]]; then
         path="/project/6002326/C3G/projects/jenkins_tests"
-    elif [[ $cluster == "cedar" ]]; then
+    elif [[ $cluster == "fir" ]]; then
         path="/project/6007512/C3G/projects/jenkins_tests"
     elif [[ $cluster == "narval" ]]; then
         path="/lustre03/project/6007512/C3G/projects/jenkins_tests"
@@ -115,6 +115,8 @@ function check_genpipes() {
         path="/project/6007512/shared/C3G/projects/MOH_PROCESSING/MAIN"
     elif [[ $cluster == "narval" ]]; then
         path="/lustre06/project/6084703/C3G/projects/MOH/MAIN"
+    elif [[ $cluster == "fir" ]]; then
+        path="/project/6007512/shared/C3G/projects/MOH/MAIN"
     fi
     logs_folder="$path/check_genpipes_logs/$timestamp"
     mkdir -p "$logs_folder"
