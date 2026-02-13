@@ -116,7 +116,7 @@ function check_genpipes() {
     elif [[ $cluster == "narval" ]]; then
         path="/lustre06/project/6084703/C3G/projects/MOH/MAIN"
     elif [[ $cluster == "fir" ]]; then
-        path="/project/6007512/C3G/projects/MOH"
+        path="/project/6007512/C3G/projects/MOH/MAIN"
     fi
     logs_folder="$path/check_genpipes_logs/$timestamp"
     mkdir -p "$logs_folder"
