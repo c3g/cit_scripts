@@ -360,9 +360,8 @@ submit () {
         echo "Nothing to submit in ${command}..."
       else
         echo submitting $pipeline
-        genpipes tools chunk_genpipes ${command} ${PIPELINE_FOLDER}/chunk
         # will retry submit 10 times
-        genpipes tools submit_genpipes -l 10 -n 999 -S $SCHEDULER ${PIPELINE_FOLDER}/chunk \
+        genpipes tools chunk_and_submit_genpipes ${command} ${PIPELINE_FOLDER}/chunk -l 10 -q 999 -S $SCHEDULER \
         | tee -a ${SCRIPT_OUTPUT}/all_jobs
         RET_CODE_SUBMIT_SCRIPT=${PIPESTATUS[0]}
         ExitCodes+=(["${PIPELINE_LONG_NAME} submit"]="$RET_CODE_SUBMIT_SCRIPT")
