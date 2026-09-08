@@ -582,6 +582,24 @@ if [[ ${run_pipeline} == 'true' ]] ; then
 fi
 
 pipeline=dnaseq
+protocol=somatic_ensemble_sv
+extra="$GENPIPES_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.cancer.ini $GENPIPES_PIPELINES_HOME/genpipes/pipelines/${pipeline}/cit.ini"
+pair="$MUGQIC_INSTALL_HOME/testdata/${pipeline}/pairs.${protocol}.csv"
+check_run "${pipeline}_${protocol}"
+if [[ ${run_pipeline} == 'true' ]] ; then
+    prologue "${pipeline}_${protocol}"
+
+    generate_script ${pipeline}_${protocol}_commands.sh \
+    ${extra} \
+    -r $MUGQIC_INSTALL_HOME/testdata/${pipeline}/readset.${protocol}.txt \
+    -p ${pair} \
+    -t ${protocol} --json-pt
+
+    submit
+
+fi
+
+pipeline=dnaseq
 protocol=germline_high_cov
 check_run "${pipeline}_${protocol}"
 extra="$GENPIPES_PIPELINES_HOME/genpipes/pipelines/${pipeline}/${pipeline}.high_cov.ini $GENPIPES_PIPELINES_HOME/genpipes/pipelines/${pipeline}/cit.ini"
