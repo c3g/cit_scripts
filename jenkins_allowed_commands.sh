@@ -71,6 +71,7 @@ function genpipes_update() {
     cd "${latest}/genpipes" || return
     git pull
     cd ../..
+    source "${latest}/genpipes/genpipes_venv/bin/activate"
     # shellcheck disable=SC2086
     $SCRIPT_DIR/integration_tests.sh -d ${latest}/genpipes ${latest}/scriptTestOutputs -u $options
 }
