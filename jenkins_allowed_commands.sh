@@ -101,6 +101,21 @@ function moh_wrapper() {
     bash jenkins_wrapper.sh
 }
 
+function moh_freezeman_data_validation() {
+    pull_repo MoH_Phase2_Automation
+    args="${SSH_ORIGINAL_COMMAND#*MoH_freezeman_data_validation }"
+    run_folder="$(echo "$args" | cut -d " " -f 1)"
+    lane="$(echo "$args" | cut -d " " -f 2)"
+    #bash ingest_transfer_raw_data.sh -r $run_folder -l $lane
+    echo """ ingest_transfer_raw_data.sh -r $run_folder -l $lane """
+}
+
+function moh_arrival_and_launch() {
+    pull_repo MoH_Phase2_Automation
+    #bash analysis/oncoanalyser_launch.sh -r "${SSH_ORIGINAL_COMMAND#*MoH_arrival_and_launch }"
+    echo """analysis/oncoanalyser_launch.sh -r "${SSH_ORIGINAL_COMMAND#*MoH_arrival_and_launch }" """
+}
+
 function check_genpipes() {
     pull_repo moh_automation main
     timestamp=$(date "+%Y-%m-%dT%H.%M.%S")
@@ -184,6 +199,12 @@ case "$SSH_ORIGINAL_COMMAND" in
     ;;
     MoH_check_GenPipes*)
         check_genpipes
+    ;;
+    MoH_arrival_and_launch*)
+        moh_arrival_and_launch
+    ;;
+    MoH_freezeman_data_validation*)
+        moh_freezeman_data_validation
     ;;
     *)
         reject_command
