@@ -106,14 +106,12 @@ function moh_freezeman_data_validation() {
     args="${SSH_ORIGINAL_COMMAND#*MoH_freezeman_data_validation }"
     run_folder="$(echo "$args" | cut -d " " -f 1)"
     lane="$(echo "$args" | cut -d " " -f 2)"
-    #bash ingest_transfer_raw_data.sh -r $run_folder -l $lane
-    echo """ ingest_transfer_raw_data.sh -r $run_folder -l $lane """
+    bash run_processing/ingest_transfer_raw_data.sh -r $run_folder -l $lane
 }
 
 function moh_arrival_and_launch() {
     pull_repo MoH_Phase2_Automation
-    #bash analysis/oncoanalyser_launch.sh -r "${SSH_ORIGINAL_COMMAND#*MoH_arrival_and_launch }"
-    echo """analysis/oncoanalyser_launch.sh -r "${SSH_ORIGINAL_COMMAND#*MoH_arrival_and_launch }" """
+    bash analysis/oncoanalyser_launch.sh -r "${SSH_ORIGINAL_COMMAND#*MoH_arrival_and_launch }"
 }
 
 function check_genpipes() {
