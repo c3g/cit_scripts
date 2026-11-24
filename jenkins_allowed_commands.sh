@@ -102,7 +102,7 @@ function moh_wrapper() {
 }
 
 function moh_freezeman_data_validation() {
-    pull_repo MoH_Phase2_Automation
+    pull_repo MoH_Phase2_Automation main
     args="${SSH_ORIGINAL_COMMAND#*MoH_freezeman_data_validation }"
     run_folder="$(echo "$args" | cut -d " " -f 1)"
     lane="$(echo "$args" | cut -d " " -f 2)"
@@ -110,7 +110,7 @@ function moh_freezeman_data_validation() {
 }
 
 function moh_arrival_and_launch() {
-    pull_repo MoH_Phase2_Automation
+    pull_repo MoH_Phase2_Automation main
     bash analysis/oncoanalyser_launch.sh -r "${SSH_ORIGINAL_COMMAND#*MoH_arrival_and_launch }"
 }
 
